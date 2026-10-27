@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <!-- Background subtle grid pattern -->
+    <pattern id="dot-grid" x="0" y="0" width="32" height="32" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.2" fill="#d8d8d2" />
+    </pattern>
+    <!-- Soft atmospheric haze gradients -->
+    <radialGradient id="haze-coral" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#c16b59" stop-opacity="0.22" />
+      <stop offset="60%" stop-color="#c16b59" stop-opacity="0.08" />
+      <stop offset="100%" stop-color="#f5f5f3" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="haze-light" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.85" />
+      <stop offset="60%" stop-color="#f5f5f3" stop-opacity="0.4" />
+      <stop offset="100%" stop-color="#f5f5f3" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="orbit-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#c16b59" stop-opacity="0.85" />
+      <stop offset="100%" stop-color="#25272b" stop-opacity="0.3" />
+    </linearGradient>
+  </defs>
+
+  <!-- Cool paper base -->
+  <rect width="1200" height="630" fill="#f5f5f3" />
+  <rect width="1200" height="630" fill="url(#dot-grid)" />
+
+  <!-- Subtle structural framing -->
+  <line x1="80" y1="60" x2="1120" y2="60" stroke="#e0e0da" stroke-width="1.5" />
+  <line x1="80" y1="570" x2="1120" y2="570" stroke="#e0e0da" stroke-width="1.5" />
+
+  <!-- Monogram & Header badge -->
+  <rect x="80" y="90" width="48" height="48" rx="10" fill="#25272b" />
+  <text x="104" y="122" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-weight="800" font-size="20" fill="#f5f5f3" text-anchor="middle">AK</text>
+  <circle cx="120" cy="98" r="4" fill="#c16b59" />
+
+  <text x="144" y="121" font-family="'JetBrains Mono', monospace" font-size="14" font-weight="500" fill="#5e636b" letter-spacing="1.5">ARTHUR KADRI DE OLIVEIRA // PORTFÓLIO</text>
+
+  <!-- Big Editorial Typography -->
+  <text x="80" y="240" font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" font-weight="800" font-size="78" fill="#25272b" letter-spacing="-2">Arthur Kadri.</text>
+
+  <text x="84" y="300" font-family="'DM Sans', system-ui, sans-serif" font-weight="500" font-size="26" fill="#5e636b">
+    Programação na prática.
+  </text>
+
+  <text x="84" y="348" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-weight="600" font-size="22" fill="#c16b59">
+    Interesse em dados e mercado financeiro.
+  </text>
+
+  <!-- Focus pill -->
+  <rect x="84" y="395" width="460" height="42" rx="21" fill="#f4ece9" stroke="#e2b4aa" stroke-width="1" />
+  <circle cx="106" cy="416" r="5" fill="#c16b59" />
+  <text x="122" y="422" font-family="'JetBrains Mono', monospace" font-size="13" font-weight="600" fill="#25272b">ESTÁGIO · MERCADO FINANCEIRO &amp; DADOS</text>
+
+  <!-- Footer meta -->
+  <text x="84" y="535" font-family="'JetBrains Mono', monospace" font-size="14" fill="#828892">github.com/arthurMPBBY</text>
+  <text x="320" y="535" font-family="'JetBrains Mono', monospace" font-size="14" fill="#828892">linkedin.com/in/arthur-kadri-de-oliveira-2586a12b2</text>
+  <text x="840" y="535" font-family="'JetBrains Mono', monospace" font-size="14" fill="#828892">arthurkadri968@gmail.com</text>
+
+  <!-- Right Side Abstract Sculptural Cloud & Orbit Artwork -->
+  <g transform="translate(880, 310)">
+    <!-- Atmospheric diffuse haze circles -->
+    <circle cx="-10" cy="-20" r="230" fill="url(#haze-coral)" />
+    <circle cx="30" cy="40" r="200" fill="url(#haze-light)" />
+
+    <!-- Abstract cloud-sculpture arcs -->
+    <path d="M -160 50 C -160 -30, -90 -100, 0 -100 C 70 -100, 130 -40, 140 30 C 180 40, 200 80, 190 120 C 170 170, 100 180, 40 180 L -120 180 C -170 180, -200 130, -180 80 C -175 65, -165 55, -160 50 Z" 
+          fill="#ffffff" fill-opacity="0.75" stroke="#e6e6e0" stroke-width="1.5" />
+
+    <!-- Orbital rings -->
+    <ellipse cx="0" cy="20" rx="210" ry="85" fill="none" stroke="url(#orbit-grad)" stroke-width="2.5" stroke-dasharray="8 6" transform="rotate(-24)" />
+    <ellipse cx="10" cy="15" rx="150" ry="60" fill="none" stroke="#25272b" stroke-opacity="0.25" stroke-width="1.5" transform="rotate(32)" />
+    <circle cx="130" cy="-65" r="9" fill="#c16b59" />
+    <circle cx="-110" cy="95" r="5" fill="#25272b" />
+    <circle cx="0" cy="15" r="6" fill="#c16b59" fill-opacity="0.4" />
+  </g>
+</svg>
