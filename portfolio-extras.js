@@ -404,7 +404,7 @@
 
       if (activateBrief) {
         const currentActiveElement = document.activeElement;
-        if (currentActiveElement && currentActiveElement.closest('[data-full-only]')) {
+        if (currentActiveElement && (currentActiveElement.closest('[data-full-only]') || currentActiveElement.closest('.hero-actions > a') || currentActiveElement.closest('.about-sidebar-card') || currentActiveElement.closest('.finance-controls-grid') || currentActiveElement.offsetParent === null)) {
           briefModeButton.focus();
         }
 
@@ -604,8 +604,12 @@
       const firstAnchorY = cachedSegments[0].startY;
       const lastAnchorY = cachedSegments[cachedSegments.length - 1].endY;
 
+      const isScrolledNearBottom = (window.scrollY + window.innerHeight) >= (document.documentElement.scrollHeight - 60);
+
       let activeLength = 0;
-      if (readingContentCoordinateY <= firstAnchorY) {
+      if (isScrolledNearBottom) {
+        activeLength = totalPathLength;
+      } else if (readingContentCoordinateY <= firstAnchorY) {
         activeLength = 0;
       } else if (readingContentCoordinateY >= lastAnchorY) {
         activeLength = totalPathLength;
@@ -636,7 +640,12 @@
       }
 
       if (contactCard) {
-        const contactIlluminationRatio = Math.max(0, Math.min(1, (progressRatio - 0.88) / 0.12));
+        let contactIlluminationRatio = 0;
+        if (isScrolledNearBottom || progressRatio >= 0.98) {
+          contactIlluminationRatio = 1;
+        } else if (progressRatio >= 0.78) {
+          contactIlluminationRatio = Math.max(0, Math.min(1, (progressRatio - 0.78) / 0.20));
+        }
         contactCard.style.setProperty('--contact-illumination', contactIlluminationRatio.toFixed(3));
       }
     }

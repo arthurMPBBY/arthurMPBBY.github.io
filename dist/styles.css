@@ -691,6 +691,7 @@ button {
   align-items: center;
   justify-content: center;
   cursor: default;
+  overflow: hidden;
 }
 
 .art-haze-layer {
@@ -1892,14 +1893,18 @@ html[data-motion="paused"] .project-compact-card {
   overflow: visible;
 }
 
-.light-trail-bg-line {
+.light-trail-bg-line,
+.light-trail-bg,
+#light-trail-bg {
   fill: none;
   stroke: rgba(193, 107, 89, 0.12);
   stroke-width: 1.5;
   stroke-linecap: round;
 }
 
-.light-trail-active-line {
+.light-trail-active-line,
+.light-trail-active,
+#light-trail-active {
   fill: none;
   stroke: #c16b59;
   stroke-width: 2;
@@ -1918,7 +1923,7 @@ html[data-motion="paused"] .light-trail-halo {
   transition: none;
 }
 
-html[data-motion="paused"] .light-trail-active-line {
+html[data-motion="paused"] :is(.light-trail-active-line, .light-trail-active, #light-trail-active) {
   stroke-opacity: 0.4;
 }
 
@@ -1927,7 +1932,7 @@ html[data-motion="paused"] .light-trail-active-line {
     opacity: 0 !important;
     transition: none;
   }
-  .light-trail-active-line {
+  :is(.light-trail-active-line, .light-trail-active, #light-trail-active) {
     stroke-opacity: 0.4;
   }
 }
@@ -1953,6 +1958,7 @@ html[data-motion="paused"] .light-trail-active-line {
   font-weight: 600;
   color: #c16b59;
   padding: 4px 8px;
+  min-height: 38px;
   border-radius: 4px;
   background: rgba(193, 107, 89, 0.08);
   border: 1px solid rgba(193, 107, 89, 0.25);
@@ -2645,4 +2651,19 @@ html[data-view="brief"] .site-footer { padding-block: 16px; }
   html[data-view="brief"] .project-compact-card { padding: 8px 10px; }
   html[data-view="brief"] .pcard-title { font-size: 0.9375rem; }
   html[data-view="brief"] .pcard-right { display: none; }
+}
+
+
+.reactive-dots-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 0;
+}
+
+html.has-reactive-dots body {
+  background-image: none;
 }
