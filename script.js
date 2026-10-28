@@ -136,6 +136,79 @@
   const layerSparks = document.querySelector('.layer-sparks');
   const hazeLayer = document.querySelector('.art-haze-layer');
   const primaryCtaButton = document.querySelector('.btn-primary');
+  const artContainer = document.querySelector('.hero-art-container');
+  const morphCaption = document.querySelector('.morph-caption');
+  let cloudMorph = typeof window.createCloudMorph === 'function' ? window.createCloudMorph(artContainer) : null;
+  let morphProgress = 0;
+  let morphFrameId = null;
+  let needsMorphMeasure = true;
+  let morphStart = 0;
+  let morphDistance = 1;
+  let isArtIntersecting = true;
+
+  function clampUnit(value) {
+    return Math.max(0, Math.min(1, value));
+  }
+
+  function morphPhase(start, end) {
+    return clampUnit((morphProgress - start) / (end - start));
+  }
+
+  function cancelMorphFrame() {
+    if (morphFrameId !== null) {
+      cancelAnimationFrame(morphFrameId);
+      morphFrameId = null;
+    }
+  }
+
+  function restoreSculpture() {
+    morphProgress = 0;
+    if (artContainer) {
+      artContainer.style.setProperty('--morph-core-opacity', '1');
+      artContainer.style.setProperty('--morph-orbit-opacity', '1');
+      artContainer.style.setProperty('--morph-haze-opacity', '1');
+      artContainer.style.setProperty('--morph-caption-opacity', '0');
+      artContainer.setAttribute('data-morph-progress', '0');
+    }
+    if (morphCaption) morphCaption.hidden = true;
+    if (cloudMorph) cloudMorph.draw(0);
+  }
+
+  function renderMorphFrame() {
+    morphFrameId = null;
+    if (!cloudMorph || isEffectsPaused || document.hidden || !isArtIntersecting) return;
+
+    try {
+      if (needsMorphMeasure) {
+        const rectangle = artContainer.getBoundingClientRect();
+        morphStart = Math.max(0, rectangle.top + window.scrollY + rectangle.height - window.innerHeight * 0.8);
+        morphDistance = Math.max(160, Math.min(280, window.innerHeight * 0.3));
+        cloudMorph.resize();
+        needsMorphMeasure = false;
+      }
+
+      morphProgress = clampUnit((window.scrollY - morphStart) / morphDistance);
+      artContainer.style.setProperty('--morph-core-opacity', String(1 - morphPhase(0.15, 0.45)));
+      artContainer.style.setProperty('--morph-orbit-opacity', String(1 - morphPhase(0.35, 0.8)));
+      artContainer.style.setProperty('--morph-haze-opacity', String(1 - morphPhase(0.35, 0.8) * 0.8));
+      artContainer.style.setProperty('--morph-caption-opacity', String(morphPhase(0.8, 1)));
+      artContainer.setAttribute('data-morph-progress', morphProgress.toFixed(4));
+      if (morphCaption) morphCaption.hidden = morphProgress <= 0.8;
+      cloudMorph.draw(morphProgress);
+      applyParallaxTransforms();
+    } catch (morphError) {
+      cloudMorph.destroy();
+      cloudMorph = null;
+      artContainer.classList.remove('morph-ready');
+      restoreSculpture();
+    }
+  }
+
+  function scheduleMorphFrame(shouldMeasure = false) {
+    if (shouldMeasure) needsMorphMeasure = true;
+    if (!cloudMorph || isEffectsPaused || document.hidden || !isArtIntersecting || morphFrameId !== null) return;
+    morphFrameId = requestAnimationFrame(renderMorphFrame);
+  }
 
   let isHeroIntersecting = true;
   let isPointerInsideHero = false;
@@ -167,27 +240,7 @@
     currentRotateX += (targetRotateX - currentRotateX) * 0.08;
     currentRotateY += (targetRotateY - currentRotateY) * 0.08;
 
-    if (sculptureStage) {
-      sculptureStage.style.transform = 'perspective(900px) rotateX(' + currentRotateX.toFixed(3) + 'deg) rotateY(' + currentRotateY.toFixed(3) + 'deg)';
-    }
-    if (layerRibbonsOuter) {
-      layerRibbonsOuter.style.transform = 'translate3d(' + (currentRotateY * 1.1).toFixed(2) + 'px, ' + (-currentRotateX * 1.1).toFixed(2) + 'px, 0)';
-    }
-    if (layerRibbonsTertiary) {
-      layerRibbonsTertiary.style.transform = 'translate3d(' + (currentRotateY * -0.6).toFixed(2) + 'px, ' + (currentRotateX * 0.6).toFixed(2) + 'px, 0)';
-    }
-    if (layerRibbonsInner) {
-      layerRibbonsInner.style.transform = 'translate3d(' + (currentRotateY * -0.9).toFixed(2) + 'px, ' + (currentRotateX * 0.9).toFixed(2) + 'px, 0)';
-    }
-    if (layerCoreSculpture) {
-      layerCoreSculpture.style.transform = 'translate3d(' + (currentRotateY * 0.6).toFixed(2) + 'px, ' + (-currentRotateX * 0.6).toFixed(2) + 'px, 0)';
-    }
-    if (layerSparks) {
-      layerSparks.style.transform = 'translate3d(' + (currentRotateY * 1.4).toFixed(2) + 'px, ' + (-currentRotateX * 1.4).toFixed(2) + 'px, 0)';
-    }
-    if (hazeLayer) {
-      hazeLayer.style.transform = 'translate3d(' + (currentRotateY * -0.45).toFixed(2) + 'px, ' + (currentRotateX * 0.45).toFixed(2) + 'px, 0)';
-    }
+    applyParallaxTransforms();
 
     const differenceX = Math.abs(targetRotateX - currentRotateX);
     const differenceY = Math.abs(targetRotateY - currentRotateY);
@@ -205,8 +258,36 @@
     animationFrameId = requestAnimationFrame(updateParallaxFrame);
   }
 
+  function applyParallaxTransforms() {
+    const parallaxWeight = 1 - clampUnit(morphProgress / 0.15);
+    const renderedRotateX = currentRotateX * parallaxWeight;
+    const renderedRotateY = currentRotateY * parallaxWeight;
+
+    if (sculptureStage) {
+      sculptureStage.style.transform = 'perspective(900px) rotateX(' + renderedRotateX.toFixed(3) + 'deg) rotateY(' + renderedRotateY.toFixed(3) + 'deg)';
+    }
+    if (layerRibbonsOuter) {
+      layerRibbonsOuter.style.transform = 'translate3d(' + (renderedRotateY * 1.1).toFixed(2) + 'px, ' + (-renderedRotateX * 1.1).toFixed(2) + 'px, 0)';
+    }
+    if (layerRibbonsTertiary) {
+      layerRibbonsTertiary.style.transform = 'translate3d(' + (renderedRotateY * -0.6).toFixed(2) + 'px, ' + (renderedRotateX * 0.6).toFixed(2) + 'px, 0)';
+    }
+    if (layerRibbonsInner) {
+      layerRibbonsInner.style.transform = 'translate3d(' + (renderedRotateY * -0.9).toFixed(2) + 'px, ' + (renderedRotateX * 0.9).toFixed(2) + 'px, 0)';
+    }
+    if (layerCoreSculpture) {
+      layerCoreSculpture.style.transform = 'translate3d(' + (renderedRotateY * 0.6).toFixed(2) + 'px, ' + (-renderedRotateX * 0.6).toFixed(2) + 'px, 0)';
+    }
+    if (layerSparks) {
+      layerSparks.style.transform = 'translate3d(' + (renderedRotateY * 1.4).toFixed(2) + 'px, ' + (-renderedRotateX * 1.4).toFixed(2) + 'px, 0)';
+    }
+    if (hazeLayer) {
+      hazeLayer.style.transform = 'translate3d(' + (renderedRotateY * -0.45).toFixed(2) + 'px, ' + (renderedRotateX * 0.45).toFixed(2) + 'px, 0)';
+    }
+  }
+
   function scheduleParallaxUpdate() {
-    if (isEffectsPaused || !isHeroIntersecting || document.hidden || !finePointerQuery.matches) {
+    if (isEffectsPaused || !isHeroIntersecting || !isArtIntersecting || document.hidden || !finePointerQuery.matches) {
       return;
     }
     if (!animationFrameId) {
@@ -220,6 +301,8 @@
     if (shouldPause) {
       document.documentElement.setAttribute('data-motion', 'paused');
       stopParallaxLoop();
+      cancelMorphFrame();
+      restoreSculpture();
       resetHeroTransforms();
       targetRotateX = 0;
       targetRotateY = 0;
@@ -228,6 +311,7 @@
       if (primaryCtaButton) primaryCtaButton.style.transform = '';
     } else {
       document.documentElement.setAttribute('data-motion', 'active');
+      scheduleMorphFrame(true);
     }
 
     if (motionToggleButton) {
@@ -243,8 +327,9 @@
     }
 
     if (shouldSaveToStorage) {
+      savedPreference = shouldPause ? 'paused' : 'active';
       try {
-        localStorage.setItem(STORAGE_KEY, shouldPause ? 'paused' : 'active');
+        localStorage.setItem(STORAGE_KEY, savedPreference);
       } catch (storageError) {
         void storageError;
       }
@@ -261,13 +346,7 @@
 
   if (typeof reducedMotionQuery.addEventListener === 'function') {
     reducedMotionQuery.addEventListener('change', function (motionQueryEvent) {
-      let explicitUserChoice = null;
-      try {
-        explicitUserChoice = localStorage.getItem(STORAGE_KEY);
-      } catch (storageError) {
-        explicitUserChoice = null;
-      }
-      if (explicitUserChoice === null) {
+      if (savedPreference === null) {
         applyMotionState(motionQueryEvent.matches, false);
       }
     });
@@ -299,8 +378,10 @@
     document.documentElement.toggleAttribute('data-page-hidden', document.hidden);
     if (document.hidden) {
       stopParallaxLoop();
-    } else if (isPointerInsideHero && !isEffectsPaused) {
-      scheduleParallaxUpdate();
+      cancelMorphFrame();
+    } else {
+      scheduleMorphFrame(true);
+      if (isPointerInsideHero && !isEffectsPaused) scheduleParallaxUpdate();
     }
   });
 
@@ -315,6 +396,50 @@
       });
     }, { threshold: 0.05 });
     heroObserver.observe(heroSection);
+  }
+
+  if (cloudMorph) {
+    artContainer.classList.add('morph-ready');
+    window.addEventListener('scroll', function () {
+      scheduleMorphFrame();
+    }, { passive: true });
+    window.addEventListener('resize', function () {
+      scheduleMorphFrame(true);
+    }, { passive: true });
+    window.addEventListener('pageshow', function () {
+      scheduleMorphFrame(true);
+    });
+
+    if ('ResizeObserver' in window) {
+      const morphResizeObserver = new ResizeObserver(function () {
+        scheduleMorphFrame(true);
+      });
+      morphResizeObserver.observe(artContainer);
+      if (heroSection) morphResizeObserver.observe(heroSection);
+    }
+
+    if ('IntersectionObserver' in window) {
+      const artObserver = new IntersectionObserver(function (artEntries) {
+        artEntries.forEach(function (artEntry) {
+          isArtIntersecting = artEntry.isIntersecting;
+          artContainer.setAttribute('data-effects-visible', String(isArtIntersecting));
+          if (isArtIntersecting) {
+            scheduleMorphFrame(true);
+          } else {
+            cancelMorphFrame();
+            stopParallaxLoop();
+          }
+        });
+      });
+      artObserver.observe(artContainer);
+    }
+
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(function () {
+        scheduleMorphFrame(true);
+      });
+    }
+    scheduleMorphFrame(true);
   }
 
   if (primaryCtaButton) {

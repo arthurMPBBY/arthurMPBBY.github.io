@@ -887,6 +887,49 @@ button {
   transition: all var(--duration-normal) var(--ease-editorial);
 }
 
+.morph-ready .art-svg-stage {
+  opacity: var(--morph-orbit-opacity, 1);
+}
+
+.morph-ready .svg-cloud-sculpture {
+  animation: none;
+  opacity: var(--morph-core-opacity, 1);
+}
+
+.morph-ready .art-haze-layer {
+  opacity: var(--morph-haze-opacity, 1);
+}
+
+.morph-ready .art-caption {
+  opacity: var(--morph-core-opacity, 1);
+}
+
+.morph-caption {
+  position: absolute;
+  bottom: 0.5rem;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  padding: 0.2rem 0.4rem;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: clamp(0.5625rem, 1.2vw, 0.6875rem);
+  line-height: 1.5;
+  color: var(--ink-secondary);
+  opacity: var(--morph-caption-opacity, 0);
+  pointer-events: none;
+}
+
+.morph-caption[hidden] {
+  display: none;
+}
+
+.hero-art-container[data-effects-visible="false"] *,
+.hero-art-container[data-effects-visible="false"] *::before,
+.hero-art-container[data-effects-visible="false"] *::after {
+  animation-play-state: paused !important;
+}
+
 .hero-art-container:hover .art-caption {
   color: var(--accent-coral);
   border-color: var(--accent-coral-border);

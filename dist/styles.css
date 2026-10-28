@@ -116,6 +116,18 @@ button {
   outline-offset: 3px;
 }
 
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
 .site-wrapper {
   max-width: var(--container-max);
   margin: 0 auto;
@@ -141,6 +153,7 @@ button {
   border-bottom: 1px solid var(--border-subtle);
   padding: 1.1rem 0;
   transition: background-color var(--duration-normal) var(--ease-editorial);
+  width: 100%;
 }
 
 .header-inner {
@@ -154,7 +167,8 @@ button {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  flex-shrink: 0;
+  flex-shrink: 1;
+  min-width: 0;
 }
 
 .monogram {
@@ -171,6 +185,7 @@ button {
   font-weight: 800;
   font-size: 0.875rem;
   letter-spacing: -0.02em;
+  flex-shrink: 0;
   transition: transform var(--duration-smooth) var(--ease-editorial),
               box-shadow var(--duration-smooth) var(--ease-editorial);
 }
@@ -198,6 +213,7 @@ button {
 .brand-label {
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .brand-name {
@@ -218,6 +234,9 @@ button {
   font-size: 0.75rem;
   color: var(--ink-tertiary);
   margin-top: 0.15rem;
+  line-height: 1.3;
+  overflow-wrap: break-word;
+  word-break: normal;
 }
 
 .main-nav {
@@ -276,6 +295,69 @@ button {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+}
+
+.motion-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.8rem;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  color: var(--ink-primary);
+  font-family: var(--font-mono);
+  font-size: 0.78125rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color var(--duration-smooth) var(--ease-editorial),
+              background-color var(--duration-smooth) var(--ease-editorial),
+              color var(--duration-smooth) var(--ease-editorial),
+              transform var(--duration-smooth) var(--ease-editorial),
+              box-shadow var(--duration-smooth) var(--ease-editorial);
+  white-space: nowrap;
+}
+
+.motion-toggle-btn:hover {
+  border-color: var(--accent-coral-border);
+  color: var(--accent-coral);
+  background-color: var(--accent-coral-soft);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px var(--accent-coral-glow);
+}
+
+.motion-toggle-btn:active {
+  transform: translateY(0);
+}
+
+.motion-toggle-btn:focus-visible {
+  outline: 2px solid var(--accent-coral);
+  outline-offset: 2px;
+}
+
+.motion-toggle-icon {
+  width: 13px;
+  height: 13px;
+  stroke: currentColor;
+  flex-shrink: 0;
+}
+
+.motion-toggle-btn .icon-play {
+  display: none;
+}
+
+.motion-toggle-btn[aria-pressed="true"] {
+  background-color: var(--accent-coral-soft);
+  border-color: var(--accent-coral);
+  color: var(--accent-coral-active);
+}
+
+.motion-toggle-btn[aria-pressed="true"] .icon-pause {
+  display: none;
+}
+
+.motion-toggle-btn[aria-pressed="true"] .icon-play {
+  display: block;
 }
 
 .header-email-btn {
@@ -490,6 +572,7 @@ button {
   letter-spacing: -0.01em;
   border: 1px solid var(--ink-primary);
   transition: all var(--duration-smooth) var(--ease-editorial);
+  will-change: transform;
 }
 
 .btn-primary:hover {
@@ -616,6 +699,7 @@ button {
   pointer-events: none;
   z-index: 1;
   overflow: visible;
+  will-change: transform;
 }
 
 .haze-blob {
@@ -654,6 +738,19 @@ button {
   animation: float-drift-cool 14s ease-in-out infinite alternate;
 }
 
+.art-grain-overlay {
+  position: absolute;
+  inset: -6%;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0.055;
+  mix-blend-mode: multiply;
+  mask-image: radial-gradient(ellipse at center, #000 20%, transparent 68%);
+  background-image: radial-gradient(#25272b 0.75px, transparent 0.75px);
+  background-size: 6px 6px;
+  z-index: 2;
+}
+
 @keyframes float-drift-coral {
   0% { transform: translate(0, 0) scale(1); }
   50% { transform: translate(-18px, 14px) scale(1.08); }
@@ -673,31 +770,66 @@ button {
 
 .art-svg-stage {
   position: relative;
-  z-index: 2;
+  z-index: 3;
   width: 100%;
   height: 100%;
-  filter: drop-shadow(0 12px 30px rgba(37, 39, 43, 0.06));
+  filter: drop-shadow(0 14px 34px rgba(37, 39, 43, 0.08));
   transition: transform var(--duration-smooth) var(--ease-editorial);
+  transform-style: preserve-3d;
+  will-change: transform;
 }
 
-.hero-art-container:hover .art-svg-stage {
-  transform: scale(1.02);
+.sculpture-layer {
+  transform-origin: 250px 250px;
+  will-change: transform;
+}
+
+.layer-corona {
+  animation: corona-pulse 12s ease-in-out infinite alternate;
 }
 
 .svg-orbit-outer {
   transform-origin: 250px 250px;
-  animation: rotate-orbit 38s linear infinite;
+  animation: rotate-orbit 42s linear infinite;
 }
 
 .svg-orbit-inner {
   transform-origin: 250px 250px;
-  animation: rotate-orbit-reverse 28s linear infinite;
+  animation: rotate-orbit-reverse 26s linear infinite;
+}
+
+.svg-orbit-tertiary {
+  transform-origin: 250px 250px;
+  animation: rotate-orbit 34s linear infinite;
 }
 
 .svg-cloud-sculpture {
   transform-origin: 250px 250px;
-  animation: cloud-breathing 10s ease-in-out infinite alternate;
+  animation: cloud-breathing 9s ease-in-out infinite alternate;
 }
+
+.sculpture-filament-primary {
+  animation: filament-glow 6s ease-in-out infinite alternate;
+}
+
+.sculpture-filament-secondary {
+  animation: filament-glow 8s ease-in-out 1s infinite alternate;
+}
+
+.sculpture-bead-halo {
+  transform-origin: 248px 235px;
+  animation: bead-pulse 4s ease-in-out infinite alternate;
+}
+
+.sculpture-spark {
+  animation: spark-drift 7s ease-in-out infinite alternate;
+}
+
+.spark-1 { animation-delay: 0s; }
+.spark-2 { animation-delay: 1.4s; }
+.spark-3 { animation-delay: 2.8s; }
+.spark-4 { animation-delay: 4.2s; }
+.spark-5 { animation-delay: 5.6s; }
 
 @keyframes rotate-orbit {
   from { transform: rotate(0deg); }
@@ -715,11 +847,35 @@ button {
   100% { transform: translateY(5px) scale(0.988); }
 }
 
+@keyframes corona-pulse {
+  0% { transform: scale(0.98); opacity: 0.85; }
+  50% { transform: scale(1.02); opacity: 1; }
+  100% { transform: scale(0.99); opacity: 0.9; }
+}
+
+@keyframes filament-glow {
+  0% { stroke-opacity: 0.55; stroke-width: 2px; }
+  50% { stroke-opacity: 0.85; stroke-width: 2.4px; }
+  100% { stroke-opacity: 0.6; stroke-width: 2.1px; }
+}
+
+@keyframes bead-pulse {
+  0% { transform: scale(1); stroke-opacity: 0.2; }
+  50% { transform: scale(1.35); stroke-opacity: 0.45; }
+  100% { transform: scale(1.05); stroke-opacity: 0.25; }
+}
+
+@keyframes spark-drift {
+  0% { transform: translate(0, 0) scale(1); opacity: 0.6; }
+  50% { transform: translate(4px, -5px) scale(1.2); opacity: 0.95; }
+  100% { transform: translate(-3px, 4px) scale(0.9); opacity: 0.7; }
+}
+
 .art-caption {
   position: absolute;
   bottom: 0.5rem;
   right: 0.5rem;
-  z-index: 3;
+  z-index: 4;
   font-family: var(--font-mono);
   font-size: 0.6875rem;
   letter-spacing: 0.04em;
@@ -729,6 +885,49 @@ button {
   border-radius: var(--radius-sm);
   border: 1px solid var(--border-subtle);
   transition: all var(--duration-normal) var(--ease-editorial);
+}
+
+.morph-ready .art-svg-stage {
+  opacity: var(--morph-orbit-opacity, 1);
+}
+
+.morph-ready .svg-cloud-sculpture {
+  animation: none;
+  opacity: var(--morph-core-opacity, 1);
+}
+
+.morph-ready .art-haze-layer {
+  opacity: var(--morph-haze-opacity, 1);
+}
+
+.morph-ready .art-caption {
+  opacity: var(--morph-core-opacity, 1);
+}
+
+.morph-caption {
+  position: absolute;
+  bottom: 0.5rem;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  padding: 0.2rem 0.4rem;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: clamp(0.5625rem, 1.2vw, 0.6875rem);
+  line-height: 1.5;
+  color: var(--ink-secondary);
+  opacity: var(--morph-caption-opacity, 0);
+  pointer-events: none;
+}
+
+.morph-caption[hidden] {
+  display: none;
+}
+
+.hero-art-container[data-effects-visible="false"] *,
+.hero-art-container[data-effects-visible="false"] *::before,
+.hero-art-container[data-effects-visible="false"] *::after {
+  animation-play-state: paused !important;
 }
 
 .hero-art-container:hover .art-caption {
@@ -800,6 +999,9 @@ button {
   gap: 1.75rem;
   position: relative;
   overflow: hidden;
+  --pointer-sheen-horizontal: 50%;
+  --pointer-sheen-vertical: 50%;
+  --sheen-opacity: 0;
   transition: border-color var(--duration-smooth) var(--ease-editorial),
               transform var(--duration-smooth) var(--ease-editorial),
               box-shadow var(--duration-smooth) var(--ease-editorial),
@@ -819,17 +1021,47 @@ button {
   transform-origin: center;
   transition: transform var(--duration-smooth) var(--ease-editorial);
   border-radius: var(--radius-md) 0 0 var(--radius-md);
+  z-index: 2;
 }
 
-.project-compact-card:hover {
+.project-compact-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    circle 260px at var(--pointer-sheen-horizontal) var(--pointer-sheen-vertical),
+    rgba(193, 107, 89, 0.14),
+    rgba(193, 107, 89, 0.03) 45%,
+    transparent 70%
+  );
+  opacity: var(--sheen-opacity);
+  transition: opacity var(--duration-smooth) var(--ease-editorial);
+  border-radius: inherit;
+  z-index: 1;
+}
+
+.project-compact-card:hover,
+.project-compact-card:focus-within {
   border-color: var(--accent-coral-border);
   background-color: #ffffff;
   transform: translateY(-3px);
   box-shadow: 0 10px 28px rgba(193, 107, 89, 0.09), 0 2px 6px rgba(0, 0, 0, 0.02);
+  --sheen-opacity: 1;
 }
 
-.project-compact-card:hover::before {
+.project-compact-card:hover::before,
+.project-compact-card:focus-within::before {
   transform: scaleY(1);
+}
+
+html.js-ready:not([data-motion="paused"]) .project-compact-card.is-revealed {
+  animation: project-arrival 550ms var(--ease-editorial) backwards;
+}
+
+@keyframes project-arrival {
+  from { opacity: 0.65; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .pcard-left {
@@ -838,6 +1070,8 @@ button {
   gap: 0.65rem;
   flex: 1;
   min-width: 0;
+  position: relative;
+  z-index: 3;
 }
 
 .pcard-badge-row {
@@ -963,6 +1197,8 @@ button {
   display: flex;
   align-items: center;
   flex-shrink: 0;
+  position: relative;
+  z-index: 3;
 }
 
 .pcard-action-btn {
@@ -1436,7 +1672,7 @@ button {
 
   .hero-art-container {
     order: 2;
-    max-width: 240px;
+    max-width: 280px;
     height: auto;
     margin: 1rem auto 0;
   }
@@ -1489,6 +1725,15 @@ button {
   }
 
   .header-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.6rem;
+    padding-top: 0.35rem;
+    border-top: 1px solid var(--border-subtle);
+  }
+
+  .header-email-btn {
     display: none;
   }
 
@@ -1544,33 +1789,81 @@ button {
   }
 }
 
+html[data-page-hidden] *,
+html[data-page-hidden] *::before,
+html[data-page-hidden] *::after,
+#hero[data-effects-visible="false"] *,
+#hero[data-effects-visible="false"] *::before,
+#hero[data-effects-visible="false"] *::after {
+  animation-play-state: paused !important;
+}
+
+html[data-motion="paused"] *,
+html[data-motion="paused"] *::before,
+html[data-motion="paused"] *::after {
+  animation-play-state: paused !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+html[data-motion="paused"] .pulse-dot,
+html[data-motion="paused"] .blob-coral,
+html[data-motion="paused"] .blob-white,
+html[data-motion="paused"] .blob-cool,
+html[data-motion="paused"] .svg-orbit-outer,
+html[data-motion="paused"] .svg-orbit-inner,
+html[data-motion="paused"] .svg-orbit-tertiary,
+html[data-motion="paused"] .svg-cloud-sculpture,
+html[data-motion="paused"] .layer-corona,
+html[data-motion="paused"] .sculpture-filament-primary,
+html[data-motion="paused"] .sculpture-filament-secondary,
+html[data-motion="paused"] .sculpture-bead-halo,
+html[data-motion="paused"] .sculpture-spark {
+  animation: none !important;
+  transform: none !important;
+}
+
+html[data-motion="paused"] .project-compact-card {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  html:not([data-motion="active"]) *,
+  html:not([data-motion="active"]) *::before,
+  html:not([data-motion="active"]) *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
 
-  .pulse-dot {
+  html:not([data-motion="active"]) .pulse-dot {
     animation: none;
   }
 
-  .blob-coral, .blob-white, .blob-cool {
-    animation: none;
-    transform: none;
-  }
-
-  .svg-orbit-outer, .svg-orbit-inner, .svg-cloud-sculpture {
+  html:not([data-motion="active"]) :is(.blob-coral, .blob-white, .blob-cool) {
     animation: none;
     transform: none;
   }
 
-  .project-compact-card:hover,
+  html:not([data-motion="active"]) :is(.svg-orbit-outer, .svg-orbit-inner, .svg-orbit-tertiary, .svg-cloud-sculpture,
+  .layer-corona, .sculpture-filament-primary, .sculpture-filament-secondary,
+  .sculpture-bead-halo, .sculpture-spark) {
+    animation: none;
+    transform: none;
+  }
+
+  html:not([data-motion="active"]) .project-compact-card {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  html:not([data-motion="active"]) :is(.project-compact-card:hover,
   .btn-primary:hover,
   .btn-secondary:hover,
   .approach-item:hover,
-  .ext-social-link:hover {
+  .ext-social-link:hover) {
     transform: none !important;
   }
 }
