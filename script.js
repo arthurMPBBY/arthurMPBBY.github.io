@@ -51,7 +51,7 @@
     }
 
     if (copiedSuccessfully) {
-      announceStatus('E-mail arthurkadri968@gmail.com copiado para a área de transferência!');
+      announceStatus('E-mail arthurkadri968@gmail.com copiado para a area de transferencia!');
 
       if (!actionButton.hasAttribute('data-original-label')) {
         actionButton.setAttribute('data-original-label', actionButton.innerHTML);
@@ -77,7 +77,7 @@
 
       copyTimeoutMap.set(actionButton, timeoutId);
     } else {
-      announceStatus('Não foi possível copiar automaticamente. Endereço: ' + EMAIL_ADDRESS, true);
+      announceStatus('Nao foi possivel copiar automaticamente. Endereco: ' + EMAIL_ADDRESS, true);
     }
   }
 
@@ -111,6 +111,7 @@
 
   let isEffectsPaused = false;
   let savedPreference = null;
+  let isViewBrief = document.documentElement.getAttribute('data-view') === 'brief';
 
   try {
     savedPreference = localStorage.getItem(STORAGE_KEY);
@@ -176,11 +177,15 @@
 
   function renderMorphFrame() {
     morphFrameId = null;
+    if (isViewBrief || document.documentElement.getAttribute('data-view') === 'brief') return;
     if (!cloudMorph || isEffectsPaused || document.hidden || !isArtIntersecting) return;
 
     try {
       if (needsMorphMeasure) {
         const rectangle = artContainer.getBoundingClientRect();
+        if (rectangle.width === 0 || rectangle.height === 0) {
+          return;
+        }
         morphStart = Math.max(0, rectangle.top + window.scrollY + rectangle.height - window.innerHeight * 0.8);
         morphDistance = Math.max(160, Math.min(280, window.innerHeight * 0.3));
         cloudMorph.resize();
@@ -205,6 +210,7 @@
   }
 
   function scheduleMorphFrame(shouldMeasure = false) {
+    if (isViewBrief || document.documentElement.getAttribute('data-view') === 'brief') return;
     if (shouldMeasure) needsMorphMeasure = true;
     if (!cloudMorph || isEffectsPaused || document.hidden || !isArtIntersecting || morphFrameId !== null) return;
     morphFrameId = requestAnimationFrame(renderMorphFrame);
@@ -237,6 +243,11 @@
   }
 
   function updateParallaxFrame() {
+    if (isViewBrief || document.documentElement.getAttribute('data-view') === 'brief') {
+      animationFrameId = null;
+      return;
+    }
+
     currentRotateX += (targetRotateX - currentRotateX) * 0.08;
     currentRotateY += (targetRotateY - currentRotateY) * 0.08;
 
@@ -287,7 +298,7 @@
   }
 
   function scheduleParallaxUpdate() {
-    if (isEffectsPaused || !isHeroIntersecting || !isArtIntersecting || document.hidden || !finePointerQuery.matches) {
+    if (isViewBrief || document.documentElement.getAttribute('data-view') === 'brief' || isEffectsPaused || !isHeroIntersecting || !isArtIntersecting || document.hidden || !finePointerQuery.matches) {
       return;
     }
     if (!animationFrameId) {
@@ -334,9 +345,33 @@
         void storageError;
       }
     }
+    window.dispatchEvent(new CustomEvent('portfolio:motionchange', {
+      detail: {
+        paused: shouldPause
+      }
+    }));
   }
 
   applyMotionState(isEffectsPaused, false);
+
+  window.addEventListener('portfolio:viewchange', function (viewEvent) {
+    isViewBrief = Boolean(viewEvent.detail && viewEvent.detail.mode === 'brief');
+    if (isViewBrief) {
+      stopParallaxLoop();
+      cancelMorphFrame();
+      resetHeroTransforms();
+    } else {
+      needsMorphMeasure = true;
+      scheduleMorphFrame(true);
+    }
+  });
+
+  window.addEventListener('portfolio:layoutchange', function () {
+    if (isViewBrief || document.documentElement.getAttribute('data-view') === 'brief') {
+      return;
+    }
+    scheduleMorphFrame(true);
+  });
 
   if (motionToggleButton) {
     motionToggleButton.addEventListener('click', function () {
@@ -354,7 +389,7 @@
 
   if (heroSection) {
     heroSection.addEventListener('pointermove', function (pointerEvent) {
-      if (!finePointerQuery.matches || isEffectsPaused) return;
+      if (isViewBrief || document.documentElement.getAttribute('data-view') === 'brief' || !finePointerQuery.matches || isEffectsPaused) return;
       const boundingRectangle = heroSection.getBoundingClientRect();
       const normalizedPointerX = ((pointerEvent.clientX - boundingRectangle.left) / boundingRectangle.width) * 2 - 1;
       const normalizedPointerY = ((pointerEvent.clientY - boundingRectangle.top) / boundingRectangle.height) * 2 - 1;
@@ -376,7 +411,7 @@
 
   document.addEventListener('visibilitychange', function () {
     document.documentElement.toggleAttribute('data-page-hidden', document.hidden);
-    if (document.hidden) {
+    if (document.hidden || isViewBrief) {
       stopParallaxLoop();
       cancelMorphFrame();
     } else {
@@ -385,7 +420,7 @@
     }
   });
 
-  if ('IntersectionObserver' in window && heroSection) {
+  if (typeof window.IntersectionObserver === 'function' && heroSection) {
     const heroObserver = new IntersectionObserver(function (heroEntries) {
       heroEntries.forEach(function (heroEntry) {
         isHeroIntersecting = heroEntry.isIntersecting;
@@ -401,24 +436,28 @@
   if (cloudMorph) {
     artContainer.classList.add('morph-ready');
     window.addEventListener('scroll', function () {
+      if (isViewBrief || document.documentElement.getAttribute('data-view') === 'brief') return;
       scheduleMorphFrame();
     }, { passive: true });
     window.addEventListener('resize', function () {
+      if (isViewBrief || document.documentElement.getAttribute('data-view') === 'brief') return;
       scheduleMorphFrame(true);
     }, { passive: true });
     window.addEventListener('pageshow', function () {
+      if (isViewBrief || document.documentElement.getAttribute('data-view') === 'brief') return;
       scheduleMorphFrame(true);
     });
 
-    if ('ResizeObserver' in window) {
+    if (typeof window.ResizeObserver === 'function') {
       const morphResizeObserver = new ResizeObserver(function () {
+        if (isViewBrief || document.documentElement.getAttribute('data-view') === 'brief') return;
         scheduleMorphFrame(true);
       });
       morphResizeObserver.observe(artContainer);
       if (heroSection) morphResizeObserver.observe(heroSection);
     }
 
-    if ('IntersectionObserver' in window) {
+    if (typeof window.IntersectionObserver === 'function') {
       const artObserver = new IntersectionObserver(function (artEntries) {
         artEntries.forEach(function (artEntry) {
           isArtIntersecting = artEntry.isIntersecting;
@@ -436,6 +475,7 @@
 
     if (document.fonts && document.fonts.ready) {
       document.fonts.ready.then(function () {
+        if (isViewBrief || document.documentElement.getAttribute('data-view') === 'brief') return;
         scheduleMorphFrame(true);
       });
     }
@@ -444,7 +484,7 @@
 
   if (primaryCtaButton) {
     primaryCtaButton.addEventListener('pointermove', function (pointerEvent) {
-      if (!finePointerQuery.matches || isEffectsPaused) return;
+      if (isViewBrief || !finePointerQuery.matches || isEffectsPaused) return;
       const ctaRectangle = primaryCtaButton.getBoundingClientRect();
       const centerX = ctaRectangle.left + ctaRectangle.width / 2;
       const centerY = ctaRectangle.top + ctaRectangle.height / 2;
@@ -470,7 +510,7 @@
     });
   }
 
-  if ('IntersectionObserver' in window && projectsList) {
+  if (typeof window.IntersectionObserver === 'function' && projectsList) {
     const projectsObserver = new IntersectionObserver(function (projectEntries, observerInstance) {
       projectEntries.forEach(function (projectEntry) {
         if (projectEntry.isIntersecting) {
@@ -486,7 +526,7 @@
 
   projectCards.forEach(function (cardItem) {
     cardItem.addEventListener('pointermove', function (pointerEvent) {
-      if (!finePointerQuery.matches || isEffectsPaused) return;
+      if (isViewBrief || !finePointerQuery.matches || isEffectsPaused) return;
       const cardRect = cardItem.getBoundingClientRect();
       const relativeCoordX = pointerEvent.clientX - cardRect.left;
       const relativeCoordY = pointerEvent.clientY - cardRect.top;

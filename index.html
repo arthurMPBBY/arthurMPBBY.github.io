@@ -70,6 +70,13 @@
   </header>
 
   <main id="main-content">
+    <div class="light-trail-layer" aria-hidden="true" data-full-only>
+      <svg class="light-trail-svg" id="light-trail-svg" focusable="false" aria-hidden="true">
+        <path class="light-trail-bg-line" id="light-trail-bg"></path>
+        <path class="light-trail-active-line" id="light-trail-active"></path>
+        <circle class="light-trail-halo" id="light-trail-halo" r="5"></circle>
+      </svg>
+    </div>
     <section class="hero-section" id="hero" aria-labelledby="hero-title">
       <div class="site-wrapper">
         <div class="hero-grid">
@@ -90,7 +97,13 @@
               Estudante na Universidade Federal do ABC (UFABC), no 2º período. Foco em programação (Python &amp; C++), automação e interesse aplicado em mercado financeiro e análise de dados.
             </p>
 
-            <div class="hero-quote-box">
+                        <div class="hero-brief-summary" data-brief-only hidden>
+              <p class="hero-brief-statement">
+                <strong>UFABC · 2º período.</strong> Busco estágio em mercado financeiro ou análise de dados. Tecnologias principais: Python &amp; C++.
+              </p>
+            </div>
+
+            <div class="hero-quote-box" data-full-only>
               <p class="hero-quote">
                 Aliando a formação acadêmica da UFABC à programação prática para finanças e análise quantitativa.
               </p>
@@ -99,7 +112,7 @@
               </p>
             </div>
 
-            <div class="hero-actions">
+                        <div class="hero-actions">
               <a href="#projetos" class="btn-primary">
                 <span>Ver projetos construídos</span>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -115,9 +128,18 @@
                   <polyline points="22,6 12,13 2,6"></polyline>
                 </svg>
               </a>
+
+              <button type="button" class="btn-brief-mode" id="brief-mode-toggle" aria-pressed="false" aria-label="Alternar para versão resumida de 20 segundos">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="brief-icon" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                <span class="brief-mode-text">Tenho 20 segundos</span>
+              </button>
+              <span class="visually-hidden" id="brief-live-status" role="status" aria-live="polite"></span>
             </div>
 
-            <div class="hero-meta-bar">
+            <div class="hero-meta-bar" data-full-only>
               <div>
                 <p class="meta-item-label">Universidade</p>
                 <p class="meta-item-val">UFABC (2º período)</p>
@@ -137,7 +159,7 @@
             </div>
           </div>
 
-          <div class="hero-art-container">
+          <div class="hero-art-container" data-full-only>
             <div class="art-haze-layer" aria-hidden="true">
               <div class="haze-blob blob-coral"></div>
               <div class="haze-blob blob-white"></div>
@@ -261,15 +283,62 @@
                   </svg>
                 </a>
               </h3>
-              <p class="pcard-desc">
+              <p class="pcard-desc" data-full-only>
                 HUD em C++ para Linux que mede a cadência e intervalos de entrega de quadros em tempo real via Vulkan (<code>vkQueuePresentKHR</code>), com exibição desacoplada em Wayland LayerShell via Qt 6 Quick.
               </p>
-              <div class="tech-spec-pills">
+                            <div class="tech-spec-pills" data-full-only>
                 <span class="spec-pill">C++17</span>
                 <span class="spec-pill">Vulkan API</span>
                 <span class="spec-pill">Qt 6 Quick</span>
                 <span class="spec-pill">Wayland</span>
               </div>
+
+              <details class="project-xray" id="xray-1" data-full-only>
+                <summary class="xray-summary">
+                  <span class="xray-summary-text">Como funciona</span>
+                  <svg class="xray-chevron" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="4 6 8 10 12 6"></polyline>
+                  </svg>
+                </summary>
+                <div class="xray-content">
+                  <p class="xray-lead">
+                    O aplicativo intercepta as chamadas de renderização via Vulkan no Linux, calcula métricas de latência e cadência de quadros em C++, e transmite as estatísticas para um overlay desacoplado renderizado em Wayland LayerShell com Qt 6 Quick.
+                  </p>
+                  <div class="xray-diagram-wrap">
+                    <div class="xray-flow" role="img" aria-label="Diagrama técnico do fluxo de funcionamento">
+                      <div class="xray-flow-step">
+                        <span class="xray-flow-label">Apresentação Vulkan</span>
+                        <span class="xray-flow-sub">vkQueuePresentKHR</span>
+                      </div>
+                      <div class="xray-flow-connector" aria-hidden="true">
+                        <svg class="xray-connector-svg" viewBox="0 0 36 16" width="36" height="16" fill="none">
+                          <path d="M 0 8 L 26 8" class="xray-diagram-connector"></path>
+                          <polygon points="26,5 34,8 26,11" fill="#c16b59"></polygon>
+                        </svg>
+                      </div>
+                      <div class="xray-flow-step">
+                        <span class="xray-flow-label">Coleta C++</span>
+                        <span class="xray-flow-sub">Frame Time &amp; Latência</span>
+                      </div>
+                      <div class="xray-flow-connector" aria-hidden="true">
+                        <svg class="xray-connector-svg" viewBox="0 0 36 16" width="36" height="16" fill="none">
+                          <path d="M 0 8 L 26 8" class="xray-diagram-connector"></path>
+                          <polygon points="26,5 34,8 26,11" fill="#c16b59"></polygon>
+                        </svg>
+                      </div>
+                      <div class="xray-flow-step">
+                        <span class="xray-flow-label">Overlay Wayland</span>
+                        <span class="xray-flow-sub">Qt 6 Quick / LayerShell</span>
+                      </div>
+                    </div>
+                    <ol class="xray-steps-list">
+                      <li><strong>Apresentação Vulkan:</strong> Intercepta a fila de apresentação gráfica via vkQueuePresentKHR.</li>
+                      <li><strong>Coleta em C++:</strong> Mede os intervalos entre quadros sem interferir na execução do jogo.</li>
+                      <li><strong>Exibição Wayland:</strong> Transmite dados a um processo isolado em Qt 6 Quick sobre LayerShell.</li>
+                    </ol>
+                  </div>
+                </div>
+              </details>
             </div>
             <div class="pcard-right">
               <a href="https://github.com/arthurMPBBY/gaming-fps-hud" class="pcard-action-btn" target="_blank" rel="noopener noreferrer" aria-label="Abrir repositório gaming-fps-hud no GitHub">
@@ -296,15 +365,62 @@
                   </svg>
                 </a>
               </h3>
-              <p class="pcard-desc">
+              <p class="pcard-desc" data-full-only>
                 Controle de dispositivos residenciais em Python via rede local direta por sockets TCP (&lt;10ms de latência), eventos em tempo real com SSE, aplicativo de bandeja em PyQt6 e contingência automática via Tuya Cloud API.
               </p>
-              <div class="tech-spec-pills">
+                            <div class="tech-spec-pills" data-full-only>
                 <span class="spec-pill">Python 3.10+</span>
                 <span class="spec-pill">TCP Sockets &amp; Heartbeat</span>
                 <span class="spec-pill">PyQt6</span>
                 <span class="spec-pill">Server-Sent Events</span>
               </div>
+
+              <details class="project-xray" id="xray-2" data-full-only>
+                <summary class="xray-summary">
+                  <span class="xray-summary-text">Como funciona</span>
+                  <svg class="xray-chevron" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="4 6 8 10 12 6"></polyline>
+                  </svg>
+                </summary>
+                <div class="xray-content">
+                  <p class="xray-lead">
+                    A interface gráfica em PyQt6 envia comandos a um serviço local em Python, que estabelece conexões diretas por sockets TCP com as lâmpadas (&lt;10ms) mantendo heartbeat contínuo. Caso a rede local falhe, a API Tuya Cloud é acionada como contingência automática.
+                  </p>
+                  <div class="xray-diagram-wrap">
+                    <div class="xray-flow" role="img" aria-label="Diagrama técnico do fluxo de funcionamento">
+                      <div class="xray-flow-step">
+                        <span class="xray-flow-label">Interface PyQt6</span>
+                        <span class="xray-flow-sub">Bandeja do Sistema</span>
+                      </div>
+                      <div class="xray-flow-connector" aria-hidden="true">
+                        <svg class="xray-connector-svg" viewBox="0 0 36 16" width="36" height="16" fill="none">
+                          <path d="M 0 8 L 26 8" class="xray-diagram-connector"></path>
+                          <polygon points="26,5 34,8 26,11" fill="#c16b59"></polygon>
+                        </svg>
+                      </div>
+                      <div class="xray-flow-step">
+                        <span class="xray-flow-label">Serviço Python Local</span>
+                        <span class="xray-flow-sub">Eventos SSE &amp; Router</span>
+                      </div>
+                      <div class="xray-flow-connector" aria-hidden="true">
+                        <svg class="xray-connector-svg" viewBox="0 0 36 16" width="36" height="16" fill="none">
+                          <path d="M 0 8 L 26 8" class="xray-diagram-connector"></path>
+                          <polygon points="26,5 34,8 26,11" fill="#c16b59"></polygon>
+                        </svg>
+                      </div>
+                      <div class="xray-flow-step">
+                        <span class="xray-flow-label">Lâmpada Local (TCP)</span>
+                        <span class="xray-flow-sub">&lt;10ms / Cloud Fallback</span>
+                      </div>
+                    </div>
+                    <ol class="xray-steps-list">
+                      <li><strong>Controle na Bandeja:</strong> Interface nativa PyQt6 dispara ações instantâneas do usuário.</li>
+                      <li><strong>Serviço Local em Python:</strong> Mantém sessões TCP ativas com pacote de heartbeat periódico.</li>
+                      <li><strong>Execução na Rede Local:</strong> Entrega comandos em menos de 10ms com fallback para a nuvem Tuya.</li>
+                    </ol>
+                  </div>
+                </div>
+              </details>
             </div>
             <div class="pcard-right">
               <a href="https://github.com/arthurMPBBY/tuya-smart-lamps" class="pcard-action-btn" target="_blank" rel="noopener noreferrer" aria-label="Abrir repositório tuya-smart-lamps no GitHub">
@@ -331,15 +447,62 @@
                   </svg>
                 </a>
               </h3>
-              <p class="pcard-desc">
+              <p class="pcard-desc" data-full-only>
                 Exercícios práticos de fundamentos em Python: resolução de problemas numéricos (Bhaskara, proporções, geometria), estruturas de dados e controle de fluxo com foco em raciocínio analítico.
               </p>
-              <div class="tech-spec-pills">
+                            <div class="tech-spec-pills" data-full-only>
                 <span class="spec-pill">Python</span>
                 <span class="spec-pill">Cálculo Numérico</span>
                 <span class="spec-pill">Controle de Fluxo</span>
                 <span class="spec-pill">Estruturas de Dados</span>
               </div>
+
+              <details class="project-xray" id="xray-3" data-full-only>
+                <summary class="xray-summary">
+                  <span class="xray-summary-text">Como funciona</span>
+                  <svg class="xray-chevron" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="4 6 8 10 12 6"></polyline>
+                  </svg>
+                </summary>
+                <div class="xray-content">
+                  <p class="xray-lead">
+                    Estruturas de algoritmos numéricos que recebem parâmetros analíticos, executam cálculos determinísticos (como resolução de raízes por Bhaskara ou razões geométricas) e validam as saídas estruturadas.
+                  </p>
+                  <div class="xray-diagram-wrap">
+                    <div class="xray-flow" role="img" aria-label="Diagrama técnico do fluxo de funcionamento">
+                      <div class="xray-flow-step">
+                        <span class="xray-flow-label">Entrada de Parâmetros</span>
+                        <span class="xray-flow-sub">Coeficientes Numéricos</span>
+                      </div>
+                      <div class="xray-flow-connector" aria-hidden="true">
+                        <svg class="xray-connector-svg" viewBox="0 0 36 16" width="36" height="16" fill="none">
+                          <path d="M 0 8 L 26 8" class="xray-diagram-connector"></path>
+                          <polygon points="26,5 34,8 26,11" fill="#c16b59"></polygon>
+                        </svg>
+                      </div>
+                      <div class="xray-flow-step">
+                        <span class="xray-flow-label">Rotina Analítica</span>
+                        <span class="xray-flow-sub">Bhaskara &amp; Algoritmos</span>
+                      </div>
+                      <div class="xray-flow-connector" aria-hidden="true">
+                        <svg class="xray-connector-svg" viewBox="0 0 36 16" width="36" height="16" fill="none">
+                          <path d="M 0 8 L 26 8" class="xray-diagram-connector"></path>
+                          <polygon points="26,5 34,8 26,11" fill="#c16b59"></polygon>
+                        </svg>
+                      </div>
+                      <div class="xray-flow-step">
+                        <span class="xray-flow-label">Saída Validada</span>
+                        <span class="xray-flow-sub">Raízes &amp; Métricas</span>
+                      </div>
+                    </div>
+                    <ol class="xray-steps-list">
+                      <li><strong>Parâmetros:</strong> Entrada de coeficientes e validação de domínio numérico.</li>
+                      <li><strong>Cálculo:</strong> Fórmula quadrática analítica (delta e raízes) ou rotinas geométricas.</li>
+                      <li><strong>Resultado:</strong> Retorno formatado de soluções com tratamento de exceções.</li>
+                    </ol>
+                  </div>
+                </div>
+              </details>
             </div>
             <div class="pcard-right">
               <a href="https://github.com/arthurMPBBY/python-curso" class="pcard-action-btn" target="_blank" rel="noopener noreferrer" aria-label="Abrir repositório python-curso no GitHub">
@@ -366,14 +529,61 @@
                   </svg>
                 </a>
               </h3>
-              <p class="pcard-desc">
+              <p class="pcard-desc" data-full-only>
                 Customização visual e estruturação de tema em JSON para aplicações de áudio, organizando paletas, contrastes e tokens de interface.
               </p>
-              <div class="tech-spec-pills">
+                            <div class="tech-spec-pills" data-full-only>
                 <span class="spec-pill">JSON</span>
                 <span class="spec-pill">Design Tokens</span>
                 <span class="spec-pill">UI Theming</span>
               </div>
+
+              <details class="project-xray" id="xray-4" data-full-only>
+                <summary class="xray-summary">
+                  <span class="xray-summary-text">Como funciona</span>
+                  <svg class="xray-chevron" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="4 6 8 10 12 6"></polyline>
+                  </svg>
+                </summary>
+                <div class="xray-content">
+                  <p class="xray-lead">
+                    Arquivo JSON centraliza tokens de design (paletas de cores, contraste tipográfico e regras de componentes). A camada de tema compila e injeta esses valores diretamente na interface de áudio.
+                  </p>
+                  <div class="xray-diagram-wrap">
+                    <div class="xray-flow" role="img" aria-label="Diagrama técnico do fluxo de funcionamento">
+                      <div class="xray-flow-step">
+                        <span class="xray-flow-label">Configuração JSON</span>
+                        <span class="xray-flow-sub">Tokens &amp; Variáveis</span>
+                      </div>
+                      <div class="xray-flow-connector" aria-hidden="true">
+                        <svg class="xray-connector-svg" viewBox="0 0 36 16" width="36" height="16" fill="none">
+                          <path d="M 0 8 L 26 8" class="xray-diagram-connector"></path>
+                          <polygon points="26,5 34,8 26,11" fill="#c16b59"></polygon>
+                        </svg>
+                      </div>
+                      <div class="xray-flow-step">
+                        <span class="xray-flow-label">Mapeador de Cores</span>
+                        <span class="xray-flow-sub">Contraste &amp; Tipografia</span>
+                      </div>
+                      <div class="xray-flow-connector" aria-hidden="true">
+                        <svg class="xray-connector-svg" viewBox="0 0 36 16" width="36" height="16" fill="none">
+                          <path d="M 0 8 L 26 8" class="xray-diagram-connector"></path>
+                          <polygon points="26,5 34,8 26,11" fill="#c16b59"></polygon>
+                        </svg>
+                      </div>
+                      <div class="xray-flow-step">
+                        <span class="xray-flow-label">Interface de Áudio</span>
+                        <span class="xray-flow-sub">Spotifast Themed UI</span>
+                      </div>
+                    </div>
+                    <ol class="xray-steps-list">
+                      <li><strong>Tokens Declarativos:</strong> Definição de paletas, espaçamentos e regras de contraste em JSON.</li>
+                      <li><strong>Compilação de Estilo:</strong> Validação de legibilidade e mapeamento para propriedades do cliente.</li>
+                      <li><strong>Aplicação Visual:</strong> Injeção nos seletores CSS da aplicação de streaming.</li>
+                    </ol>
+                  </div>
+                </div>
+              </details>
             </div>
             <div class="pcard-right">
               <a href="https://github.com/arthurMPBBY/spotifast-neon-theme" class="pcard-action-btn" target="_blank" rel="noopener noreferrer" aria-label="Abrir repositório spotifast-neon-theme no GitHub">
@@ -385,6 +595,137 @@
             </div>
           </article>
         </div>
+      </div>
+    </section>
+
+    <hr class="editorial-divider" data-full-only>
+
+    <section class="section-block section-finance-lab" id="laboratorio" aria-labelledby="finance-lab-title" data-full-only>
+      <div class="site-wrapper">
+        <details class="finance-lab-details" id="finance-lab">
+          <summary class="finance-lab-summary" id="finance-lab-title">
+            <span class="finance-lab-summary-left">
+              <span class="finance-lab-summary-text">Laboratório · O efeito do tempo nos juros</span>
+              <span class="finance-lab-badge">Simulação</span>
+            </span>
+            <svg class="finance-chevron" viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="4 6 8 10 12 6"></polyline>
+            </svg>
+          </summary>
+
+          <div class="finance-lab-content">
+            <div class="finance-header-strip">
+              <p class="finance-disclaimer">
+                <strong>Simulação didática de juros compostos.</strong> Não usa cotações de mercado.
+              </p>
+              <p class="finance-note">
+                Hipóteses: taxa anual efetiva, aportes no fim de cada mês, sem incidência de impostos, taxas ou correção pela inflação.
+              </p>
+            </div>
+
+            <noscript>
+              <div class="finance-noscript-notice">
+                <p><strong>Exemplo didático pré-calculado:</strong> Valor inicial de R$ 1.000,00, aporte mensal de R$ 100,00, taxa efetiva de 12% ao ano durante 12 meses: Total aportado de R$ 2.200,00, Juros de R$ 184,65 e Saldo final acumulado de R$ 2.384,65. Para executar simulações interativas personalizadas, ative o JavaScript do navegador.</p>
+              </div>
+            </noscript>
+
+            <div class="finance-controls-grid">
+              <div class="finance-control-group">
+                <label for="finance-initial" class="finance-label">Valor inicial (R$)</label>
+                <input type="number" id="finance-initial" class="finance-input" min="0" max="1000000" step="50" value="1000" aria-describedby="error-finance-initial">
+                <span class="finance-field-error" id="error-finance-initial" role="alert" hidden></span>
+              </div>
+
+              <div class="finance-control-group">
+                <label for="finance-monthly" class="finance-label">Aporte mensal (R$)</label>
+                <input type="number" id="finance-monthly" class="finance-input" min="0" max="10000" step="25" value="100" aria-describedby="error-finance-monthly">
+                <span class="finance-field-error" id="error-finance-monthly" role="alert" hidden></span>
+              </div>
+
+              <div class="finance-control-group">
+                <label for="finance-rate-input" class="finance-label">Taxa anual efetiva (%)</label>
+                <div class="finance-dual-input">
+                  <input type="range" id="finance-rate-slider" class="finance-range" min="0" max="30" step="0.5" value="12" aria-label="Taxa anual efetiva em porcentagem" aria-valuetext="12% ao ano">
+                  <input type="number" id="finance-rate-input" class="finance-input finance-input-compact" min="0" max="30" step="0.5" value="12" aria-describedby="error-finance-rate">
+                </div>
+                <span class="finance-field-error" id="error-finance-rate" role="alert" hidden></span>
+              </div>
+
+              <div class="finance-control-group">
+                <label for="finance-months-input" class="finance-label">Prazo (meses)</label>
+                <div class="finance-dual-input">
+                  <input type="range" id="finance-months-slider" class="finance-range" min="1" max="360" step="1" value="12" aria-label="Prazo do investimento em meses" aria-valuetext="12 meses">
+                  <input type="number" id="finance-months-input" class="finance-input finance-input-compact" min="1" max="360" step="1" value="12" aria-describedby="error-finance-months">
+                </div>
+                <span class="finance-field-error" id="error-finance-months" role="alert" hidden></span>
+              </div>
+            </div>
+
+            <div class="finance-actions-row">
+              <button type="button" class="btn-finance-reset" id="finance-reset-btn">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                  <path d="M3 3v5h5"></path>
+                </svg>
+                <span>Restaurar exemplo</span>
+              </button>
+            </div>
+
+            <div class="finance-results-strip" aria-live="polite">
+              <div class="finance-result-card">
+                <span class="result-label">Total aportado</span>
+                <span class="result-value" id="finance-res-contributed">R$ 2.200,00</span>
+              </div>
+              <div class="finance-result-card">
+                <span class="result-label">Juros no período</span>
+                <span class="result-value" id="finance-res-interest">R$ 184,65</span>
+              </div>
+              <div class="finance-result-card finance-result-card-highlight">
+                <span class="result-label">Saldo final acumulado</span>
+                <span class="result-value" id="finance-res-balance">R$ 2.384,65</span>
+              </div>
+            </div>
+
+            <div class="finance-chart-section">
+              <div class="finance-chart-legend">
+                <span class="legend-item">
+                  <span class="legend-line line-balance" aria-hidden="true"></span>
+                  <span>Linha contínua coral: Saldo acumulado</span>
+                </span>
+                <span class="legend-item">
+                  <span class="legend-line line-contributed" aria-hidden="true"></span>
+                  <span>Linha tracejada grafite: Total aportado</span>
+                </span>
+              </div>
+
+              <div class="finance-chart-wrap">
+                <svg class="finance-chart-svg" id="finance-chart-svg" viewBox="0 0 600 280" role="img" aria-label="Gráfico de evolução patrimonial comparando total aportado e saldo acumulado"></svg>
+              </div>
+            </div>
+
+            <details class="finance-table-details">
+              <summary class="finance-table-summary">
+                <span>Ver tabela de marcos (anuais e mês final)</span>
+                <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polyline points="4 6 8 10 12 6"></polyline>
+                </svg>
+              </summary>
+              <div class="finance-table-wrap">
+                <table class="finance-milestones-table" id="finance-milestones-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Marco temporal</th>
+                      <th scope="col">Total aportado</th>
+                      <th scope="col">Saldo acumulado</th>
+                      <th scope="col">Juros auferidos</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </details>
+          </div>
+        </details>
       </div>
     </section>
 
@@ -416,7 +757,7 @@
             </p>
           </div>
 
-          <aside class="about-sidebar-card">
+          <aside class="about-sidebar-card" data-full-only>
             <h3 class="sidebar-title">Formação &amp; Foco</h3>
 
             <ul class="approach-list">
@@ -553,6 +894,8 @@
   </footer>
 
   <script src="cloud-morph.js"></script>
+  <script src="finance-lab.js"></script>
+  <script src="portfolio-extras.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
