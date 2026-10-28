@@ -4,12 +4,13 @@ Portfólio estático para apresentar projetos de programação e a busca por est
 
 ## Direção visual
 
-Composição tipográfica diagonal, espaço em branco e entrada curta por barras, inspirados na linguagem visual de Abliteration. Código e identidade próprios, sem copiar a marca, textos ou ativos da referência.
+Composição tipográfica diagonal, espaço em branco e entrada suave por microbarras, inspirados na linguagem visual de Abliteration. Código e identidade próprios, sem copiar a marca, textos ou ativos da referência.
 
-- Papel `#fafaf9`, tinta `#1b1c1b`, coral `#c16b59`.
+- Papel `#fafaf9`, tinta `#1b1c1b`, superfícies em pérola neutra / pedra suave (`#f0f2f1`), bordas em grafite (`#d0d5d3`) e acentos pontuais em coral (`#c16b59`).
+- Superfícies com preenchimento em marrom/pêssego em contato, e-mail, badges e botões foram substituídas por tons neutros frios elegantes e legíveis.
 - Plus Jakarta Sans para títulos, DM Sans para texto, JetBrains Mono para metadados.
-- Microbarras em Canvas 2D com repulsão e desfoque próximo ao ponteiro; SVG estático em CSS quando o efeito está indisponível.
-- Introdução cancelável por botão, Escape ou Tab, com limite de duração e preferência de sessão.
+- Microbarras em Canvas 2D com repulsão e desfoque próximo ao ponteiro; SVG estático em CSS com microbarras frias quando o efeito está indisponível.
+- Introdução em microbarras com crescimento e decaimento contínuos, ondulação harmônica suave sem trepidação, nome legível e transição por crossfade para o layout real em menos de 2.200 ms. Cancelável por botão, Escape ou Tab, com preferência de sessão e fail-open total.
 - A antiga trilha luminosa foi removida para não atravessar números ou textos.
 
 ## Conteúdo e interações
@@ -49,6 +50,7 @@ Execute a partir da pasta de trabalho que contém `arthur-portfolio`. No checkou
 
 Revisão final executada em Microsoft Edge headless por CDP em 28/10/2026. Os scripts de QA e capturas ficam em `outputs/` na pasta de trabalho, não no site público.
 
+- `smooth-neutral-review.cjs`: 24 verificações aprovadas. Registra capturas da introdução, confere cores computadas neutras frias no bloco de e-mail e badges, ausência de exceções de console e de RAF contínuo em repouso, além do layout em 320×640 e 390×844. A duração real é medida separadamente por `spatial-sol-review.cjs`.
 - `abliteration-hardening-review.cjs`: 51 verificações aprovadas, sem exceções JavaScript na execução revisada.
 - Cobertura: buffer Canvas em DPR 2, repulsão e sprites de desfoque, parada de RAF em repouso, pausa e modo resumo, fallback em falha de contexto e sem JavaScript, foco ao pular a entrada, laboratório e acordeão.
 - Layouts verificados: 320×640, 390×844, 768×1024, 1440×900 e 800×1600 em DPR 2, sem transbordamento horizontal nos testes.

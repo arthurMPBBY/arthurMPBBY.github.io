@@ -371,7 +371,7 @@
     let isIntroDismissed = false;
     let animationFrameId = null;
     let animationStartTime = null;
-    const animationTotalDuration = 1650;
+    const animationTotalDuration = 1600;
     const totalBarsCount = 42;
 
     let cachedDeviceRatio = 1;
@@ -475,7 +475,7 @@
       setTimeout(function () {
         introOverlay.setAttribute('hidden', '');
         introOverlay.style.display = 'none';
-      }, 350);
+      }, 320);
     }
 
     function handleKeyDown(keyboardEvent) {
@@ -540,7 +540,7 @@
       });
     }
 
-    const failsafeTimerId = setTimeout(dismissIntro, 2200);
+    const failsafeTimerId = setTimeout(dismissIntro, 2150);
     const wallClockStart = performance.now();
 
     measureLayout();
@@ -557,39 +557,51 @@
       const elapsedTime = timestamp - animationStartTime;
       const progressRatio = Math.min(1, elapsedTime / animationTotalDuration);
 
+      canvasContext.setTransform(1, 0, 0, 1, 0, 0);
+      canvasContext.clearRect(0, 0, introCanvas.width, introCanvas.height);
       canvasContext.setTransform(cachedDeviceRatio, 0, 0, cachedDeviceRatio, 0, 0);
       canvasContext.fillStyle = '#fafaf9';
       canvasContext.fillRect(0, 0, cachedViewportWidth, cachedViewportHeight);
 
-      if (progressRatio < 0.85) {
-        const sweepProgress = Math.min(1, progressRatio / 0.65);
-        const waveFront = sweepProgress * (cachedViewportWidth + 180);
+      const peakHeight = cachedIsDesktopLayout ? 130 : 85;
+      const restHeight = 6;
 
-        for (let barIndex = 0; barIndex < totalBarsCount; barIndex += 1) {
+      for (let barIndex = 0; barIndex < totalBarsCount; barIndex += 1) {
+        const normalizedBarIndex = barIndex / (totalBarsCount - 1);
+        const sweepDelay = normalizedBarIndex * 0.32;
+        const barGrowthPhase = Math.max(0, Math.min(1, (progressRatio - sweepDelay) / 0.32));
+        const smoothGrowth = barGrowthPhase * barGrowthPhase * (3 - 2 * barGrowthPhase);
+
+        const decayPhase = Math.max(0, Math.min(1, (progressRatio - 0.62) / 0.36));
+        const smoothDecay = 1 - decayPhase * decayPhase * (3 - 2 * decayPhase);
+
+        const barEnvelope = smoothGrowth * smoothDecay;
+        if (barEnvelope > 0.001) {
+          const waveHarmonic = Math.sin(normalizedBarIndex * Math.PI * 3 + progressRatio * Math.PI * 2) * 6;
+          const barHeight = restHeight + barEnvelope * (peakHeight - restHeight + waveHarmonic);
           const barHorizontal = barIndex * cachedBarPitch;
-          const barDistance = barHorizontal - waveFront;
+          const barTop = cachedCenterY - barHeight / 2;
+          const barWidth = Math.max(1.5, Math.min(2.4, cachedBarPitch * 0.18));
+          const barAlpha = barEnvelope * 0.72;
 
-          if (barDistance < 40 && barDistance > -520) {
-            const barInfluence = Math.max(0, 1 - Math.abs(barDistance) / 420);
-            const barHeight = 40 + barInfluence * 220 + Math.sin(barIndex * 0.6 + progressRatio * 7) * 25;
-            const barTop = cachedCenterY - barHeight / 2;
-            const barWidth = Math.max(1.5, cachedBarPitch * (0.22 + barInfluence * 0.35));
-
-            canvasContext.fillStyle = barIndex % 4 === 0 ? 'rgba(193, 107, 89, 0.88)' : 'rgba(27, 28, 27, 0.78)';
-            canvasContext.fillRect(barHorizontal, barTop, barWidth, barHeight);
+          if (barIndex % 7 === 0) {
+            canvasContext.fillStyle = 'rgba(193, 107, 89, ' + (barAlpha * 0.88).toFixed(3) + ')';
+          } else {
+            canvasContext.fillStyle = 'rgba(27, 28, 27, ' + (barAlpha * 0.75).toFixed(3) + ')';
           }
+          canvasContext.fillRect(barHorizontal, barTop, barWidth, barHeight);
         }
       }
 
-      if (progressRatio > 0.25) {
-        const textProgress = Math.min(1, (progressRatio - 0.25) / 0.55);
+      if (progressRatio > 0.20) {
+        const textProgress = Math.min(1, (progressRatio - 0.20) / 0.35);
         const easeOutText = 1 - Math.pow(1 - textProgress, 3);
         const textOpacity = easeOutText;
 
         canvasContext.save();
 
         if (cachedIsDesktopLayout) {
-          canvasContext.font = '800 ' + Math.round(cachedBaseTitleSize) + 'px \"Plus Jakarta Sans\", system-ui, sans-serif';
+          canvasContext.font = '800 ' + Math.round(cachedBaseTitleSize) + 'px "Plus Jakarta Sans", system-ui, sans-serif';
           canvasContext.fillStyle = 'rgba(27, 28, 27, ' + textOpacity.toFixed(3) + ')';
 
           canvasContext.textAlign = 'left';
@@ -599,29 +611,29 @@
           canvasContext.textAlign = 'right';
           canvasContext.fillText('Kadri.', cachedRightMargin, cachedBottomBaseline);
 
-          canvasContext.font = '600 ' + Math.round(cachedSubFontSize) + 'px \"JetBrains Mono\", monospace';
+          canvasContext.font = '600 ' + Math.round(cachedSubFontSize) + 'px "JetBrains Mono", monospace';
           canvasContext.fillStyle = 'rgba(193, 107, 89, ' + (textOpacity * 0.95).toFixed(3) + ')';
           canvasContext.textAlign = 'left';
           canvasContext.fillText('UFABC \u00b7 2\u00ba PER\u00cdODO', cachedLeftMargin, cachedTopBaseline - cachedBaseTitleSize * 0.9);
 
-          canvasContext.font = '500 ' + Math.round(cachedSubFontSize * 0.95) + 'px \"DM Sans\", system-ui, sans-serif';
-          canvasContext.fillStyle = 'rgba(88, 88, 82, ' + (textOpacity * 0.85).toFixed(3) + ')';
+          canvasContext.font = '500 ' + Math.round(cachedSubFontSize * 0.95) + 'px "DM Sans", system-ui, sans-serif';
+          canvasContext.fillStyle = 'rgba(78, 83, 80, ' + (textOpacity * 0.85).toFixed(3) + ')';
           canvasContext.textAlign = 'right';
           canvasContext.fillText('PROGRAMA\u00c7\u00c3O PR\u00c1TICA \u00b7 DADOS & MERCADO FINANCEIRO', cachedRightMargin, cachedBottomBaseline + cachedBaseTitleSize * 0.35);
         } else {
           canvasContext.textAlign = 'center';
           canvasContext.textBaseline = 'middle';
 
-          canvasContext.font = '800 ' + Math.round(cachedBaseTitleSize) + 'px \"Plus Jakarta Sans\", system-ui, sans-serif';
+          canvasContext.font = '800 ' + Math.round(cachedBaseTitleSize) + 'px "Plus Jakarta Sans", system-ui, sans-serif';
           canvasContext.fillStyle = 'rgba(27, 28, 27, ' + textOpacity.toFixed(3) + ')';
           canvasContext.fillText('Arthur Kadri.', cachedViewportWidth / 2, cachedCenterY - cachedBaseTitleSize * 0.3);
 
-          canvasContext.font = '600 ' + Math.round(cachedSubFontSize) + 'px \"JetBrains Mono\", monospace';
+          canvasContext.font = '600 ' + Math.round(cachedSubFontSize) + 'px "JetBrains Mono", monospace';
           canvasContext.fillStyle = 'rgba(193, 107, 89, ' + (textOpacity * 0.95).toFixed(3) + ')';
           canvasContext.fillText('UFABC \u00b7 2\u00ba PER\u00cdODO', cachedViewportWidth / 2, cachedCenterY + cachedBaseTitleSize * 0.45);
 
-          canvasContext.font = '500 ' + Math.round(cachedSubFontSize * 0.95) + 'px \"DM Sans\", system-ui, sans-serif';
-          canvasContext.fillStyle = 'rgba(88, 88, 82, ' + (textOpacity * 0.85).toFixed(3) + ')';
+          canvasContext.font = '500 ' + Math.round(cachedSubFontSize * 0.95) + 'px "DM Sans", system-ui, sans-serif';
+          canvasContext.fillStyle = 'rgba(78, 83, 80, ' + (textOpacity * 0.85).toFixed(3) + ')';
           canvasContext.fillText('PROGRAMA\u00c7\u00c3O \u00b7 DADOS & FINAN\u00c7AS', cachedViewportWidth / 2, cachedCenterY + cachedBaseTitleSize * 0.8);
         }
 

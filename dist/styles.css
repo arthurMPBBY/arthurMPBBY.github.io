@@ -1,14 +1,14 @@
 :root {
   --bg-canvas: #fafaf9;
   --bg-surface: #ffffff;
-  --bg-surface-subtle: #f4f3ee;
+  --bg-surface-subtle: #f0f2f1;
   --text-primary: #1b1c1b;
-  --text-secondary: #585852;
-  --text-muted: #84847d;
-  --border-hairline: #e6e4dc;
-  --border-subtle: #dedbd1;
+  --text-secondary: #4e5350;
+  --text-muted: #787e7b;
+  --border-hairline: #e2e5e4;
+  --border-subtle: #d0d5d3;
   --accent-coral: #c16b59;
-  --accent-coral-soft: rgba(193, 107, 89, 0.10);
+  --accent-coral-soft: rgba(193, 107, 89, 0.08);
   --accent-slate: #3b5066;
   --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --font-body: 'DM Sans', system-ui, -apple-system, sans-serif;
@@ -38,7 +38,7 @@ body {
   font-family: var(--font-body);
   font-size: 1rem;
   background-color: var(--bg-canvas);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='16'%3E%3Crect x='6.4' y='5' width='1.2' height='6' fill='%23dec3b1' fill-opacity='0.42'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='16'%3E%3Crect x='6.4' y='5' width='1.2' height='6' fill='%23cfd4d2' fill-opacity='0.48'/%3E%3C/svg%3E");
   background-size: 14px 16px;
   color: var(--text-primary);
   line-height: 1.6;
@@ -74,6 +74,9 @@ html[data-view="brief"] .reactive-dots-canvas {
   .reactive-dots-canvas {
     display: none !important;
   }
+  .status-live-indicator {
+    animation: none !important;
+  }
 }
 
 .intro-overlay {
@@ -89,7 +92,7 @@ html[data-view="brief"] .reactive-dots-canvas {
   pointer-events: auto;
   opacity: 1;
   visibility: visible;
-  transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.35s;
+  transition: opacity 0.32s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.32s;
   overflow: hidden;
 }
 
@@ -141,7 +144,7 @@ html:not(.js-ready) .intro-overlay {
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(240, 242, 241, 0.94);
   border: 1px solid var(--border-subtle);
   border-radius: 2px;
   cursor: pointer;
@@ -249,7 +252,7 @@ html:not(.js-ready) .intro-overlay {
   align-items: center;
   gap: 0.35rem;
   padding: 0.2rem 0.5rem;
-  background: var(--bg-surface);
+  background: var(--bg-surface-subtle);
   border: 1px solid var(--border-hairline);
   border-radius: 2px;
   font-family: var(--font-mono);
@@ -318,7 +321,7 @@ html[data-page-hidden] .status-live-indicator {
   gap: 0.45rem;
   min-height: 40px;
   padding: 0.4rem 0.8rem;
-  background: var(--bg-surface);
+  background: var(--bg-surface-subtle);
   border: 1px solid var(--border-subtle);
   border-radius: 2px;
   font-family: var(--font-mono);
@@ -396,7 +399,7 @@ html[data-page-hidden] .status-live-indicator {
   align-items: center;
   gap: 0.5rem;
   padding: 0.35rem 0.75rem;
-  background: var(--bg-surface);
+  background: var(--bg-surface-subtle);
   border: 1px solid var(--border-subtle);
   border-radius: 2px;
   font-family: var(--font-mono);
@@ -494,13 +497,13 @@ html[data-page-hidden] .status-live-indicator {
   align-items: center;
   gap: 0.5rem;
   padding: 0.4rem 0.8rem;
-  background: var(--accent-coral-soft);
-  border: 1px solid rgba(193, 107, 89, 0.25);
+  background: var(--bg-surface-subtle);
+  border: 1px solid var(--border-subtle);
   border-radius: 2px;
   font-family: var(--font-mono);
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--accent-coral);
+  color: var(--text-primary);
   width: fit-content;
 }
 
@@ -568,12 +571,13 @@ html[data-page-hidden] .status-live-indicator {
 }
 
 .btn-secondary {
-  background: var(--bg-surface);
+  background: var(--bg-surface-subtle);
   color: var(--text-primary);
   border: 1px solid var(--border-subtle);
 }
 
 .btn-secondary:hover {
+  background: #ffffff;
   border-color: var(--text-primary);
   transform: translateY(-1px);
 }
@@ -846,7 +850,7 @@ html[data-page-hidden] .status-live-indicator {
   font-size: 0.75rem;
   font-weight: 600;
   color: var(--text-primary);
-  background: var(--bg-surface);
+  background: var(--bg-surface-subtle);
   border: 1px solid var(--border-subtle);
   border-radius: 2px;
   text-decoration: none;
@@ -900,9 +904,10 @@ html[data-page-hidden] .status-live-indicator {
 
 .flab-toggle-tag {
   font-size: 0.6875rem;
-  color: var(--accent-coral);
+  color: var(--text-secondary);
   padding: 0.2rem 0.5rem;
-  background: var(--accent-coral-soft);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-hairline);
   border-radius: 2px;
 }
 
@@ -1035,7 +1040,7 @@ html[data-page-hidden] .status-live-indicator {
   font-size: 0.75rem;
   color: var(--text-secondary);
   background: var(--bg-surface-subtle);
-  border: 1px solid var(--border-hairline);
+  border: 1px solid var(--border-subtle);
   border-radius: 2px;
   cursor: pointer;
   transition: background 0.15s, color 0.15s, border-color 0.15s;
@@ -1378,7 +1383,8 @@ html:not(.js-ready) .copy-email-btn {
   font-family: var(--font-mono);
   font-size: 0.75rem;
   font-weight: 700;
-  color: var(--accent-coral);
+  color: var(--text-secondary);
+  letter-spacing: 0.04em;
 }
 
 .contact-email-box {
@@ -1442,7 +1448,7 @@ html:not(.js-ready) .copy-email-btn {
 
 .mailto-link-btn:hover {
   border-color: var(--text-primary);
-  background: #ffffff;
+  background: var(--bg-surface-subtle);
 }
 
 .copy-email-btn:focus-visible,
