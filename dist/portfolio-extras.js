@@ -36,7 +36,7 @@
     const resultInterest = document.getElementById('finance-res-interest');
     const resultBalance = document.getElementById('finance-res-balance');
     const chartSvg = document.getElementById('finance-chart-svg');
-    const milestonesTableBody = document.querySelector('#finance-milestones-table tbody');
+    const milestonesTableBody = document.getElementById('finance-milestones-body');
 
     const errorInitial = document.getElementById('error-finance-initial');
     const errorMonthly = document.getElementById('error-finance-monthly');
@@ -151,47 +151,51 @@
         const contributedCoordinateY = scaleCoordinateY(pointItem.contributed).toFixed(2);
 
         if (pointIndex === 0) {
-          balancePathString = 'M ' + pointCoordinateX + ' ' + balanceCoordinateY;
-          contributedPathString = 'M ' + pointCoordinateX + ' ' + contributedCoordinateY;
+          balancePathString += 'M ' + pointCoordinateX + ' ' + balanceCoordinateY;
+          contributedPathString += 'M ' + pointCoordinateX + ' ' + contributedCoordinateY;
         } else {
           balancePathString += ' L ' + pointCoordinateX + ' ' + balanceCoordinateY;
           contributedPathString += ' L ' + pointCoordinateX + ' ' + contributedCoordinateY;
         }
       });
 
-      const horizontalGridLevels = 4;
-      let gridLinesMarkup = '';
-      for (let levelIndex = 0; levelIndex <= horizontalGridLevels; levelIndex += 1) {
-        const levelFraction = levelIndex / horizontalGridLevels;
-        const levelAmount = maximumAmount * levelFraction;
-        const levelCoordinateY = scaleCoordinateY(levelAmount).toFixed(2);
+      const firstPointX = scaleCoordinateX(0).toFixed(2);
+      const lastPointX = scaleCoordinateX(totalMonths).toFixed(2);
+      const zeroBaseY = scaleCoordinateY(0).toFixed(2);
 
-        gridLinesMarkup += '<line x1="' + paddingLeft + '" y1="' + levelCoordinateY + '" x2="' + (svgViewWidth - paddingRight) + '" y2="' + levelCoordinateY + '" stroke="#e5e5e0" stroke-width="1" stroke-dasharray="2 3" />';
-        gridLinesMarkup += '<text x="' + (paddingLeft - 8) + '" y="' + (Number(levelCoordinateY) + 4) + '" text-anchor="end" font-size="10" fill="#585d66" font-family="monospace">' + axisFormatter.format(levelAmount) + '</text>';
+      const balanceAreaPathString = balancePathString + ' L ' + lastPointX + ' ' + zeroBaseY + ' L ' + firstPointX + ' ' + zeroBaseY + ' Z';
+
+      let gridLinesHtml = '';
+      const horizontalGridSteps = 4;
+      for (let stepIndex = 0; stepIndex <= horizontalGridSteps; stepIndex += 1) {
+        const stepAmount = (maximumAmount / horizontalGridSteps) * stepIndex;
+        const gridCoordinateY = scaleCoordinateY(stepAmount).toFixed(2);
+        const formattedAxisLabel = axisFormatter.format(stepAmount);
+
+        gridLinesHtml += '<line x1="' + paddingLeft + '" y1="' + gridCoordinateY + '" x2="' + (svgViewWidth - paddingRight) + '" y2="' + gridCoordinateY + '" stroke="#e5e5df" stroke-width="1" stroke-dasharray="3,3" />';
+        gridLinesHtml += '<text x="' + (paddingLeft - 8) + '" y="' + (Number(gridCoordinateY) + 4) + '" fill="#7a7972" font-size="10" font-family="var(--font-mono, monospace)" text-anchor="end">' + formattedAxisLabel + '</text>';
       }
 
-      let timeTicksMarkup = '';
-      const timeIntervals = totalMonths <= 12 ? 3 : (totalMonths <= 60 ? 12 : 36);
-      for (let monthTick = 0; monthTick <= totalMonths; monthTick += timeIntervals) {
-        const tickCoordinateX = scaleCoordinateX(monthTick).toFixed(2);
-        timeTicksMarkup += '<line x1="' + tickCoordinateX + '" y1="' + (svgViewHeight - paddingBottom) + '" x2="' + tickCoordinateX + '" y2="' + (svgViewHeight - paddingBottom + 5) + '" stroke="#585d66" stroke-width="1" />';
-        timeTicksMarkup += '<text x="' + tickCoordinateX + '" y="' + (svgViewHeight - paddingBottom + 18) + '" text-anchor="middle" font-size="10" fill="#585d66" font-family="monospace">' + monthTick + 'm</text>';
-      }
+      let monthAxisLabelsHtml = '';
+      const timeIntervals = [0, Math.round(totalMonths / 2), totalMonths];
+      const uniqueIntervals = Array.from(new Set(timeIntervals));
+      uniqueIntervals.forEach(function (monthInterval) {
+        const intervalCoordinateX = scaleCoordinateX(monthInterval).toFixed(2);
+        const intervalText = monthInterval === 0 ? 'Mês 0' : 'Mês ' + monthInterval;
+        monthAxisLabelsHtml += '<text x="' + intervalCoordinateX + '" y="' + (svgViewHeight - 14) + '" fill="#7a7972" font-size="10" font-family="var(--font-mono, monospace)" text-anchor="middle">' + intervalText + '</text>';
+      });
 
-      if (totalMonths % timeIntervals !== 0) {
-        const finalTickX = scaleCoordinateX(totalMonths).toFixed(2);
-        timeTicksMarkup += '<line x1="' + finalTickX + '" y1="' + (svgViewHeight - paddingBottom) + '" x2="' + finalTickX + '" y2="' + (svgViewHeight - paddingBottom + 5) + '" stroke="#c16b59" stroke-width="1" />';
-        timeTicksMarkup += '<text x="' + finalTickX + '" y="' + (svgViewHeight - paddingBottom + 30) + '" text-anchor="middle" font-size="10" fill="#c16b59" font-family="monospace">' + totalMonths + 'm</text>';
-      }
-
-      chartSvg.innerHTML = `
-        <g class="chart-grid">${gridLinesMarkup}</g>
-        <g class="chart-ticks">${timeTicksMarkup}</g>
-        <line x1="${paddingLeft}" y1="${svgViewHeight - paddingBottom}" x2="${svgViewWidth - paddingRight}" y2="${svgViewHeight - paddingBottom}" stroke="#25272b" stroke-width="1.2" />
-        <line x1="${paddingLeft}" y1="${paddingTop}" x2="${paddingLeft}" y2="${svgViewHeight - paddingBottom}" stroke="#25272b" stroke-width="1.2" />
-        <path d="${contributedPathString}" fill="none" stroke="#585d66" stroke-width="1.8" stroke-dasharray="5 4" class="chart-line-contributed" />
-        <path d="${balancePathString}" fill="none" stroke="#c16b59" stroke-width="2.4" class="chart-line-balance" />
-      `;
+      chartSvg.innerHTML = '<defs>' +
+        '<linearGradient id="balance-area-gradient" x1="0" y1="0" x2="0" y2="1">' +
+          '<stop offset="0%" stop-color="#c16b59" stop-opacity="0.22" />' +
+          '<stop offset="100%" stop-color="#c16b59" stop-opacity="0.01" />' +
+        '</linearGradient>' +
+        '</defs>' +
+        gridLinesHtml +
+        '<path d="' + balanceAreaPathString + '" fill="url(#balance-area-gradient)" />' +
+        '<path d="' + contributedPathString + '" fill="none" stroke="#6e6e66" stroke-width="1.8" stroke-dasharray="4,4" />' +
+        '<path d="' + balancePathString + '" fill="none" stroke="#c16b59" stroke-width="2.5" />' +
+        monthAxisLabelsHtml;
     }
 
     function populateMilestonesTable(calculationData) {
@@ -199,139 +203,127 @@
 
       const pointsArray = calculationData.points;
       const totalMonths = pointsArray.length - 1;
-      const selectedMilestones = [];
 
-      selectedMilestones.push(pointsArray[0]);
-
-      for (let monthNumber = 12; monthNumber < totalMonths; monthNumber += 12) {
-        selectedMilestones.push(pointsArray[monthNumber]);
+      const milestoneMonths = [];
+      for (let monthTicker = 12; monthTicker <= totalMonths; monthTicker += 12) {
+        milestoneMonths.push(monthTicker);
+      }
+      if (totalMonths > 0 && !milestoneMonths.includes(totalMonths)) {
+        milestoneMonths.push(totalMonths);
       }
 
-      if (totalMonths > 0) {
-        selectedMilestones.push(pointsArray[totalMonths]);
+      if (milestoneMonths.length === 0) {
+        milestoneMonths.push(totalMonths);
       }
 
-      let rowsMarkup = '';
-      selectedMilestones.forEach(function (milestonePoint) {
-        const monthNumber = milestonePoint.month;
-        const yearsCount = (monthNumber / 12).toFixed(1);
-        const timeLabel = monthNumber === 0
-          ? 'Mes 0 (Inicio)'
-          : monthNumber + ' meses (' + yearsCount + ' anos)';
-        const interestAccumulated = milestonePoint.balance - milestonePoint.contributed;
+      let generatedRowsHtml = '';
+      milestoneMonths.forEach(function (targetMonth) {
+        const foundPoint = pointsArray.find(function (point) {
+          return point.month === targetMonth;
+        }) || pointsArray[pointsArray.length - 1];
 
-        rowsMarkup += `
-          <tr>
-            <th scope="row">${timeLabel}</th>
-            <td>${currencyFormatter.format(milestonePoint.contributed)}</td>
-            <td><strong>${currencyFormatter.format(milestonePoint.balance)}</strong></td>
-            <td>${currencyFormatter.format(interestAccumulated)}</td>
-          </tr>
-        `;
+        const yearsCount = Math.floor(targetMonth / 12);
+        const remainderMonths = targetMonth % 12;
+        let periodDescription = 'Mês ' + targetMonth;
+        if (yearsCount > 0 && remainderMonths === 0) {
+          periodDescription += ' (Ano ' + yearsCount + ')';
+        } else if (yearsCount > 0) {
+          periodDescription += ' (' + yearsCount + 'a ' + remainderMonths + 'm)';
+        }
+
+        const calculatedInterest = Math.max(0, foundPoint.balance - foundPoint.contributed);
+
+        generatedRowsHtml += '<tr>' +
+          '<td>' + periodDescription + '</td>' +
+          '<td>' + currencyFormatter.format(foundPoint.contributed) + '</td>' +
+          '<td>' + currencyFormatter.format(calculatedInterest) + '</td>' +
+          '<td><strong>' + currencyFormatter.format(foundPoint.balance) + '</strong></td>' +
+          '</tr>';
       });
 
-      milestonesTableBody.innerHTML = rowsMarkup;
+      milestonesTableBody.innerHTML = generatedRowsHtml;
     }
 
     function executeCalculation() {
-      let hasValidationError = false;
+      const parsedInitial = parseNumericValue(initialInput.value);
+      const parsedMonthly = parseNumericValue(monthlyInput.value);
+      const parsedRate = parseNumericValue(rateInput.value);
+      const parsedMonths = parseNumericValue(monthsInput.value);
 
-      const rawInitial = initialInput.value;
-      const parsedInitial = parseNumericValue(rawInitial);
-      if (rawInitial.trim() === '') {
-        setFieldError(errorInitial, initialInput, 'Informe o valor inicial (R$ 0 a R$ 1.000.000).');
-        hasValidationError = true;
-      } else if (Number.isNaN(parsedInitial) || parsedInitial < 0 || parsedInitial > 1000000) {
-        setFieldError(errorInitial, initialInput, 'Informe um valor valido entre R$ 0 e R$ 1.000.000.');
-        hasValidationError = true;
+      let hasFormErrors = false;
+
+      if (!Number.isFinite(parsedInitial) || parsedInitial < 0 || parsedInitial > 1000000) {
+        setFieldError(errorInitial, initialInput, 'Informe um valor inicial entre R$ 0 e R$ 1.000.000');
+        hasFormErrors = true;
       } else {
         clearFieldError(errorInitial, initialInput);
       }
 
-      const rawMonthly = monthlyInput.value;
-      const parsedMonthly = parseNumericValue(rawMonthly);
-      if (rawMonthly.trim() === '') {
-        setFieldError(errorMonthly, monthlyInput, 'Informe o aporte mensal (R$ 0 a R$ 10.000).');
-        hasValidationError = true;
-      } else if (Number.isNaN(parsedMonthly) || parsedMonthly < 0 || parsedMonthly > 10000) {
-        setFieldError(errorMonthly, monthlyInput, 'Informe um aporte entre R$ 0 e R$ 10.000.');
-        hasValidationError = true;
+      if (!Number.isFinite(parsedMonthly) || parsedMonthly < 0 || parsedMonthly > 10000) {
+        setFieldError(errorMonthly, monthlyInput, 'Informe um aporte mensal entre R$ 0 e R$ 10.000');
+        hasFormErrors = true;
       } else {
         clearFieldError(errorMonthly, monthlyInput);
       }
 
-      const rawRate = rateInput.value;
-      const parsedRate = parseNumericValue(rawRate);
-      if (rawRate.trim() === '') {
-        setFieldError(errorRate, rateInput, 'Informe a taxa anual (0% a 30%).');
-        hasValidationError = true;
-      } else if (Number.isNaN(parsedRate) || parsedRate < 0 || parsedRate > 30) {
-        setFieldError(errorRate, rateInput, 'Informe uma taxa anual entre 0% e 30%.');
-        hasValidationError = true;
+      if (!Number.isFinite(parsedRate) || parsedRate < 0 || parsedRate > 30) {
+        setFieldError(errorRate, rateInput, 'Informe uma taxa anual entre 0% e 30%');
+        hasFormErrors = true;
       } else {
         clearFieldError(errorRate, rateInput);
       }
 
-      const rawMonths = monthsInput.value;
-      const parsedMonths = parseNumericValue(rawMonths);
-      if (rawMonths.trim() === '') {
-        setFieldError(errorMonths, monthsInput, 'Informe o prazo (1 a 360 meses).');
-        hasValidationError = true;
-      } else if (Number.isNaN(parsedMonths) || !Number.isInteger(parsedMonths) || parsedMonths < 1 || parsedMonths > 360) {
-        setFieldError(errorMonths, monthsInput, 'Informe um prazo inteiro entre 1 e 360 meses.');
-        hasValidationError = true;
+      if (!Number.isInteger(parsedMonths) || parsedMonths < 1 || parsedMonths > 360) {
+        setFieldError(errorMonths, monthsInput, 'Informe um prazo inteiro entre 1 e 360 meses');
+        hasFormErrors = true;
       } else {
         clearFieldError(errorMonths, monthsInput);
       }
 
-      if (hasValidationError) {
+      if (hasFormErrors) {
+        return;
+      }
+
+      if (!window.PortfolioFinance || typeof window.PortfolioFinance.calculate !== 'function') {
         return;
       }
 
       try {
-        const calculationResult = window.PortfolioFinance.calculate({
+        const calculationOutput = window.PortfolioFinance.calculate({
           initialAmount: parsedInitial,
           monthlyContribution: parsedMonthly,
           annualRatePercent: parsedRate,
           months: parsedMonths
         });
 
-        lastValidCalculation = calculationResult;
+        lastValidCalculation = calculationOutput;
 
-        if (resultContributed) resultContributed.textContent = currencyFormatter.format(calculationResult.totalContributed);
-        if (resultInterest) resultInterest.textContent = currencyFormatter.format(calculationResult.interest);
-        if (resultBalance) resultBalance.textContent = currencyFormatter.format(calculationResult.finalBalance);
+        resultBalance.textContent = currencyFormatter.format(calculationOutput.finalBalance);
+        resultContributed.textContent = currencyFormatter.format(calculationOutput.totalContributed);
+        resultInterest.textContent = currencyFormatter.format(calculationOutput.interest);
 
-        drawChart(calculationResult);
-        populateMilestonesTable(calculationResult);
-      } catch (calculationError) {
-        setFieldError(errorMonths, monthsInput, calculationError.message);
+        drawChart(calculationOutput);
+        populateMilestonesTable(calculationOutput);
+      } catch (calculationException) {
+        setFieldError(errorInitial, initialInput, calculationException.message || 'Erro ao calcular.');
       }
     }
 
-    function syncRateControls(sourceControl) {
-      if (sourceControl === rateSlider) {
+    function syncRateControls(sourceElement) {
+      if (sourceElement === rateSlider) {
         rateInput.value = rateSlider.value;
       } else {
-        const numericRate = parseNumericValue(rateInput.value);
-        if (!Number.isNaN(numericRate) && numericRate >= 0 && numericRate <= 30) {
-          rateSlider.value = String(numericRate);
-        }
+        rateSlider.value = rateInput.value;
       }
-      rateSlider.setAttribute('aria-valuetext', rateSlider.value + '% ao ano');
       executeCalculation();
     }
 
-    function syncMonthsControls(sourceControl) {
-      if (sourceControl === monthsSlider) {
+    function syncMonthsControls(sourceElement) {
+      if (sourceElement === monthsSlider) {
         monthsInput.value = monthsSlider.value;
       } else {
-        const numericMonths = parseNumericValue(monthsInput.value);
-        if (!Number.isNaN(numericMonths) && Number.isInteger(numericMonths) && numericMonths >= 1 && numericMonths <= 360) {
-          monthsSlider.value = String(numericMonths);
-        }
+        monthsSlider.value = monthsInput.value;
       }
-      monthsSlider.setAttribute('aria-valuetext', monthsSlider.value + ' meses');
       executeCalculation();
     }
 
@@ -352,88 +344,74 @@
       syncMonthsControls(monthsInput);
     });
 
-    if (resetFormButton) {
-      resetFormButton.addEventListener('click', function () {
-        initialInput.value = String(defaultValues.initialAmount);
-        monthlyInput.value = String(defaultValues.monthlyContribution);
-        rateSlider.value = String(defaultValues.annualRatePercent);
-        rateInput.value = String(defaultValues.annualRatePercent);
-        monthsSlider.value = String(defaultValues.months);
-        monthsInput.value = String(defaultValues.months);
+    resetFormButton.addEventListener('click', function () {
+      initialInput.value = defaultValues.initialAmount;
+      monthlyInput.value = defaultValues.monthlyContribution;
+      rateSlider.value = defaultValues.annualRatePercent;
+      rateInput.value = defaultValues.annualRatePercent;
+      monthsSlider.value = defaultValues.months;
+      monthsInput.value = defaultValues.months;
 
-        rateSlider.setAttribute('aria-valuetext', defaultValues.annualRatePercent + '% ao ano');
-        monthsSlider.setAttribute('aria-valuetext', defaultValues.months + ' meses');
+      clearFieldError(errorInitial, initialInput);
+      clearFieldError(errorMonthly, monthlyInput);
+      clearFieldError(errorRate, rateInput);
+      clearFieldError(errorMonths, monthsInput);
 
-        clearFieldError(errorInitial, initialInput);
-        clearFieldError(errorMonthly, monthlyInput);
-        clearFieldError(errorRate, rateInput);
-        clearFieldError(errorMonths, monthsInput);
-
-        executeCalculation();
-        window.dispatchEvent(new CustomEvent('portfolio:layoutchange'));
-      });
-    }
-
-    labDetails.addEventListener('toggle', function () {
-      if (labDetails.open && !lastValidCalculation) {
-        executeCalculation();
-      }
-      window.dispatchEvent(new CustomEvent('portfolio:layoutchange'));
+      executeCalculation();
     });
-
-    const tableDetails = document.querySelector('.finance-table-details');
-    if (tableDetails) {
-      tableDetails.addEventListener('toggle', function () {
-        window.dispatchEvent(new CustomEvent('portfolio:layoutchange'));
-      });
-    }
 
     executeCalculation();
   }
 
   function initializeBriefMode() {
     const briefModeButton = document.getElementById('brief-mode-toggle');
-    const briefLiveStatus = document.getElementById('brief-live-status');
+    const briefStatusRegion = document.getElementById('brief-live-status');
     if (!briefModeButton) return;
 
-    let isBriefActive = false;
+    let isBriefActive = document.documentElement.getAttribute('data-view') === 'brief';
 
     function applyBriefMode(activateBrief) {
       isBriefActive = activateBrief;
-      const htmlRoot = document.documentElement;
 
       if (activateBrief) {
         const currentActiveElement = document.activeElement;
-        if (currentActiveElement && (currentActiveElement.closest('[data-full-only]') || currentActiveElement.closest('.hero-actions > a') || currentActiveElement.closest('.about-sidebar-card') || currentActiveElement.closest('.finance-controls-grid') || currentActiveElement.offsetParent === null)) {
+        const isFocusInsideHiddenScope = currentActiveElement && (
+          currentActiveElement.closest('[data-full-only]') !== null ||
+          currentActiveElement.classList.contains('btn-primary') ||
+          currentActiveElement.classList.contains('btn-secondary')
+        );
+
+        document.documentElement.setAttribute('data-view', 'brief');
+        briefModeButton.setAttribute('aria-pressed', 'true');
+        briefModeButton.classList.add('is-active');
+        const buttonLabel = briefModeButton.querySelector('.brief-btn-text');
+        if (buttonLabel) buttonLabel.textContent = 'Ver portfólio completo';
+
+        if (briefStatusRegion) {
+          briefStatusRegion.textContent = 'Modo resumo de 20 segundos ativado. Exibindo apenas destaques.';
+        }
+
+        if (isFocusInsideHiddenScope) {
           briefModeButton.focus();
         }
-
-        htmlRoot.setAttribute('data-view', 'brief');
-        briefModeButton.setAttribute('aria-pressed', 'true');
-        briefModeButton.setAttribute('aria-label', 'Ver portfólio completo');
-        const buttonTextElement = briefModeButton.querySelector('.brief-mode-text');
-        if (buttonTextElement) buttonTextElement.textContent = 'Ver portfolio completo';
-
-        if (briefLiveStatus) {
-          briefLiveStatus.textContent = 'Modo de 20 segundos ativado. Conteudo resumido para leitura rapida.';
-        }
-
-        window.dispatchEvent(new CustomEvent('portfolio:viewchange', { detail: { mode: 'brief' } }));
-        window.dispatchEvent(new CustomEvent('portfolio:layoutchange'));
       } else {
-        htmlRoot.setAttribute('data-view', 'full');
+        document.documentElement.setAttribute('data-view', 'full');
         briefModeButton.setAttribute('aria-pressed', 'false');
-        briefModeButton.setAttribute('aria-label', 'Ativar versão resumida de 20 segundos');
-        const buttonTextElement = briefModeButton.querySelector('.brief-mode-text');
-        if (buttonTextElement) buttonTextElement.textContent = 'Tenho 20 segundos';
+        briefModeButton.classList.remove('is-active');
+        const buttonLabel = briefModeButton.querySelector('.brief-btn-text');
+        if (buttonLabel) buttonLabel.textContent = 'Tenho 20 segundos';
 
-        if (briefLiveStatus) {
-          briefLiveStatus.textContent = 'Portfolio completo restaurado.';
+        if (briefStatusRegion) {
+          briefStatusRegion.textContent = 'Modo completo ativado. Todas as seções e detalhes estão visíveis.';
         }
-
-        window.dispatchEvent(new CustomEvent('portfolio:viewchange', { detail: { mode: 'full' } }));
-        window.dispatchEvent(new CustomEvent('portfolio:layoutchange'));
       }
+
+      window.dispatchEvent(new CustomEvent('portfolio:viewchange', {
+        detail: {
+          mode: activateBrief ? 'brief' : 'full'
+        }
+      }));
+      window.dispatchEvent(new CustomEvent('portfolio:layoutchange'));
     }
 
     briefModeButton.addEventListener('click', function () {
@@ -492,7 +470,7 @@
       trailSvg.style.width = contentWidth + 'px';
       trailSvg.style.height = contentHeight + 'px';
 
-      const heroEditorial = document.querySelector('.hero-editorial') || document.getElementById('hero');
+      const heroEditorial = document.querySelector('.hero-editorial-column') || document.getElementById('hero');
       const projectsHeader = document.querySelector('#projetos .section-header');
       const projectCards = document.querySelectorAll('.project-compact-card');
       const emailBox = document.querySelector('.contact-email-box') || contactCard;
@@ -501,27 +479,25 @@
         return;
       }
 
+      const safeGutterHorizontal = Math.max(8, Math.min(16, mainRectangle.left > 24 ? 12 : 8));
       const calculatedAnchors = [];
 
       const heroRect = heroEditorial.getBoundingClientRect();
-      const heroAnchorX = Math.max(16, heroRect.left - mainRectangle.left - 20);
       const heroAnchorY = Math.max(20, heroRect.top - mainRectangle.top + 40);
-      calculatedAnchors.push({ coordinateX: heroAnchorX, coordinateY: heroAnchorY });
+      calculatedAnchors.push({ coordinateX: safeGutterHorizontal, coordinateY: heroAnchorY });
 
       const headerRect = projectsHeader.getBoundingClientRect();
-      const headerAnchorX = Math.max(16, headerRect.left - mainRectangle.left - 20);
       const headerAnchorY = headerRect.top - mainRectangle.top + 16;
-      calculatedAnchors.push({ coordinateX: headerAnchorX, coordinateY: headerAnchorY });
+      calculatedAnchors.push({ coordinateX: safeGutterHorizontal, coordinateY: headerAnchorY });
 
       projectCards.forEach(function (cardItem) {
         const cardRect = cardItem.getBoundingClientRect();
-        const cardAnchorX = Math.max(16, cardRect.left - mainRectangle.left - 18);
         const cardAnchorY = cardRect.top - mainRectangle.top + cardRect.height * 0.45;
-        calculatedAnchors.push({ coordinateX: cardAnchorX, coordinateY: cardAnchorY });
+        calculatedAnchors.push({ coordinateX: safeGutterHorizontal, coordinateY: cardAnchorY });
       });
 
       const emailRect = emailBox.getBoundingClientRect();
-      const endAnchorX = Math.max(16, emailRect.left - mainRectangle.left - 8);
+      const endAnchorX = Math.max(safeGutterHorizontal, emailRect.left - mainRectangle.left - 8);
       const endAnchorY = emailRect.top - mainRectangle.top + emailRect.height * 0.5;
       calculatedAnchors.push({ coordinateX: endAnchorX, coordinateY: endAnchorY });
 
@@ -660,24 +636,29 @@
       isTrailGeometryInvalid = true;
       scheduleTrailUpdate();
     }, { passive: true });
-    window.addEventListener('orientationchange', function () {
-      isTrailGeometryInvalid = true;
-      scheduleTrailUpdate();
-    }, { passive: true });
-    window.addEventListener('pageshow', function () {
-      isTrailGeometryInvalid = true;
-      scheduleTrailUpdate();
-    });
+
     window.addEventListener('portfolio:layoutchange', function () {
       isTrailGeometryInvalid = true;
       scheduleTrailUpdate();
     });
-    window.addEventListener('portfolio:motionchange', function (motionChangeEvent) {
-      isEffectsPaused = Boolean(motionChangeEvent.detail && motionChangeEvent.detail.paused);
-      scheduleTrailUpdate();
-    });
-    window.addEventListener('portfolio:viewchange', function (viewChangeEvent) {
-      isViewBrief = Boolean(viewChangeEvent.detail && viewChangeEvent.detail.mode === 'brief');
+
+    const contactNavLink = document.querySelector('a[href="#contato"]');
+    if (contactNavLink) {
+      contactNavLink.addEventListener('click', function () {
+        setTimeout(function () {
+          if (contactCard) {
+            contactCard.style.setProperty('--contact-illumination', '0.85');
+          }
+          isTrailGeometryInvalid = true;
+          scheduleTrailUpdate();
+        }, 120);
+      });
+    }
+
+    const motionStateObserver = new MutationObserver(function () {
+      isEffectsPaused = document.documentElement.getAttribute('data-motion') === 'paused';
+      isViewBrief = document.documentElement.getAttribute('data-view') === 'brief';
+
       if (isViewBrief) {
         cancelTrailFrame();
         trailSvg.style.display = 'none';
@@ -686,7 +667,19 @@
         isTrailGeometryInvalid = true;
         scheduleTrailUpdate();
       }
+
+      if (isEffectsPaused) {
+        trailHaloCircle.style.opacity = '0';
+      } else {
+        scheduleTrailUpdate();
+      }
     });
+
+    motionStateObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-motion', 'data-view']
+    });
+
     document.addEventListener('visibilitychange', function () {
       isDocumentHidden = document.hidden;
       if (isDocumentHidden) {
@@ -697,31 +690,26 @@
       }
     });
 
-    if (typeof window.ResizeObserver === 'function') {
-      const trailResizeObserver = new ResizeObserver(function () {
-        isTrailGeometryInvalid = true;
-        scheduleTrailUpdate();
-      });
-      trailResizeObserver.observe(mainContent);
-    }
-
-    if (document.fonts && document.fonts.ready) {
-      document.fonts.ready.then(function () {
-        isTrailGeometryInvalid = true;
-        scheduleTrailUpdate();
-      });
-    }
-
-    setTimeout(function () {
+    const trailResizeObserver = new ResizeObserver(function () {
       isTrailGeometryInvalid = true;
       scheduleTrailUpdate();
-    }, 50);
+    });
+    trailResizeObserver.observe(mainContent);
+
+    recomputeGeometry();
+    scheduleTrailUpdate();
   }
 
-  document.addEventListener('DOMContentLoaded', function () {
+  function initializeAllExtras() {
     initializeProjectXray();
     initializeFinanceLab();
     initializeBriefMode();
     initializeLightTrail();
-  });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeAllExtras);
+  } else {
+    initializeAllExtras();
+  }
 })();

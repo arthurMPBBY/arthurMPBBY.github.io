@@ -1,876 +1,739 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-motion="active" data-view="full">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Arthur Kadri de Oliveira | UFABC &amp; Portfólio</title>
-  <meta name="description" content="Portfólio de Arthur Kadri de Oliveira. Graduação na Universidade Federal do ABC (UFABC), 2º período. Projetos práticos em C++ e Python, automação e telemetria. Em busca de estágio em mercado financeiro e dados.">
+  <title>Arthur Kadri de Oliveira | Portfólio &amp; UFABC</title>
+  <meta name="description" content="Portfólio de Arthur Kadri de Oliveira. Graduação na Universidade Federal do ABC (UFABC), 2º período. Programação na prática em Python e C++, com interesse em dados e mercado financeiro.">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <meta property="og:title" content="Arthur Kadri de Oliveira | UFABC &amp; Portfólio">
-  <meta property="og:description" content="Estudante na UFABC (2º período). Projetos no GitHub em C++ e Python, automação local e telemetria. Em busca de estágio em mercado financeiro e dados.">
-  <meta property="og:type" content="website">
   <link rel="canonical" href="https://arthurmpbby.github.io/">
-  <meta property="og:url" content="https://arthurmpbby.github.io/">
+  <meta property="og:title" content="Arthur Kadri de Oliveira | Portfólio &amp; UFABC">
+  <meta property="og:description" content="Estudante na UFABC (2º período). Programação em Python e C++, projetos no GitHub e interesse em estágio de finanças e dados.">
   <meta property="og:image" content="https://arthurmpbby.github.io/og-image.png">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-  <meta property="og:image:type" content="image/png">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Arthur Kadri de Oliveira | UFABC &amp; Portfólio">
-  <meta name="twitter:description" content="Estudante na UFABC (2º período). Projetos no GitHub em C++ e Python, automação local e telemetria. Em busca de estágio em mercado financeiro e dados.">
-  <meta name="twitter:image" content="https://arthurmpbby.github.io/og-image.png">
-  <link rel="stylesheet" href="styles.css?v=20261028-dots">
+  <meta property="og:url" content="https://arthurmpbby.github.io/">
+  <meta property="og:type" content="website">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=20261028-spatial">
 </head>
 <body>
+  <div id="intro-overlay" class="intro-overlay" hidden>
+    <canvas id="intro-canvas" class="intro-canvas" aria-hidden="true"></canvas>
+    <button id="intro-skip-btn" class="intro-skip-btn" type="button" aria-label="Pular introdução">Pular [Esc]</button>
+  </div>
+
   <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
 
   <header class="site-header">
-    <div class="site-wrapper header-inner">
-      <a href="#" class="brand-link" aria-label="Arthur Kadri de Oliveira — Início">
-        <div class="monogram">
-          <span class="monogram-text">AK</span>
-          <span class="monogram-dot"></span>
-        </div>
-        <div class="brand-label">
-          <span class="brand-name">Arthur Kadri</span>
-          <span class="brand-role">UFABC (2º período) · Finanças &amp; Dados</span>
-        </div>
-      </a>
+    <div class="header-inner">
+      <div class="header-brand-block">
+        <a href="#hero" class="brand-link" aria-label="Arthur Kadri - Início">
+          <span class="brand-symbol" aria-hidden="true"></span>
+          <span class="brand-text">Arthur Kadri</span>
+        </a>
+        <span class="brand-badge" aria-label="Status atual: UFABC 2º Período">
+          <span class="status-live-indicator" aria-hidden="true"></span>
+          <span class="brand-badge-label">UFABC · 2º Período</span>
+        </span>
+      </div>
 
-      <nav class="main-nav" aria-label="Navegação Principal">
+      <nav class="site-nav" aria-label="Navegação principal">
         <ul class="nav-links">
-          <li><a href="#projetos" class="nav-link" id="nav-projetos">Projetos</a></li>
-          <li><a href="#sobre" class="nav-link" id="nav-sobre">Sobre</a></li>
-          <li><a href="#contato" class="nav-link" id="nav-contato">Contato</a></li>
+          <li><a href="#projetos" class="nav-link">Projetos</a></li>
+          <li><a href="#laboratorio" class="nav-link">Laboratório</a></li>
+          <li><a href="#sobre" class="nav-link">Sobre</a></li>
+          <li><a href="#contato" class="nav-link">Contato</a></li>
         </ul>
       </nav>
 
-      <div class="header-actions">
-        <button type="button" class="motion-toggle-btn" id="motion-toggle-btn" aria-pressed="false" aria-label="Pausar efeitos visuais">
-          <svg class="motion-toggle-icon icon-pause" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <rect x="6" y="4" width="4" height="16" rx="1"></rect>
-            <rect x="14" y="4" width="4" height="16" rx="1"></rect>
-          </svg>
-          <svg class="motion-toggle-icon icon-play" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <polygon points="5 3 19 12 5 21 5 3"></polygon>
-          </svg>
-          <span class="motion-toggle-text">Pausar efeitos</span>
+      <div class="header-controls">
+        <button id="brief-mode-toggle" class="control-btn brief-btn" type="button" aria-pressed="false" aria-label="Alternar para modo resumido de 20 segundos">
+          <span class="control-indicator" aria-hidden="true"></span>
+          <span class="brief-btn-text">Tenho 20 segundos</span>
         </button>
-        <span class="visually-hidden" id="motion-live-status" role="status" aria-live="polite"></span>
+        <span id="brief-live-status" class="sr-only" aria-live="polite"></span>
 
-        <button type="button" class="header-email-btn" data-copy-email aria-label="Copiar endereço de e-mail de Arthur Kadri">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-          </svg>
-          <span>arthurkadri968@gmail.com</span>
+        <button id="motion-toggle-btn" class="control-btn motion-btn" type="button" aria-pressed="false" aria-label="Pausar animações decorativas">
+          <span class="motion-icon" aria-hidden="true"></span>
+          <span class="motion-btn-text">Pausar animações</span>
         </button>
+        <span id="motion-live-status" class="sr-only" aria-live="polite"></span>
       </div>
     </div>
   </header>
 
   <main id="main-content">
-    <div class="light-trail-layer" aria-hidden="true" data-full-only>
-      <svg class="light-trail-svg" id="light-trail-svg" focusable="false" aria-hidden="true">
-        <path class="light-trail-bg-line" id="light-trail-bg"></path>
-        <path class="light-trail-active-line" id="light-trail-active"></path>
-        <circle class="light-trail-halo" id="light-trail-halo" r="5"></circle>
-      </svg>
-    </div>
     <section class="hero-section" id="hero" aria-labelledby="hero-title">
-      <div class="site-wrapper">
-        <div class="hero-grid">
-          <div class="hero-editorial">
-            <div class="hero-badge-wrap">
-              <span class="hero-tag">UFABC · 2º Período</span>
-              <span class="hero-opportunity-badge">
-                <span class="pulse-dot"></span>
-                <span>Buscando estágio em mercado financeiro / dados</span>
-              </span>
-            </div>
+      <div class="hero-stage">
+        <div class="hero-status-strip">
+          <span class="status-pill">
+            <span class="status-pulse-dot" aria-hidden="true"></span>
+            <span>UFABC · 2º Período · Em formação</span>
+          </span>
+          <span class="status-motto">Programação na prática · Interesse em dados e mercado financeiro</span>
+        </div>
 
-            <h1 class="hero-title" id="hero-title">
-              Arthur Kadri<span class="period">.</span>
-            </h1>
+        <div class="hero-diagonal-layout">
+          <h1 class="hero-title" id="hero-title">
+            <span class="hero-title-top">Arthur</span>
+            <span class="hero-title-bottom">Kadri<span class="hero-period">.</span></span>
+          </h1>
 
-            <p class="hero-subtitle">
-              Estudante na Universidade Federal do ABC (UFABC), no 2º período. Foco em programação (Python &amp; C++), automação e interesse aplicado em mercado financeiro e análise de dados.
+          <div class="hero-floating-bio">
+            <p class="hero-bio-lead">
+              Estudante na <strong>Universidade Federal do ABC (UFABC &mdash; 2º período)</strong>. Programação na prática com foco em Python e C++, código aberto e interesse aplicado em análise de dados e mercado financeiro.
             </p>
-
-                        <div class="hero-brief-summary" data-brief-only hidden>
-              <p class="hero-brief-statement">
-                <strong>UFABC · 2º período.</strong> Busco estágio em mercado financeiro ou análise de dados. Tecnologias principais: Python &amp; C++.
-              </p>
-            </div>
-
-            <div class="hero-quote-box" data-full-only>
-              <p class="hero-quote">
-                Aliando a formação acadêmica da UFABC à programação prática para finanças e análise quantitativa.
-              </p>
-              <p class="hero-quote-caption">
-                Disponibilidade imediata para estágio em equipes de dados, risco, automação e finanças.
-              </p>
-            </div>
-
-                        <div class="hero-actions">
-              <a href="#projetos" class="btn-primary" data-full-only>
-                <span>Ver projetos construídos</span>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <line x1="12" y1="5" x2="12" y2="19"></line>
-                  <polyline points="19 12 12 19 5 12"></polyline>
-                </svg>
-              </a>
-
-              <a href="#contato" class="btn-secondary" data-full-only>
-                <span>Entrar em contato</span>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                  <polyline points="22,6 12,13 2,6"></polyline>
-                </svg>
-              </a>
-
-              <button type="button" class="btn-brief-mode" id="brief-mode-toggle" aria-pressed="false" aria-label="Alternar para versão resumida de 20 segundos">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="brief-icon" aria-hidden="true">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <polyline points="12 6 12 12 16 14"></polyline>
-                </svg>
-                <span class="brief-mode-text">Tenho 20 segundos</span>
-              </button>
-              <span class="visually-hidden" id="brief-live-status" role="status" aria-live="polite"></span>
-            </div>
-
-            <div class="hero-meta-bar" data-full-only>
-              <div>
-                <p class="meta-item-label">Universidade</p>
-                <p class="meta-item-val">UFABC (2º período)</p>
-              </div>
-              <div>
-                <p class="meta-item-label">Foco técnico</p>
-                <p class="meta-item-val">Python &amp; C++</p>
-              </div>
-              <div>
-                <p class="meta-item-label">Objetivo</p>
-                <p class="meta-item-val">Estágio Finanças / Dados</p>
-              </div>
-              <div>
-                <p class="meta-item-label">Código aberto</p>
-                <p class="meta-item-val">GitHub (@arthurMPBBY)</p>
-              </div>
+            <div class="hero-opportunity-badge" aria-label="Objetivo de busca profissional">
+              <span class="opportunity-dot" aria-hidden="true"></span>
+              <span>Buscando estágio em mercado financeiro / dados</span>
             </div>
           </div>
 
-          <div class="hero-art-container" data-full-only>
-            <div class="art-haze-layer" aria-hidden="true">
-              <div class="haze-blob blob-coral"></div>
-              <div class="haze-blob blob-white"></div>
-              <div class="haze-blob blob-cool"></div>
-              <div class="art-grain-overlay"></div>
+          <div class="hero-actions-cluster" data-full-only>
+            <div class="hero-cta-group">
+              <a href="#projetos" class="action-btn btn-primary">
+                <span>Ver projetos construídos</span>
+                <span class="btn-arrow" aria-hidden="true">&darr;</span>
+              </a>
+              <a href="#contato" class="action-btn btn-secondary">
+                <span>Entrar em contato</span>
+                <span class="btn-arrow" aria-hidden="true">&nearr;</span>
+              </a>
             </div>
-
-            <svg class="art-svg-stage" aria-hidden="true" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <radialGradient id="sunCoronaGlow" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95" />
-                  <stop offset="38%" stop-color="#fdf8f6" stop-opacity="0.75" />
-                  <stop offset="68%" stop-color="#ebd7d1" stop-opacity="0.32" />
-                  <stop offset="86%" stop-color="#c16b59" stop-opacity="0.12" />
-                  <stop offset="100%" stop-color="#f5f5f3" stop-opacity="0" />
-                </radialGradient>
-                <radialGradient id="pearlescentCore" cx="44%" cy="36%" r="62%">
-                  <stop offset="0%" stop-color="#ffffff" stop-opacity="0.98" />
-                  <stop offset="35%" stop-color="#fcf9f7" stop-opacity="0.92" />
-                  <stop offset="70%" stop-color="#f2e2de" stop-opacity="0.84" />
-                  <stop offset="100%" stop-color="#dfb3a7" stop-opacity="0.58" />
-                </radialGradient>
-                <radialGradient id="pearlUnderlay" cx="52%" cy="64%" r="58%">
-                  <stop offset="0%" stop-color="#ffffff" stop-opacity="0.75" />
-                  <stop offset="55%" stop-color="#dfb3a7" stop-opacity="0.45" />
-                  <stop offset="100%" stop-color="#585d66" stop-opacity="0.18" />
-                </radialGradient>
-                <linearGradient id="orbitRingGradient1" x1="40" y1="40" x2="460" y2="460" gradientUnits="userSpaceOnUse">
-                  <stop offset="0%" stop-color="#c16b59" stop-opacity="0.88" />
-                  <stop offset="48%" stop-color="#dfb3a7" stop-opacity="0.6" />
-                  <stop offset="78%" stop-color="#585d66" stop-opacity="0.3" />
-                  <stop offset="100%" stop-color="#25272b" stop-opacity="0.08" />
-                </linearGradient>
-                <linearGradient id="orbitRingGradient2" x1="460" y1="60" x2="60" y2="440" gradientUnits="userSpaceOnUse">
-                  <stop offset="0%" stop-color="#25272b" stop-opacity="0.45" />
-                  <stop offset="36%" stop-color="#c16b59" stop-opacity="0.75" />
-                  <stop offset="72%" stop-color="#dfb3a7" stop-opacity="0.3" />
-                  <stop offset="100%" stop-color="#ffffff" stop-opacity="0.1" />
-                </linearGradient>
-                <linearGradient id="orbitRingGradient3" x1="120" y1="250" x2="380" y2="250" gradientUnits="userSpaceOnUse">
-                  <stop offset="0%" stop-color="#c16b59" stop-opacity="0.65" />
-                  <stop offset="50%" stop-color="#25272b" stop-opacity="0.25" />
-                  <stop offset="100%" stop-color="#c16b59" stop-opacity="0.5" />
-                </linearGradient>
-              </defs>
-
-              <g class="sculpture-layer layer-corona">
-                <circle cx="250" cy="250" r="162" fill="url(#sunCoronaGlow)" />
-                <ellipse cx="250" cy="250" rx="196" ry="196" stroke="#c16b59" stroke-opacity="0.14" stroke-width="1" stroke-dasharray="2 12" />
-                <ellipse cx="250" cy="250" rx="172" ry="172" stroke="#585d66" stroke-opacity="0.1" stroke-width="0.8" stroke-dasharray="4 8" />
-              </g>
-
-              <g class="sculpture-layer layer-ribbons-outer">
-                <ellipse cx="250" cy="250" rx="198" ry="76" stroke="url(#orbitRingGradient1)" stroke-width="1.8" stroke-dasharray="8 6" transform="rotate(-26 250 250)" class="svg-orbit-outer" />
-                <circle cx="418" cy="172" r="7.5" fill="#c16b59" class="svg-sat-coral-large" />
-                <circle cx="418" cy="172" r="12" stroke="#c16b59" stroke-width="1" stroke-opacity="0.25" />
-                <circle cx="82" cy="328" r="4.5" fill="#25272b" fill-opacity="0.6" />
-              </g>
-
-              <g class="sculpture-layer layer-ribbons-tertiary">
-                <ellipse cx="250" cy="250" rx="162" ry="58" stroke="url(#orbitRingGradient3)" stroke-width="1.3" stroke-dasharray="5 7" transform="rotate(-62 250 250)" class="svg-orbit-tertiary" />
-                <circle cx="250" cy="92" r="4" fill="#c16b59" fill-opacity="0.9" />
-                <circle cx="250" cy="408" r="3.5" fill="#585d66" fill-opacity="0.5" />
-              </g>
-
-              <g class="sculpture-layer layer-ribbons-inner">
-                <ellipse cx="250" cy="250" rx="136" ry="52" stroke="url(#orbitRingGradient2)" stroke-width="1.5" stroke-dasharray="5 5" transform="rotate(35 250 250)" class="svg-orbit-inner" />
-                <circle cx="158" cy="190" r="4.5" fill="#c16b59" />
-                <circle cx="342" cy="310" r="5.5" fill="#585d66" fill-opacity="0.55" />
-                <circle cx="342" cy="310" r="9.5" stroke="#c16b59" stroke-width="1" stroke-opacity="0.2" />
-              </g>
-
-              <g class="sculpture-layer layer-core-sculpture svg-cloud-sculpture">
-                <path d="M 162 284 C 136 284 116 262 116 236 C 116 211 133 190 156 188 C 164 156 192 133 228 133 C 267 133 297 160 303 196 C 310 193 318 191 326 191 C 349 191 368 209 368 232 C 368 235 367 238 366 241 C 379 246 388 260 388 275 C 388 297 371 314 348 314 L 162 314 Z" fill="url(#pearlUnderlay)" stroke="#dfb3a7" stroke-width="1" stroke-opacity="0.45" class="sculpture-underbillow" />
-                <path d="M 170 280 C 145 280 125 260 125 235 C 125 212 142 193 164 191 C 172 163 198 142 230 142 C 265 142 293 167 298 200 C 304 197 311 195 318 195 C 339 195 356 212 356 233 C 356 235 355 238 355 240 C 367 245 375 258 375 272 C 375 292 359 308 339 308 L 170 308 C 150 308 135 296 135 280 Z" fill="url(#pearlescentCore)" stroke="#e4e4de" stroke-width="1.6" class="sculpture-mainbillow" />
-                <path d="M 145 263 C 210 306 326 144 355 223" stroke="#c16b59" stroke-width="1.4" stroke-linecap="round" fill="none" stroke-opacity="0.4" class="sculpture-filament-primary" />
-                <path d="M 153 251 C 218 294 326 133 361 214" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" fill="none" stroke-opacity="0.8" class="sculpture-filament-secondary" />
-              </g>
-
-              <g class="sculpture-layer layer-sparks">
-                <circle cx="185" cy="145" r="2.2" fill="#c16b59" fill-opacity="0.75" class="sculpture-spark spark-1" />
-                <circle cx="325" cy="158" r="1.8" fill="#585d66" fill-opacity="0.5" class="sculpture-spark spark-2" />
-                <circle cx="385" cy="215" r="2.8" fill="#dfb3a7" fill-opacity="0.8" class="sculpture-spark spark-3" />
-                <circle cx="125" cy="265" r="2.2" fill="#c16b59" fill-opacity="0.65" class="sculpture-spark spark-4" />
-                <circle cx="295" cy="335" r="1.8" fill="#25272b" fill-opacity="0.45" class="sculpture-spark spark-5" />
-              </g>
-            </svg>
-
-            <span class="art-caption" aria-hidden="true">Luz em movimento</span>
-            <span class="morph-caption" hidden>Série ilustrativa · sem dados de mercado</span>
+            <p class="hero-repos-indicator">4 projetos com código aberto no GitHub</p>
           </div>
         </div>
       </div>
     </section>
 
-    <hr class="editorial-divider">
-
     <section class="section-block" id="projetos" aria-labelledby="projetos-title">
-      <div class="site-wrapper">
+      <div class="section-container">
         <header class="section-header">
-          <div class="section-pretitle">01 / Portfólio Técnico</div>
-          <h2 class="section-title" id="projetos-title">Projetos no GitHub</h2>
-          <p class="section-description">
-            Código construído na prática para exercitar telemetria gráfica em C++, automação de redes em Python e algoritmos.
+          <div class="section-index-badge">
+            <span class="section-index-num">01</span>
+            <span class="section-index-label">/ Projetos pessoais</span>
+          </div>
+          <h2 class="section-title" id="projetos-title">Código no GitHub</h2>
+          <p class="section-subtitle">
+            Implementações práticas para exercitar telemetria em C++, automação de redes em Python e estruturação de dados.
           </p>
         </header>
 
-        <div class="projects-compact-list" role="list">
-          <!-- Item 1: gaming-fps-hud -->
+        <div class="projects-ledger" role="list">
           <article class="project-compact-card" role="listitem" aria-labelledby="pcard-title-1">
-            <div class="pcard-left">
-              <div class="pcard-badge-row">
-                <span class="pcard-num">[01]</span>
-                <span class="category-tag">Telemetria &amp; Sistemas</span>
-              </div>
-              <h3 class="pcard-title" id="pcard-title-1">
-                <a href="https://github.com/arthurMPBBY/gaming-fps-hud" target="_blank" rel="noopener noreferrer">
-                  gaming-fps-hud
-                  <svg viewBox="0 0 16 16" class="pcard-ext-icon" aria-hidden="true">
-                    <path d="M4 12l8-8m0 0H6m6 0v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                </a>
-              </h3>
-              <p class="pcard-desc" data-full-only>
-                HUD em C++ para Linux que mede a cadência e intervalos de entrega de quadros em tempo real via Vulkan (<code>vkQueuePresentKHR</code>), com exibição desacoplada em Wayland LayerShell via Qt 6 Quick.
-              </p>
-                            <div class="tech-spec-pills" data-full-only>
-                <span class="spec-pill">C++17</span>
-                <span class="spec-pill">Vulkan API</span>
-                <span class="spec-pill">Qt 6 Quick</span>
-                <span class="spec-pill">Wayland</span>
+            <div class="pcard-main-row">
+              <div class="pcard-identity">
+                <div class="pcard-badge-row">
+                  <span class="pcard-num">[01]</span>
+                  <span class="category-tag">Telemetria &amp; Sistemas</span>
+                </div>
+                <h3 class="pcard-title" id="pcard-title-1">
+                  <a href="https://github.com/arthurMPBBY/gaming-fps-hud" target="_blank" rel="noopener noreferrer">
+                    gaming-fps-hud
+                    <svg viewBox="0 0 16 16" class="pcard-ext-icon" aria-hidden="true">
+                      <path d="M4 12l8-8m0 0H6m6 0v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </a>
+                </h3>
               </div>
 
-              <details class="project-xray" id="xray-1" data-full-only>
-                <summary class="xray-summary">
-                  <span class="xray-summary-text">Como funciona</span>
-                  <svg class="xray-chevron" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <polyline points="4 6 8 10 12 6"></polyline>
-                  </svg>
-                </summary>
-                <div class="xray-content">
-                  <p class="xray-lead">
-                    O aplicativo intercepta as chamadas de renderização via Vulkan no Linux, calcula métricas de latência e cadência de quadros em C++, e transmite as estatísticas para um overlay desacoplado renderizado em Wayland LayerShell com Qt 6 Quick.
-                  </p>
-                  <div class="xray-diagram-wrap">
-                    <div class="xray-flow" role="img" aria-label="Diagrama técnico do fluxo de funcionamento">
-                      <div class="xray-flow-step">
-                        <span class="xray-flow-label">Apresentação Vulkan</span>
-                        <span class="xray-flow-sub">vkQueuePresentKHR</span>
+              <div class="pcard-content-block">
+                <p class="pcard-desc" data-full-only>
+                  Monitor de desempenho em C++ para Linux. Mede a apresentação de quadros via Vulkan e exibe as métricas em uma camada independente no KDE Wayland.
+                </p>
+
+                <div class="tech-spec-pills" data-full-only>
+                  <span class="spec-pill">C++17</span>
+                  <span class="spec-pill">Vulkan API</span>
+                  <span class="spec-pill">Qt 6 Quick</span>
+                  <span class="spec-pill">Wayland</span>
+                </div>
+
+                <details class="project-xray" id="xray-1" data-full-only>
+                  <summary class="xray-summary">
+                    <span class="xray-summary-icon" aria-hidden="true">+</span>
+                    <span class="xray-summary-text">Como funciona (Raio-X Técnico)</span>
+                  </summary>
+                  <div class="xray-body">
+                    <div class="xray-flow" aria-label="Fluxo de execução do gaming-fps-hud">
+                      <div class="xray-step">
+                        <span class="xray-step-idx">01</span>
+                        <span class="xray-step-title">Camada Vulkan</span>
+                        <span class="xray-step-desc">Observa chamadas de apresentação de quadros</span>
                       </div>
-                      <div class="xray-flow-connector" aria-hidden="true">
-                        <svg class="xray-connector-svg" viewBox="0 0 36 16" width="36" height="16" fill="none">
-                          <path d="M 0 8 L 26 8" class="xray-diagram-connector"></path>
-                          <polygon points="26,5 34,8 26,11" fill="#c16b59"></polygon>
-                        </svg>
+                      <div class="xray-arrow" aria-hidden="true">&rarr;</div>
+                      <div class="xray-step">
+                        <span class="xray-step-idx">02</span>
+                        <span class="xray-step-title">Amostragem</span>
+                        <span class="xray-step-desc">Mede os intervalos entre apresentações</span>
                       </div>
-                      <div class="xray-flow-step">
-                        <span class="xray-flow-label">Coleta C++</span>
-                        <span class="xray-flow-sub">Frame Time &amp; Latência</span>
+                      <div class="xray-arrow" aria-hidden="true">&rarr;</div>
+                      <div class="xray-step">
+                        <span class="xray-step-idx">03</span>
+                        <span class="xray-step-title">Snapshot JSON</span>
+                        <span class="xray-step-desc">Publica métricas em um arquivo local</span>
                       </div>
-                      <div class="xray-flow-connector" aria-hidden="true">
-                        <svg class="xray-connector-svg" viewBox="0 0 36 16" width="36" height="16" fill="none">
-                          <path d="M 0 8 L 26 8" class="xray-diagram-connector"></path>
-                          <polygon points="26,5 34,8 26,11" fill="#c16b59"></polygon>
-                        </svg>
-                      </div>
-                      <div class="xray-flow-step">
-                        <span class="xray-flow-label">Overlay Wayland</span>
-                        <span class="xray-flow-sub">Qt 6 Quick / LayerShell</span>
+                      <div class="xray-arrow" aria-hidden="true">&rarr;</div>
+                      <div class="xray-step">
+                        <span class="xray-step-idx">04</span>
+                        <span class="xray-step-title">Overlay Qt</span>
+                        <span class="xray-step-desc">Lê as métricas e exibe um HUD independente</span>
                       </div>
                     </div>
-                    <ol class="xray-steps-list">
-                      <li><strong>Apresentação Vulkan:</strong> Intercepta a fila de apresentação gráfica via vkQueuePresentKHR.</li>
-                      <li><strong>Coleta em C++:</strong> Mede os intervalos entre quadros sem interferir na execução do jogo.</li>
-                      <li><strong>Exibição Wayland:</strong> Transmite dados a um processo isolado em Qt 6 Quick sobre LayerShell.</li>
-                    </ol>
+                    <div class="xray-meta">
+                      <span class="xray-tag">Estrutura:</span> Medição e visualização em processos separados, sem capturar o teclado ou o mouse.
+                    </div>
                   </div>
-                </div>
-              </details>
-            </div>
-            <div class="pcard-right">
-              <a href="https://github.com/arthurMPBBY/gaming-fps-hud" class="pcard-action-btn" target="_blank" rel="noopener noreferrer" aria-label="Abrir repositório gaming-fps-hud no GitHub">
-                <span>Repositório</span>
-                <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="currentColor">
-                  <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path>
-                </svg>
-              </a>
+                </details>
+              </div>
+
+              <div class="pcard-action-block">
+                <a href="https://github.com/arthurMPBBY/gaming-fps-hud" class="pcard-action-link" target="_blank" rel="noopener noreferrer">
+                  <span>Repositório</span>
+                  <span aria-hidden="true">&nearr;</span>
+                </a>
+              </div>
             </div>
           </article>
 
-          <!-- Item 2: tuya-smart-lamps -->
           <article class="project-compact-card" role="listitem" aria-labelledby="pcard-title-2">
-            <div class="pcard-left">
-              <div class="pcard-badge-row">
-                <span class="pcard-num">[02]</span>
-                <span class="category-tag">IoT &amp; Redes</span>
-              </div>
-              <h3 class="pcard-title" id="pcard-title-2">
-                <a href="https://github.com/arthurMPBBY/tuya-smart-lamps" target="_blank" rel="noopener noreferrer">
-                  tuya-smart-lamps
-                  <svg viewBox="0 0 16 16" class="pcard-ext-icon" aria-hidden="true">
-                    <path d="M4 12l8-8m0 0H6m6 0v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                </a>
-              </h3>
-              <p class="pcard-desc" data-full-only>
-                Controle de dispositivos residenciais em Python via rede local direta por sockets TCP (&lt;10ms de latência), eventos em tempo real com SSE, aplicativo de bandeja em PyQt6 e contingência automática via Tuya Cloud API.
-              </p>
-                            <div class="tech-spec-pills" data-full-only>
-                <span class="spec-pill">Python 3.10+</span>
-                <span class="spec-pill">TCP Sockets &amp; Heartbeat</span>
-                <span class="spec-pill">PyQt6</span>
-                <span class="spec-pill">Server-Sent Events</span>
+            <div class="pcard-main-row">
+              <div class="pcard-identity">
+                <div class="pcard-badge-row">
+                  <span class="pcard-num">[02]</span>
+                  <span class="category-tag">Automação &amp; Redes</span>
+                </div>
+                <h3 class="pcard-title" id="pcard-title-2">
+                  <a href="https://github.com/arthurMPBBY/tuya-smart-lamps" target="_blank" rel="noopener noreferrer">
+                    tuya-smart-lamps
+                    <svg viewBox="0 0 16 16" class="pcard-ext-icon" aria-hidden="true">
+                      <path d="M4 12l8-8m0 0H6m6 0v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </a>
+                </h3>
               </div>
 
-              <details class="project-xray" id="xray-2" data-full-only>
-                <summary class="xray-summary">
-                  <span class="xray-summary-text">Como funciona</span>
-                  <svg class="xray-chevron" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <polyline points="4 6 8 10 12 6"></polyline>
-                  </svg>
-                </summary>
-                <div class="xray-content">
-                  <p class="xray-lead">
-                    A interface gráfica em PyQt6 envia comandos a um serviço local em Python, que estabelece conexões diretas por sockets TCP com as lâmpadas (&lt;10ms) mantendo heartbeat contínuo. Caso a rede local falhe, a API Tuya Cloud é acionada como contingência automática.
-                  </p>
-                  <div class="xray-diagram-wrap">
-                    <div class="xray-flow" role="img" aria-label="Diagrama técnico do fluxo de funcionamento">
-                      <div class="xray-flow-step">
-                        <span class="xray-flow-label">Interface PyQt6</span>
-                        <span class="xray-flow-sub">Bandeja do Sistema</span>
+              <div class="pcard-content-block">
+                <p class="pcard-desc" data-full-only>
+                  Controle de lâmpadas Tuya com backend Python e aplicativo Android. Prioriza a rede local e usa a API em nuvem como alternativa.
+                </p>
+
+                <div class="tech-spec-pills" data-full-only>
+                  <span class="spec-pill">Python 3</span>
+                  <span class="spec-pill">Tuya IoT API</span>
+                  <span class="spec-pill">TCP / SSE</span>
+                  <span class="spec-pill">Android</span>
+                </div>
+
+                <details class="project-xray" id="xray-2" data-full-only>
+                  <summary class="xray-summary">
+                    <span class="xray-summary-icon" aria-hidden="true">+</span>
+                    <span class="xray-summary-text">Como funciona (Raio-X Técnico)</span>
+                  </summary>
+                  <div class="xray-body">
+                    <div class="xray-flow" aria-label="Fluxo de execução do tuya-smart-lamps">
+                      <div class="xray-step">
+                        <span class="xray-step-idx">01</span>
+                        <span class="xray-step-title">Interfaces</span>
+                        <span class="xray-step-desc">Aplicativo Android, widget e bandeja do desktop</span>
                       </div>
-                      <div class="xray-flow-connector" aria-hidden="true">
-                        <svg class="xray-connector-svg" viewBox="0 0 36 16" width="36" height="16" fill="none">
-                          <path d="M 0 8 L 26 8" class="xray-diagram-connector"></path>
-                          <polygon points="26,5 34,8 26,11" fill="#c16b59"></polygon>
-                        </svg>
+                      <div class="xray-arrow" aria-hidden="true">&rarr;</div>
+                      <div class="xray-step">
+                        <span class="xray-step-idx">02</span>
+                        <span class="xray-step-title">Backend Python</span>
+                        <span class="xray-step-desc">Recebe comandos e compartilha atualizações por SSE</span>
                       </div>
-                      <div class="xray-flow-step">
-                        <span class="xray-flow-label">Serviço Python Local</span>
-                        <span class="xray-flow-sub">Eventos SSE &amp; Router</span>
+                      <div class="xray-arrow" aria-hidden="true">&rarr;</div>
+                      <div class="xray-step">
+                        <span class="xray-step-idx">03</span>
+                        <span class="xray-step-title">Rede local</span>
+                        <span class="xray-step-desc">Mantém conexões TCP com as lâmpadas</span>
                       </div>
-                      <div class="xray-flow-connector" aria-hidden="true">
-                        <svg class="xray-connector-svg" viewBox="0 0 36 16" width="36" height="16" fill="none">
-                          <path d="M 0 8 L 26 8" class="xray-diagram-connector"></path>
-                          <polygon points="26,5 34,8 26,11" fill="#c16b59"></polygon>
-                        </svg>
-                      </div>
-                      <div class="xray-flow-step">
-                        <span class="xray-flow-label">Lâmpada Local (TCP)</span>
-                        <span class="xray-flow-sub">&lt;10ms / Cloud Fallback</span>
+                      <div class="xray-arrow" aria-hidden="true">&rarr;</div>
+                      <div class="xray-step">
+                        <span class="xray-step-idx">04</span>
+                        <span class="xray-step-title">Alternativa em nuvem</span>
+                        <span class="xray-step-desc">Usa a Tuya OpenAPI quando o caminho local não está disponível</span>
                       </div>
                     </div>
-                    <ol class="xray-steps-list">
-                      <li><strong>Controle na Bandeja:</strong> Interface nativa PyQt6 dispara ações instantâneas do usuário.</li>
-                      <li><strong>Serviço Local em Python:</strong> Mantém sessões TCP ativas com pacote de heartbeat periódico.</li>
-                      <li><strong>Execução na Rede Local:</strong> Entrega comandos em menos de 10ms com fallback para a nuvem Tuya.</li>
-                    </ol>
+                    <div class="xray-meta">
+                      <span class="xray-tag">Estrutura:</span> Controle local como caminho principal; nuvem como contingência.
+                    </div>
                   </div>
-                </div>
-              </details>
-            </div>
-            <div class="pcard-right">
-              <a href="https://github.com/arthurMPBBY/tuya-smart-lamps" class="pcard-action-btn" target="_blank" rel="noopener noreferrer" aria-label="Abrir repositório tuya-smart-lamps no GitHub">
-                <span>Repositório</span>
-                <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="currentColor">
-                  <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path>
-                </svg>
-              </a>
+                </details>
+              </div>
+
+              <div class="pcard-action-block">
+                <a href="https://github.com/arthurMPBBY/tuya-smart-lamps" class="pcard-action-link" target="_blank" rel="noopener noreferrer">
+                  <span>Repositório</span>
+                  <span aria-hidden="true">&nearr;</span>
+                </a>
+              </div>
             </div>
           </article>
 
-          <!-- Item 3: python-curso -->
           <article class="project-compact-card" role="listitem" aria-labelledby="pcard-title-3">
-            <div class="pcard-left">
-              <div class="pcard-badge-row">
-                <span class="pcard-num">[03]</span>
-                <span class="category-tag">Lógica &amp; Fundamentos</span>
-              </div>
-              <h3 class="pcard-title" id="pcard-title-3">
-                <a href="https://github.com/arthurMPBBY/python-curso" target="_blank" rel="noopener noreferrer">
-                  python-curso
-                  <svg viewBox="0 0 16 16" class="pcard-ext-icon" aria-hidden="true">
-                    <path d="M4 12l8-8m0 0H6m6 0v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                </a>
-              </h3>
-              <p class="pcard-desc" data-full-only>
-                Exercícios práticos de fundamentos em Python: resolução de problemas numéricos (Bhaskara, proporções, geometria), estruturas de dados e controle de fluxo com foco em raciocínio analítico.
-              </p>
-                            <div class="tech-spec-pills" data-full-only>
-                <span class="spec-pill">Python</span>
-                <span class="spec-pill">Cálculo Numérico</span>
-                <span class="spec-pill">Controle de Fluxo</span>
-                <span class="spec-pill">Estruturas de Dados</span>
+            <div class="pcard-main-row">
+              <div class="pcard-identity">
+                <div class="pcard-badge-row">
+                  <span class="pcard-num">[03]</span>
+                  <span class="category-tag">Algoritmos &amp; Dados</span>
+                </div>
+                <h3 class="pcard-title" id="pcard-title-3">
+                  <a href="https://github.com/arthurMPBBY/python-curso" target="_blank" rel="noopener noreferrer">
+                    python-curso
+                    <svg viewBox="0 0 16 16" class="pcard-ext-icon" aria-hidden="true">
+                      <path d="M4 12l8-8m0 0H6m6 0v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </a>
+                </h3>
               </div>
 
-              <details class="project-xray" id="xray-3" data-full-only>
-                <summary class="xray-summary">
-                  <span class="xray-summary-text">Como funciona</span>
-                  <svg class="xray-chevron" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <polyline points="4 6 8 10 12 6"></polyline>
-                  </svg>
-                </summary>
-                <div class="xray-content">
-                  <p class="xray-lead">
-                    Estruturas de algoritmos numéricos que recebem parâmetros analíticos, executam cálculos determinísticos (como resolução de raízes por Bhaskara ou razões geométricas) e validam as saídas estruturadas.
-                  </p>
-                  <div class="xray-diagram-wrap">
-                    <div class="xray-flow" role="img" aria-label="Diagrama técnico do fluxo de funcionamento">
-                      <div class="xray-flow-step">
-                        <span class="xray-flow-label">Entrada de Parâmetros</span>
-                        <span class="xray-flow-sub">Coeficientes Numéricos</span>
+              <div class="pcard-content-block">
+                <p class="pcard-desc" data-full-only>
+                  Exercícios de fundamentos em Python: cálculos, conversões de unidades e operações com conjuntos.
+                </p>
+
+                <div class="tech-spec-pills" data-full-only>
+                  <span class="spec-pill">Python 3</span>
+                  <span class="spec-pill">Lógica</span>
+                  <span class="spec-pill">Cálculos</span>
+                  <span class="spec-pill">Conjuntos</span>
+                </div>
+
+                <details class="project-xray" id="xray-3" data-full-only>
+                  <summary class="xray-summary">
+                    <span class="xray-summary-icon" aria-hidden="true">+</span>
+                    <span class="xray-summary-text">Como funciona (Raio-X Técnico)</span>
+                  </summary>
+                  <div class="xray-body">
+                    <div class="xray-flow" aria-label="Estrutura do repositório python-curso">
+                      <div class="xray-step">
+                        <span class="xray-step-idx">01</span>
+                        <span class="xray-step-title">Fundamentos</span>
+                        <span class="xray-step-desc">Prática de variáveis e controle de fluxo</span>
                       </div>
-                      <div class="xray-flow-connector" aria-hidden="true">
-                        <svg class="xray-connector-svg" viewBox="0 0 36 16" width="36" height="16" fill="none">
-                          <path d="M 0 8 L 26 8" class="xray-diagram-connector"></path>
-                          <polygon points="26,5 34,8 26,11" fill="#c16b59"></polygon>
-                        </svg>
+                      <div class="xray-arrow" aria-hidden="true">&rarr;</div>
+                      <div class="xray-step">
+                        <span class="xray-step-idx">02</span>
+                        <span class="xray-step-title">Cálculos</span>
+                        <span class="xray-step-desc">Bhaskara, regra de três e área do círculo</span>
                       </div>
-                      <div class="xray-flow-step">
-                        <span class="xray-flow-label">Rotina Analítica</span>
-                        <span class="xray-flow-sub">Bhaskara &amp; Algoritmos</span>
+                      <div class="xray-arrow" aria-hidden="true">&rarr;</div>
+                      <div class="xray-step">
+                        <span class="xray-step-idx">03</span>
+                        <span class="xray-step-title">Conjuntos</span>
+                        <span class="xray-step-desc">Exercícios com operações de interseção</span>
                       </div>
-                      <div class="xray-flow-connector" aria-hidden="true">
-                        <svg class="xray-connector-svg" viewBox="0 0 36 16" width="36" height="16" fill="none">
-                          <path d="M 0 8 L 26 8" class="xray-diagram-connector"></path>
-                          <polygon points="26,5 34,8 26,11" fill="#c16b59"></polygon>
-                        </svg>
-                      </div>
-                      <div class="xray-flow-step">
-                        <span class="xray-flow-label">Saída Validada</span>
-                        <span class="xray-flow-sub">Raízes &amp; Métricas</span>
+                      <div class="xray-arrow" aria-hidden="true">&rarr;</div>
+                      <div class="xray-step">
+                        <span class="xray-step-idx">04</span>
+                        <span class="xray-step-title">Conversões</span>
+                        <span class="xray-step-desc">Temperatura de Celsius para Fahrenheit</span>
                       </div>
                     </div>
-                    <ol class="xray-steps-list">
-                      <li><strong>Parâmetros:</strong> Entrada de coeficientes e validação de domínio numérico.</li>
-                      <li><strong>Cálculo:</strong> Fórmula quadrática analítica (delta e raízes) ou rotinas geométricas.</li>
-                      <li><strong>Resultado:</strong> Retorno formatado de soluções com tratamento de exceções.</li>
-                    </ol>
+                    <div class="xray-meta">
+                      <span class="xray-tag">Foco de aprendizado:</span> Fundamentos da linguagem em exercícios pequenos.
+                    </div>
                   </div>
-                </div>
-              </details>
-            </div>
-            <div class="pcard-right">
-              <a href="https://github.com/arthurMPBBY/python-curso" class="pcard-action-btn" target="_blank" rel="noopener noreferrer" aria-label="Abrir repositório python-curso no GitHub">
-                <span>Repositório</span>
-                <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="currentColor">
-                  <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path>
-                </svg>
-              </a>
+                </details>
+              </div>
+
+              <div class="pcard-action-block">
+                <a href="https://github.com/arthurMPBBY/python-curso" class="pcard-action-link" target="_blank" rel="noopener noreferrer">
+                  <span>Repositório</span>
+                  <span aria-hidden="true">&nearr;</span>
+                </a>
+              </div>
             </div>
           </article>
 
-          <!-- Item 4: spotifast-neon-theme -->
           <article class="project-compact-card" role="listitem" aria-labelledby="pcard-title-4">
-            <div class="pcard-left">
-              <div class="pcard-badge-row">
-                <span class="pcard-num">[04]</span>
-                <span class="category-tag">Interface &amp; Design Tokens</span>
-              </div>
-              <h3 class="pcard-title" id="pcard-title-4">
-                <a href="https://github.com/arthurMPBBY/spotifast-neon-theme" target="_blank" rel="noopener noreferrer">
-                  spotifast-neon-theme
-                  <svg viewBox="0 0 16 16" class="pcard-ext-icon" aria-hidden="true">
-                    <path d="M4 12l8-8m0 0H6m6 0v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                </a>
-              </h3>
-              <p class="pcard-desc" data-full-only>
-                Customização visual e estruturação de tema em JSON para aplicações de áudio, organizando paletas, contrastes e tokens de interface.
-              </p>
-                            <div class="tech-spec-pills" data-full-only>
-                <span class="spec-pill">JSON</span>
-                <span class="spec-pill">Design Tokens</span>
-                <span class="spec-pill">UI Theming</span>
+            <div class="pcard-main-row">
+              <div class="pcard-identity">
+                <div class="pcard-badge-row">
+                  <span class="pcard-num">[04]</span>
+                  <span class="category-tag">Interface &amp; Estilização</span>
+                </div>
+                <h3 class="pcard-title" id="pcard-title-4">
+                  <a href="https://github.com/arthurMPBBY/spotifast-neon-theme" target="_blank" rel="noopener noreferrer">
+                    spotifast-neon-theme
+                    <svg viewBox="0 0 16 16" class="pcard-ext-icon" aria-hidden="true">
+                      <path d="M4 12l8-8m0 0H6m6 0v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </a>
+                </h3>
               </div>
 
-              <details class="project-xray" id="xray-4" data-full-only>
-                <summary class="xray-summary">
-                  <span class="xray-summary-text">Como funciona</span>
-                  <svg class="xray-chevron" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <polyline points="4 6 8 10 12 6"></polyline>
-                  </svg>
-                </summary>
-                <div class="xray-content">
-                  <p class="xray-lead">
-                    Arquivo JSON centraliza tokens de design (paletas de cores, contraste tipográfico e regras de componentes). A camada de tema compila e injeta esses valores diretamente na interface de áudio.
-                  </p>
-                  <div class="xray-diagram-wrap">
-                    <div class="xray-flow" role="img" aria-label="Diagrama técnico do fluxo de funcionamento">
-                      <div class="xray-flow-step">
-                        <span class="xray-flow-label">Configuração JSON</span>
-                        <span class="xray-flow-sub">Tokens &amp; Variáveis</span>
+              <div class="pcard-content-block">
+                <p class="pcard-desc" data-full-only>
+                  Paleta visual para o Spotifast, definida em um arquivo JSON. Explora cores e contraste na interface de um aplicativo de música.
+                </p>
+
+                <div class="tech-spec-pills" data-full-only>
+                  <span class="spec-pill">JSON</span>
+                  <span class="spec-pill">Spotifast</span>
+                  <span class="spec-pill">Tema visual</span>
+                </div>
+
+                <details class="project-xray" id="xray-4" data-full-only>
+                  <summary class="xray-summary">
+                    <span class="xray-summary-icon" aria-hidden="true">+</span>
+                    <span class="xray-summary-text">Como funciona (Raio-X Técnico)</span>
+                  </summary>
+                  <div class="xray-body">
+                    <div class="xray-flow" aria-label="Configuração do tema Spotifast">
+                      <div class="xray-step">
+                        <span class="xray-step-idx">01</span>
+                        <span class="xray-step-title">Arquivo de tema</span>
+                        <span class="xray-step-desc">neon.json reúne a paleta de cores</span>
                       </div>
-                      <div class="xray-flow-connector" aria-hidden="true">
-                        <svg class="xray-connector-svg" viewBox="0 0 36 16" width="36" height="16" fill="none">
-                          <path d="M 0 8 L 26 8" class="xray-diagram-connector"></path>
-                          <polygon points="26,5 34,8 26,11" fill="#c16b59"></polygon>
-                        </svg>
+                      <div class="xray-arrow" aria-hidden="true">&rarr;</div>
+                      <div class="xray-step">
+                        <span class="xray-step-idx">02</span>
+                        <span class="xray-step-title">Instalação</span>
+                        <span class="xray-step-desc">O arquivo vai para a pasta de temas do Spotifast</span>
                       </div>
-                      <div class="xray-flow-step">
-                        <span class="xray-flow-label">Mapeador de Cores</span>
-                        <span class="xray-flow-sub">Contraste &amp; Tipografia</span>
+                      <div class="xray-arrow" aria-hidden="true">&rarr;</div>
+                      <div class="xray-step">
+                        <span class="xray-step-idx">03</span>
+                        <span class="xray-step-title">Seleção</span>
+                        <span class="xray-step-desc">A paleta é escolhida nas configurações de aparência</span>
                       </div>
-                      <div class="xray-flow-connector" aria-hidden="true">
-                        <svg class="xray-connector-svg" viewBox="0 0 36 16" width="36" height="16" fill="none">
-                          <path d="M 0 8 L 26 8" class="xray-diagram-connector"></path>
-                          <polygon points="26,5 34,8 26,11" fill="#c16b59"></polygon>
-                        </svg>
-                      </div>
-                      <div class="xray-flow-step">
-                        <span class="xray-flow-label">Interface de Áudio</span>
-                        <span class="xray-flow-sub">Spotifast Themed UI</span>
+                      <div class="xray-arrow" aria-hidden="true">&rarr;</div>
+                      <div class="xray-step">
+                        <span class="xray-step-idx">04</span>
+                        <span class="xray-step-title">Integração</span>
+                        <span class="xray-step-desc">Efeitos animados dependem do suporte no aplicativo</span>
                       </div>
                     </div>
-                    <ol class="xray-steps-list">
-                      <li><strong>Tokens Declarativos:</strong> Definição de paletas, espaçamentos e regras de contraste em JSON.</li>
-                      <li><strong>Compilação de Estilo:</strong> Validação de legibilidade e mapeamento para propriedades do cliente.</li>
-                      <li><strong>Aplicação Visual:</strong> Injeção nos seletores CSS da aplicação de streaming.</li>
-                    </ol>
+                    <div class="xray-meta">
+                      <span class="xray-tag">Escopo:</span> Este repositório fornece a paleta; a integração dos efeitos pertence ao aplicativo.
+                    </div>
                   </div>
-                </div>
-              </details>
-            </div>
-            <div class="pcard-right">
-              <a href="https://github.com/arthurMPBBY/spotifast-neon-theme" class="pcard-action-btn" target="_blank" rel="noopener noreferrer" aria-label="Abrir repositório spotifast-neon-theme no GitHub">
-                <span>Repositório</span>
-                <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="currentColor">
-                  <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path>
-                </svg>
-              </a>
+                </details>
+              </div>
+
+              <div class="pcard-action-block">
+                <a href="https://github.com/arthurMPBBY/spotifast-neon-theme" class="pcard-action-link" target="_blank" rel="noopener noreferrer">
+                  <span>Repositório</span>
+                  <span aria-hidden="true">&nearr;</span>
+                </a>
+              </div>
             </div>
           </article>
         </div>
       </div>
     </section>
 
-    <hr class="editorial-divider" data-full-only>
-
     <section class="section-block section-finance-lab" id="laboratorio" aria-labelledby="finance-lab-title" data-full-only>
-      <div class="site-wrapper">
+      <div class="section-container">
+        <header class="section-header">
+          <div class="section-index-badge">
+            <span class="section-index-num">02</span>
+            <span class="section-index-label">/ Laboratório interativo</span>
+          </div>
+          <h2 class="section-title" id="finance-lab-title">Simulador de Juros Compostos</h2>
+          <p class="section-subtitle">
+            Veja como o prazo e os aportes mudam um saldo. Simulação didática, sem cotações de mercado nem recomendação de investimento.
+          </p>
+        </header>
+
         <details class="finance-lab-details" id="finance-lab">
-          <summary class="finance-lab-summary" id="finance-lab-title">
-            <span class="finance-lab-summary-left">
-              <span class="finance-lab-summary-text">Laboratório · O efeito do tempo nos juros</span>
-              <span class="finance-lab-badge">Simulação</span>
-            </span>
-            <svg class="finance-chevron" viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <polyline points="4 6 8 10 12 6"></polyline>
-            </svg>
+          <summary class="finance-lab-summary">
+            <span class="flab-toggle-icon" aria-hidden="true">+</span>
+            <span class="flab-toggle-title">Simulador Financeiro: Aporte Mensal &amp; Taxa Anual Efetiva</span>
+            <span class="flab-toggle-tag">MÓDULO INTERATIVO</span>
           </summary>
 
-          <div class="finance-lab-content">
-            <div class="finance-header-strip">
-              <p class="finance-disclaimer">
-                <strong>Simulação didática de juros compostos.</strong> Não usa cotações de mercado.
-              </p>
-              <p class="finance-note">
-                Hipóteses: taxa anual efetiva, aportes no fim de cada mês, sem incidência de impostos, taxas ou correção pela inflação.
-              </p>
+          <div class="finance-lab-panel">
+            <p class="flab-method-note">Taxa anual efetiva convertida para mensal, com aportes no fim de cada mês. Não inclui impostos, taxas ou inflação.</p>
+            <div class="flab-grid">
+              <div class="flab-controls">
+                <div class="flab-field">
+                  <label for="finance-initial" class="flab-label">
+                    <span class="flab-label-text">Valor Inicial (R$)</span>
+                    <span class="flab-label-hint">0 a 1.000.000</span>
+                  </label>
+                  <div class="flab-input-prefix">
+                    <span class="currency-symbol">R$</span>
+                    <input type="number" id="finance-initial" class="flab-input" value="1000" min="0" max="1000000" step="100" aria-describedby="error-finance-initial">
+                  </div>
+                  <span id="error-finance-initial" class="flab-error" role="alert" hidden></span>
+                </div>
+
+                <div class="flab-field">
+                  <label for="finance-monthly" class="flab-label">
+                    <span class="flab-label-text">Aporte Mensal (R$)</span>
+                    <span class="flab-label-hint">0 a 10.000</span>
+                  </label>
+                  <div class="flab-input-prefix">
+                    <span class="currency-symbol">R$</span>
+                    <input type="number" id="finance-monthly" class="flab-input" value="100" min="0" max="10000" step="50" aria-describedby="error-finance-monthly">
+                  </div>
+                  <span id="error-finance-monthly" class="flab-error" role="alert" hidden></span>
+                </div>
+
+                <div class="flab-field">
+                  <label for="finance-rate-input" class="flab-label">
+                    <span class="flab-label-text">Taxa Anual Efetiva (%)</span>
+                    <span class="flab-label-hint">0% a 30%</span>
+                  </label>
+                  <div class="flab-slider-row">
+                    <input type="range" id="finance-rate-slider" class="flab-slider" min="0" max="30" step="0.25" value="12" aria-label="Taxa anual em porcentagem (slider)">
+                    <input type="number" id="finance-rate-input" class="flab-input flab-input-compact" min="0" max="30" step="0.25" value="12" aria-describedby="error-finance-rate" aria-label="Taxa anual em porcentagem (numérico)">
+                  </div>
+                  <span id="error-finance-rate" class="flab-error" role="alert" hidden></span>
+                </div>
+
+                <div class="flab-field">
+                  <label for="finance-months-input" class="flab-label">
+                    <span class="flab-label-text">Prazo (meses)</span>
+                    <span class="flab-label-hint">1 a 360 meses (até 30 anos)</span>
+                  </label>
+                  <div class="flab-slider-row">
+                    <input type="range" id="finance-months-slider" class="flab-slider" min="1" max="360" step="1" value="12" aria-label="Prazo em meses (slider)">
+                    <input type="number" id="finance-months-input" class="flab-input flab-input-compact" min="1" max="360" step="1" value="12" aria-describedby="error-finance-months" aria-label="Prazo em meses (numérico)">
+                  </div>
+                  <span id="error-finance-months" class="flab-error" role="alert" hidden></span>
+                </div>
+
+                <div class="flab-actions">
+                  <button type="button" id="finance-reset-btn" class="flab-reset-btn">Restaurar Valores Padrão</button>
+                </div>
+              </div>
+
+              <div class="flab-display">
+                <div class="flab-results-grid">
+                  <div class="flab-card flab-card-main">
+                    <span class="flab-card-label">Saldo Final Projetado</span>
+                    <strong class="flab-card-value" id="finance-res-balance">R$ 2.384,65</strong>
+                  </div>
+                  <div class="flab-card">
+                    <span class="flab-card-label">Total Aportado</span>
+                    <span class="flab-card-subvalue" id="finance-res-contributed">R$ 2.200,00</span>
+                  </div>
+                  <div class="flab-card">
+                    <span class="flab-card-label">Juros Acumulados</span>
+                    <span class="flab-card-subvalue flab-interest" id="finance-res-interest">R$ 184,65</span>
+                  </div>
+                </div>
+
+                <div class="flab-chart-wrapper">
+                  <div class="chart-header-row">
+                    <span class="chart-title">Evolução do Saldo vs. Aportes</span>
+                    <div class="chart-legend">
+                      <span class="legend-item"><span class="legend-dot dot-balance"></span>Saldo</span>
+                      <span class="legend-item"><span class="legend-dot dot-contributed"></span>Aportado</span>
+                    </div>
+                  </div>
+                  <svg id="finance-chart-svg" class="finance-chart-svg" viewBox="0 0 540 240" preserveAspectRatio="none" role="img" aria-label="Gráfico de evolução do saldo ao longo dos meses">
+                    <rect width="540" height="240" fill="transparent"/>
+                  </svg>
+                </div>
+
+                <details class="flab-milestones-details">
+                  <summary class="milestones-summary">Tabela de Marcos Anuais</summary>
+                  <div class="milestones-table-scroll">
+                    <table class="milestones-table">
+                      <thead>
+                        <tr>
+                          <th scope="col">Período</th>
+                          <th scope="col">Total Aportado</th>
+                          <th scope="col">Juros Acumulados</th>
+                          <th scope="col">Saldo Total</th>
+                        </tr>
+                      </thead>
+                      <tbody id="finance-milestones-body">
+                        <tr>
+                          <td>Mês 12 (Ano 1)</td>
+                          <td>R$ 2.200,00</td>
+                          <td>R$ 184,65</td>
+                          <td>R$ 2.384,65</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </details>
+              </div>
             </div>
 
             <noscript>
-              <div class="finance-noscript-notice">
-                <p><strong>Exemplo didático pré-calculado:</strong> Valor inicial de R$ 1.000,00, aporte mensal de R$ 100,00, taxa efetiva de 12% ao ano durante 12 meses: Total aportado de R$ 2.200,00, Juros de R$ 184,65 e Saldo final acumulado de R$ 2.384,65. Para executar simulações interativas personalizadas, ative o JavaScript do navegador.</p>
+              <div class="flab-noscript-notice">
+                <p><strong>Sem JavaScript:</strong> os valores exibidos são um exemplo fixo de 12 meses, com R$ 1.000 iniciais, R$ 100 por mês e taxa de 12% ao ano.</p>
               </div>
             </noscript>
-
-            <div class="finance-controls-grid">
-              <div class="finance-control-group">
-                <label for="finance-initial" class="finance-label">Valor inicial (R$)</label>
-                <input type="number" id="finance-initial" class="finance-input" min="0" max="1000000" step="50" value="1000" aria-describedby="error-finance-initial">
-                <span class="finance-field-error" id="error-finance-initial" role="alert" hidden></span>
-              </div>
-
-              <div class="finance-control-group">
-                <label for="finance-monthly" class="finance-label">Aporte mensal (R$)</label>
-                <input type="number" id="finance-monthly" class="finance-input" min="0" max="10000" step="25" value="100" aria-describedby="error-finance-monthly">
-                <span class="finance-field-error" id="error-finance-monthly" role="alert" hidden></span>
-              </div>
-
-              <div class="finance-control-group">
-                <label for="finance-rate-input" class="finance-label">Taxa anual efetiva (%)</label>
-                <div class="finance-dual-input">
-                  <input type="range" id="finance-rate-slider" class="finance-range" min="0" max="30" step="0.5" value="12" aria-label="Taxa anual efetiva em porcentagem" aria-valuetext="12% ao ano">
-                  <input type="number" id="finance-rate-input" class="finance-input finance-input-compact" min="0" max="30" step="0.5" value="12" aria-describedby="error-finance-rate">
-                </div>
-                <span class="finance-field-error" id="error-finance-rate" role="alert" hidden></span>
-              </div>
-
-              <div class="finance-control-group">
-                <label for="finance-months-input" class="finance-label">Prazo (meses)</label>
-                <div class="finance-dual-input">
-                  <input type="range" id="finance-months-slider" class="finance-range" min="1" max="360" step="1" value="12" aria-label="Prazo do investimento em meses" aria-valuetext="12 meses">
-                  <input type="number" id="finance-months-input" class="finance-input finance-input-compact" min="1" max="360" step="1" value="12" aria-describedby="error-finance-months">
-                </div>
-                <span class="finance-field-error" id="error-finance-months" role="alert" hidden></span>
-              </div>
-            </div>
-
-            <div class="finance-actions-row">
-              <button type="button" class="btn-finance-reset" id="finance-reset-btn">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
-                  <path d="M3 3v5h5"></path>
-                </svg>
-                <span>Restaurar exemplo</span>
-              </button>
-            </div>
-
-            <div class="finance-results-strip" aria-live="polite">
-              <div class="finance-result-card">
-                <span class="result-label">Total aportado</span>
-                <span class="result-value" id="finance-res-contributed">R$ 2.200,00</span>
-              </div>
-              <div class="finance-result-card">
-                <span class="result-label">Juros no período</span>
-                <span class="result-value" id="finance-res-interest">R$ 184,65</span>
-              </div>
-              <div class="finance-result-card finance-result-card-highlight">
-                <span class="result-label">Saldo final acumulado</span>
-                <span class="result-value" id="finance-res-balance">R$ 2.384,65</span>
-              </div>
-            </div>
-
-            <div class="finance-chart-section">
-              <div class="finance-chart-legend">
-                <span class="legend-item">
-                  <span class="legend-line line-balance" aria-hidden="true"></span>
-                  <span>Linha contínua coral: Saldo acumulado</span>
-                </span>
-                <span class="legend-item">
-                  <span class="legend-line line-contributed" aria-hidden="true"></span>
-                  <span>Linha tracejada grafite: Total aportado</span>
-                </span>
-              </div>
-
-              <div class="finance-chart-wrap">
-                <svg class="finance-chart-svg" id="finance-chart-svg" viewBox="0 0 600 280" role="img" aria-label="Gráfico de evolução patrimonial comparando total aportado e saldo acumulado"></svg>
-              </div>
-            </div>
-
-            <details class="finance-table-details">
-              <summary class="finance-table-summary">
-                <span>Ver tabela de marcos (anuais e mês final)</span>
-                <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <polyline points="4 6 8 10 12 6"></polyline>
-                </svg>
-              </summary>
-              <div class="finance-table-wrap">
-                <table class="finance-milestones-table" id="finance-milestones-table">
-                  <thead>
-                    <tr>
-                      <th scope="col">Marco temporal</th>
-                      <th scope="col">Total aportado</th>
-                      <th scope="col">Saldo acumulado</th>
-                      <th scope="col">Juros auferidos</th>
-                    </tr>
-                  </thead>
-                  <tbody></tbody>
-                </table>
-              </div>
-            </details>
           </div>
         </details>
       </div>
     </section>
 
-    <hr class="editorial-divider">
-
     <section class="section-block" id="sobre" aria-labelledby="sobre-title">
-      <div class="site-wrapper">
+      <div class="section-container">
         <header class="section-header">
-          <div class="section-pretitle">02 / Trajetória &amp; Aspiração</div>
+          <div class="section-index-badge">
+            <span class="section-index-num">03</span>
+            <span class="section-index-label">/ Em formação</span>
+          </div>
           <h2 class="section-title" id="sobre-title">Sobre mim</h2>
+          <p class="section-subtitle">
+            UFABC, 2º período. Aprendizado colocado em prática no código.
+          </p>
         </header>
 
-        <div class="about-grid">
-          <div class="about-prose">
-            <p>
-              Sou <strong>Arthur Kadri de Oliveira</strong>, estudante de graduação na <strong>Universidade Federal do ABC (UFABC)</strong>, atualmente no <strong>2º período</strong>.
+        <div class="sobre-editorial-grid">
+          <div class="sobre-primary-column">
+            <p class="sobre-lead-paragraph">
+              Sou Arthur Kadri de Oliveira, estudante na <strong>Universidade Federal do ABC, no 2º período</strong>. Meus projetos no GitHub passam por programação em C++ e Python, de telemetria a automação local.
             </p>
-
-            <p>
-              Meus projetos no GitHub combinam programação em <strong>Python</strong> e <strong>C++</strong>: desde medição de telemetria de alta frequência em chamadas de sistema da GPU até a automação de dispositivos via sockets de rede locais e rotinas numéricas.
-            </p>
-
-            <div class="about-highlight-box">
-              Formação acadêmica em andamento na UFABC (2º período) unida à aplicação prática em programação para finanças quantitativas e engenharia de dados.
-            </div>
-
-            <p>
-              Busco oportunidade de estágio no <strong>mercado financeiro</strong> e na área de <strong>dados</strong> para integrar rotinas de análise, automatizar processos e tratar fluxos de informação com rigor técnico.
+            <p class="sobre-body-paragraph">
+              Busco um <strong>estágio em mercado financeiro ou dados</strong> para aprender as rotinas da área e aplicar programação no tratamento de informações.
             </p>
           </div>
 
-          <aside class="about-sidebar-card" data-full-only>
-            <h3 class="sidebar-title">Formação &amp; Foco</h3>
+          <aside class="sobre-sidebar-column" data-full-only aria-hidden="true">
+            <div class="hero-art-container about-art-cloud" data-morph-progress="0" aria-label="Escultura vetorial perolada representando nuvem de dados" data-full-only>
+              <svg class="art-svg-stage" aria-hidden="true" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <radialGradient id="sunCoronaGlow" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95" />
+                    <stop offset="38%" stop-color="#fdf8f6" stop-opacity="0.75" />
+                    <stop offset="68%" stop-color="#ebd7d1" stop-opacity="0.32" />
+                    <stop offset="86%" stop-color="#c16b59" stop-opacity="0.12" />
+                    <stop offset="100%" stop-color="#f5f5f3" stop-opacity="0" />
+                  </radialGradient>
+                  <radialGradient id="pearlescentCore" cx="44%" cy="36%" r="62%">
+                    <stop offset="0%" stop-color="#ffffff" stop-opacity="0.98" />
+                    <stop offset="35%" stop-color="#fcf9f7" stop-opacity="0.92" />
+                    <stop offset="70%" stop-color="#f2e2de" stop-opacity="0.84" />
+                    <stop offset="100%" stop-color="#dfb3a7" stop-opacity="0.58" />
+                  </radialGradient>
+                  <radialGradient id="pearlUnderlay" cx="52%" cy="64%" r="58%">
+                    <stop offset="0%" stop-color="#ffffff" stop-opacity="0.75" />
+                    <stop offset="55%" stop-color="#dfb3a7" stop-opacity="0.45" />
+                    <stop offset="100%" stop-color="#585d66" stop-opacity="0.18" />
+                  </radialGradient>
+                  <linearGradient id="orbitRingGradient1" x1="40" y1="40" x2="460" y2="460" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stop-color="#c16b59" stop-opacity="0.88" />
+                    <stop offset="48%" stop-color="#dfb3a7" stop-opacity="0.6" />
+                    <stop offset="78%" stop-color="#585d66" stop-opacity="0.3" />
+                    <stop offset="100%" stop-color="#25272b" stop-opacity="0.08" />
+                  </linearGradient>
+                  <linearGradient id="orbitRingGradient2" x1="460" y1="60" x2="60" y2="440" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stop-color="#25272b" stop-opacity="0.45" />
+                    <stop offset="36%" stop-color="#c16b59" stop-opacity="0.75" />
+                    <stop offset="72%" stop-color="#dfb3a7" stop-opacity="0.3" />
+                    <stop offset="100%" stop-color="#ffffff" stop-opacity="0.1" />
+                  </linearGradient>
+                  <linearGradient id="orbitRingGradient3" x1="120" y1="250" x2="380" y2="250" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stop-color="#c16b59" stop-opacity="0.65" />
+                    <stop offset="50%" stop-color="#25272b" stop-opacity="0.25" />
+                    <stop offset="100%" stop-color="#c16b59" stop-opacity="0.5" />
+                  </linearGradient>
+                </defs>
 
-            <ul class="approach-list">
-              <li class="approach-item">
-                <div class="approach-icon-wrap" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
-                    <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
-                  </svg>
-                </div>
-                <div class="approach-content">
-                  <h4>UFABC · 2º Período</h4>
-                  <p>Graduação na Universidade Federal do ABC com sólida base quantitativa e interdisciplinar.</p>
-                </div>
-              </li>
+                <g class="sculpture-layer layer-corona">
+                  <circle cx="250" cy="250" r="162" fill="url(#sunCoronaGlow)" />
+                  <ellipse cx="250" cy="250" rx="196" ry="196" stroke="#c16b59" stroke-opacity="0.14" stroke-width="1" stroke-dasharray="2 12" />
+                  <ellipse cx="250" cy="250" rx="172" ry="172" stroke="#585d66" stroke-opacity="0.1" stroke-width="0.8" stroke-dasharray="4 8" />
+                </g>
 
-              <li class="approach-item">
-                <div class="approach-icon-wrap" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-                  </svg>
-                </div>
-                <div class="approach-content">
-                  <h4>Telemetria &amp; Performance</h4>
-                  <p>C++17 e Vulkan para leitura de métricas temporais e cadência de quadros (gaming-fps-hud).</p>
-                </div>
-              </li>
+                <g class="sculpture-layer layer-ribbons-outer">
+                  <ellipse cx="250" cy="250" rx="198" ry="76" stroke="url(#orbitRingGradient1)" stroke-width="1.8" stroke-dasharray="8 6" transform="rotate(-26 250 250)" class="svg-orbit-outer" />
+                  <circle cx="418" cy="172" r="7.5" fill="#c16b59" class="svg-sat-coral-large" />
+                  <circle cx="418" cy="172" r="12" stroke="#c16b59" stroke-width="1" stroke-opacity="0.25" />
+                  <circle cx="82" cy="328" r="4.5" fill="#25272b" fill-opacity="0.6" />
+                </g>
 
-              <li class="approach-item">
-                <div class="approach-icon-wrap" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                  </svg>
-                </div>
-                <div class="approach-content">
-                  <h4>Automação &amp; Redes</h4>
-                  <p>Python com sockets TCP diretos e contingência em API REST (tuya-smart-lamps).</p>
-                </div>
-              </li>
-            </ul>
+                <g class="sculpture-layer layer-ribbons-tertiary">
+                  <ellipse cx="250" cy="250" rx="162" ry="58" stroke="url(#orbitRingGradient3)" stroke-width="1.3" stroke-dasharray="5 7" transform="rotate(-62 250 250)" class="svg-orbit-tertiary" />
+                  <circle cx="250" cy="92" r="4" fill="#c16b59" fill-opacity="0.9" />
+                  <circle cx="250" cy="408" r="3.5" fill="#585d66" fill-opacity="0.5" />
+                </g>
+
+                <g class="sculpture-layer layer-ribbons-inner">
+                  <ellipse cx="250" cy="250" rx="136" ry="52" stroke="url(#orbitRingGradient2)" stroke-width="1.5" stroke-dasharray="5 5" transform="rotate(35 250 250)" class="svg-orbit-inner" />
+                  <circle cx="158" cy="190" r="4.5" fill="#c16b59" />
+                  <circle cx="342" cy="310" r="5.5" fill="#585d66" fill-opacity="0.55" />
+                  <circle cx="342" cy="310" r="9.5" stroke="#c16b59" stroke-width="1" stroke-opacity="0.2" />
+                </g>
+
+                <g class="sculpture-layer layer-core-sculpture svg-cloud-sculpture">
+                  <path d="M 162 284 C 136 284 116 262 116 236 C 116 211 133 190 156 188 C 164 156 192 133 228 133 C 267 133 297 160 303 196 C 310 193 318 191 326 191 C 349 191 368 209 368 232 C 368 235 367 238 366 241 C 379 246 388 260 388 275 C 388 297 371 314 348 314 L 162 314 Z" fill="url(#pearlUnderlay)" stroke="#dfb3a7" stroke-width="1" stroke-opacity="0.45" class="sculpture-underbillow" />
+                  <path d="M 170 280 C 145 280 125 260 125 235 C 125 212 142 193 164 191 C 172 163 198 142 230 142 C 265 142 293 167 298 200 C 304 197 311 195 318 195 C 339 195 356 212 356 233 C 356 235 355 238 355 240 C 367 245 375 258 375 272 C 375 292 359 308 339 308 L 170 308 C 150 308 135 296 135 280 Z" fill="url(#pearlescentCore)" stroke="#e4e4de" stroke-width="1.6" class="sculpture-mainbillow" />
+                  <path d="M 145 263 C 210 306 326 144 355 223" stroke="#c16b59" stroke-width="1.4" stroke-linecap="round" fill="none" stroke-opacity="0.4" class="sculpture-filament-primary" />
+                  <path d="M 153 251 C 218 294 326 133 361 214" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" fill="none" stroke-opacity="0.8" class="sculpture-filament-secondary" />
+                </g>
+
+                <g class="sculpture-layer layer-sparks">
+                  <circle cx="185" cy="145" r="2.2" fill="#c16b59" fill-opacity="0.75" class="sculpture-spark spark-1" />
+                  <circle cx="325" cy="158" r="1.8" fill="#585d66" fill-opacity="0.5" class="sculpture-spark spark-2" />
+                  <circle cx="385" cy="215" r="2.8" fill="#dfb3a7" fill-opacity="0.8" class="sculpture-spark spark-3" />
+                  <circle cx="125" cy="265" r="2.2" fill="#c16b59" fill-opacity="0.65" class="sculpture-spark spark-4" />
+                  <circle cx="295" cy="335" r="1.8" fill="#25272b" fill-opacity="0.45" class="sculpture-spark spark-5" />
+                </g>
+              </svg>
+            </div>
+
           </aside>
         </div>
       </div>
     </section>
 
-    <hr class="editorial-divider">
-
     <section class="section-block" id="contato" aria-labelledby="contato-title">
-      <div class="site-wrapper">
+      <div class="section-container">
+        <header class="section-header">
+          <div class="section-index-badge">
+            <span class="section-index-num">04</span>
+            <span class="section-index-label">/ Contato</span>
+          </div>
+          <h2 class="section-title contact-title" id="contato-title">Vamos conversar?</h2>
+          <p class="section-subtitle">
+            Aberto a conversas sobre oportunidades de estágio em tecnologia, análise de dados e mercado financeiro.
+          </p>
+        </header>
+
         <div class="contact-editorial-card">
-          <div class="contact-decor-glow" aria-hidden="true"></div>
-
-          <div class="contact-inner">
-            <div class="contact-left">
-              <span class="category-tag" style="background-color: #272a31; color: #f28b75; border-color: #3d424e; align-self: flex-start;">
-                03 / Conexão Direta
-              </span>
-
-              <h2 class="contact-title" id="contato-title">
-                Vamos conversar?
-              </h2>
-
-              <p class="contact-lead">
-                Estou disponível para processos seletivos e conversas sobre oportunidades de estágio em mercado financeiro e análise de dados.
-              </p>
-
-              <div class="contact-email-box">
-                <div class="email-display-row">
-                  <span class="email-address-text">arthurkadri968@gmail.com</span>
-
-                  <button type="button" class="btn-copy-email" data-copy-email aria-label="Copiar endereço de e-mail de Arthur">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                    </svg>
-                    <span>Copiar e-mail</span>
-                  </button>
-
-                  <a href="mailto:arthurkadri968@gmail.com" class="btn-mailto" aria-label="Enviar mensagem para arthurkadri968@gmail.com via cliente de e-mail">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                      <polyline points="22,6 12,13 2,6"></polyline>
-                    </svg>
-                    <span>Abrir e-mail</span>
-                  </a>
-                </div>
-
-                <div id="email-live-status" class="email-live-status" role="status" aria-live="polite"></div>
+          <div class="contact-main-info">
+            <p class="contact-card-kicker">CANAL DE CONTATO DIRETO</p>
+            <div class="contact-email-box">
+              <span class="email-display" id="contact-email-text">arthurkadri968@gmail.com</span>
+              <div class="contact-btn-group">
+                <button class="copy-email-btn" type="button" data-copy-email aria-label="Copiar endereço de e-mail para a área de transferência">
+                  <svg viewBox="0 0 16 16" class="copy-icon" aria-hidden="true">
+                    <path d="M5 2h7a1 1 0 011 1v7m-3 4H4a1 1 0 01-1-1V6a1 1 0 011-1h6a1 1 0 011 1v7a1 1 0 01-1 1z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  <span class="copy-btn-label">Copiar E-mail</span>
+                </button>
+                <a href="mailto:arthurkadri968@gmail.com" class="mailto-link-btn" aria-label="Enviar e-mail para arthurkadri968@gmail.com">
+                  <svg viewBox="0 0 16 16" class="copy-icon" aria-hidden="true">
+                    <path d="M2 3.5A1.5 1.5 0 0 1 3.5 2h9A1.5 1.5 0 0 1 14 3.5v9a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 12.5v-9zm1.75.5a.25.25 0 0 0-.25.25v.379l4.5 3.15 4.5-3.15V4.25a.25.25 0 0 0-.25-.25h-8.5zm8.5 7.75V6.321L8.28 9.098a.5.5 0 0 1-.56 0L3.5 6.321v5.429c0 .138.112.25.25.25h8.5a.25.25 0 0 0 .25-.25z" fill="currentColor"/>
+                  </svg>
+                  <span>Abrir</span>
+                </a>
               </div>
             </div>
+            <span id="email-live-status" class="sr-only" aria-live="polite"></span>
+            <p class="contact-availability-note">
+              Entre em contato por e-mail ou pelo LinkedIn.
+            </p>
+          </div>
 
-            <div class="contact-right">
-              <div class="contact-meta-group">
-                <h4>Perfis Profissionais</h4>
-                <div class="external-links-list">
-                  <a href="https://github.com/arthurMPBBY" class="ext-social-link" target="_blank" rel="noopener noreferrer">
-                    <svg viewBox="0 0 16 16" aria-hidden="true">
-                      <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path>
-                    </svg>
-                    <span>GitHub: arthurMPBBY</span>
-                    <span class="ext-arrow" aria-hidden="true">&#8599;</span>
-                  </a>
+          <div class="contact-profiles-block">
+            <h4>Perfis Profissionais</h4>
+            <div class="contact-links-grid">
+              <a href="https://github.com/arthurMPBBY" class="contact-profile-link" target="_blank" rel="noopener noreferrer">
+                <span class="profile-network-name">GitHub</span>
+                <span class="profile-network-handle">github.com/arthurMPBBY</span>
+                <span class="profile-arrow" aria-hidden="true">&nearr;</span>
+              </a>
 
-                  <a href="https://www.linkedin.com/in/arthur-kadri-de-oliveira-2586a12b2/" class="ext-social-link" target="_blank" rel="noopener noreferrer">
-                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                      <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"></path>
-                    </svg>
-                    <span>LinkedIn: Arthur Kadri</span>
-                    <span class="ext-arrow" aria-hidden="true">&#8599;</span>
-                  </a>
-                </div>
-              </div>
+              <a href="https://www.linkedin.com/in/arthur-kadri-de-oliveira-2586a12b2/" class="contact-profile-link" target="_blank" rel="noopener noreferrer">
+                <span class="profile-network-name">LinkedIn</span>
+                <span class="profile-network-handle">Arthur Kadri de Oliveira</span>
+                <span class="profile-arrow" aria-hidden="true">&nearr;</span>
+              </a>
             </div>
           </div>
         </div>
@@ -879,24 +742,22 @@
   </main>
 
   <footer class="site-footer">
-    <div class="site-wrapper footer-inner">
+    <div class="footer-inner">
       <div class="footer-left">
-        <span>&copy; 2026 Arthur Kadri de Oliveira</span>
-        <span class="footer-bullet" aria-hidden="true">&bull;</span>
-        <span>UFABC · 2º Período</span>
-        <span class="footer-bullet" aria-hidden="true">&bull;</span>
-        <span>Portfólio Estático</span>
+        <span class="footer-brand">Arthur Kadri de Oliveira</span>
+        <span class="footer-sep">·</span>
+        <span class="footer-academic">UFABC · 2º Período</span>
       </div>
       <div class="footer-right">
-        <span>Sem dependências externas de compilação</span>
+        <span class="footer-copy">Projetos pessoais e código aberto no GitHub.</span>
       </div>
     </div>
   </footer>
 
-  <script src="cloud-morph.js?v=20261028-dots"></script>
-  <script src="finance-lab.js?v=20261028-dots"></script>
-  <script src="portfolio-extras.js?v=20261028-dots"></script>
-  <script src="reactive-dots.js?v=20261028-dots"></script>
-  <script src="script.js?v=20261028-dots"></script>
+  <script src="cloud-morph.js?v=20261028-spatial"></script>
+  <script src="finance-lab.js?v=20261028-spatial"></script>
+  <script src="portfolio-extras.js?v=20261028-spatial"></script>
+  <script src="reactive-dots.js?v=20261028-spatial"></script>
+  <script src="script.js?v=20261028-spatial"></script>
 </body>
 </html>
