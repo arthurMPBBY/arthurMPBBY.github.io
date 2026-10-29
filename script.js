@@ -20,6 +20,91 @@
 
   const PROJECT_SEQUENCE = ['yahcw', 'tuya', 'gaming', 'python', 'spotifast', 'financeiro'];
 
+  const CONCEPTUAL_RELATIONS = {
+    yahcw: {
+      title: 'YAHCW',
+      category: 'Win32 · DWM · C#',
+      related: [
+        { id: 'tuya', label: 'tuya-smart-lamps', relTag: 'Interfaces de controle' },
+        { id: 'spotifast', label: 'spotifast-neon-theme', relTag: 'Ergonomia Desktop' }
+      ],
+      editorial: 'Controle e interface direta: do gerenciamento de janelas DWM e luminância física aos comandos de iluminação residencial e ergonomia visual no desktop.',
+      connectionTags: 'Controle de ambiente & interfaces de desktop'
+    },
+    tuya: {
+      title: 'tuya-smart-lamps',
+      category: 'Redes · TCP / OpenAPI',
+      related: [
+        { id: 'yahcw', label: 'YAHCW', relTag: 'Software & Hardware' },
+        { id: 'python', label: 'python-curso', relTag: 'Automação & Lógica' }
+      ],
+      editorial: 'Automação e protocolos determinísticos: orquestração de rede e contingência inteligente aliadas a estruturas de dados e comunicação com periféricos.',
+      connectionTags: 'Protocolos de rede, sockets e automação'
+    },
+    gaming: {
+      title: 'gaming-fps-hud',
+      category: 'C++17 · Vulkan · Wayland',
+      related: [
+        { id: 'financeiro', label: 'Laboratório Financeiro', relTag: 'Séries Temporais' },
+        { id: 'python', label: 'python-curso', relTag: 'Métricas & Amostragem' }
+      ],
+      editorial: 'Observabilidade quantitativa e telemetria: leitura contínua de latências e 1% lows dialoga com modelagem temporal e simulações analíticas de capitalização.',
+      connectionTags: 'Observação, amostragem e séries temporais'
+    },
+    python: {
+      title: 'python-curso',
+      category: 'Python 3 · Algoritmos UFABC',
+      related: [
+        { id: 'financeiro', label: 'Laboratório Financeiro', relTag: 'Cálculo Rigoroso' },
+        { id: 'tuya', label: 'tuya-smart-lamps', relTag: 'Estruturas de Dados' }
+      ],
+      editorial: 'Estruturas de dados e rigor lógico: fundamentos de coleções e precisão determinística aplicados diretamente a modelos matemáticos e protocolos de rede.',
+      connectionTags: 'Estrutura lógica, coleções e algoritmos'
+    },
+    spotifast: {
+      title: 'spotifast-neon-theme',
+      category: 'Design Tokens · JSON',
+      related: [
+        { id: 'yahcw', label: 'YAHCW', relTag: 'Ergonomia de Tela' },
+        { id: 'gaming', label: 'gaming-fps-hud', relTag: 'Performance & HUD' }
+      ],
+      editorial: 'Aparência, tokens e design de interação: interfaces utilitárias que priorizam contraste, baixo overhead de renderização e conforto visual operacional.',
+      connectionTags: 'Design de tokens e ergonomia operacional'
+    },
+    financeiro: {
+      title: 'Laboratório Financeiro',
+      category: 'Finanças · Taxa Efetiva',
+      related: [
+        { id: 'gaming', label: 'gaming-fps-hud', relTag: 'Modelagem Contínua' },
+        { id: 'python', label: 'python-curso', relTag: 'Matemática Aplicada' }
+      ],
+      editorial: 'Modelagem quantitativa e matemática aplicada: simulação rigorosa de juros compostos compartilhando princípios de medição contínua e algoritmos determinísticos.',
+      connectionTags: 'Matemática aplicada e simulação quantitativa'
+    }
+  };
+
+  let activeRelationProject = null;
+  let savedAtlasCamera = null;
+  let savedAtlasFocus = null;
+  let relationDismissTimer = null;
+
+  function cancelRelationDismissal() {
+    clearTimeout(relationDismissTimer);
+    relationDismissTimer = null;
+  }
+
+  function scheduleRelationDismissal() {
+    cancelRelationDismissal();
+    relationDismissTimer = setTimeout(function () {
+      const banner = document.getElementById('atlas-relation-banner');
+      const artifact = document.getElementById('artifact-' + activeRelationProject);
+      const activeElement = document.activeElement;
+      if ((banner && (banner.matches(':hover') || banner.contains(activeElement))) ||
+          (artifact && (artifact.matches(':hover') || artifact.contains(activeElement)))) return;
+      clearConceptualRelation();
+    }, 1200);
+  }
+
   function safeStorageGet(storageKey) {
     try {
       return window.localStorage.getItem(storageKey);
@@ -151,7 +236,7 @@
   }
 
   function requestCameraWakeup() {
-    if (!isPageVisible) {
+    if (!isPageVisible || currentActiveRoom || isDirectReadingActive) {
       return;
     }
     if (animationFrameHandle === null) {
@@ -169,6 +254,88 @@
 
     spatialWorld.style.transform = 'translate3d(' + translateX.toFixed(1) + 'px, ' + translateY.toFixed(1) + 'px, 0) scale(' + cameraState.currentZoom.toFixed(4) + ')';
     updateMinimapFrustum();
+  }
+
+  function setConceptualRelation(projectId) {
+    cancelRelationDismissal();
+    if (activeRelationProject === projectId) return;
+    activeRelationProject = projectId;
+
+    const banner = document.getElementById('atlas-relation-banner');
+    const pairLabel = document.getElementById('relation-pair-label');
+    const editorialText = document.getElementById('relation-editorial-text');
+    const jumpActions = document.getElementById('relation-jump-actions');
+
+    const allArtifacts = document.querySelectorAll('.spatial-artifact');
+    if (!projectId || !CONCEPTUAL_RELATIONS[projectId]) {
+      allArtifacts.forEach(function (art) {
+        art.classList.remove('is-highlighted', 'is-concept-connected', 'is-concept-dimmed');
+      });
+      if (banner) {
+        banner.setAttribute('inert', '');
+        banner.classList.remove('is-visible');
+        banner.setAttribute('aria-hidden', 'true');
+      }
+      drawAtlasCanvas();
+      return;
+    }
+
+    const relData = CONCEPTUAL_RELATIONS[projectId];
+    const relatedIds = relData.related.map(function (relation) { return relation.id; });
+
+    allArtifacts.forEach(function (art) {
+      const artId = art.getAttribute('data-project');
+      if (artId === projectId) {
+        art.classList.add('is-highlighted');
+        art.classList.remove('is-concept-connected', 'is-concept-dimmed');
+      } else if (relatedIds.indexOf(artId) !== -1) {
+        art.classList.add('is-concept-connected');
+        art.classList.remove('is-highlighted', 'is-concept-dimmed');
+      } else {
+        art.classList.add('is-concept-dimmed');
+        art.classList.remove('is-highlighted', 'is-concept-connected');
+      }
+    });
+
+    if (banner && pairLabel && editorialText && jumpActions) {
+      const firstRel = relData.related[0];
+      const secondRel = relData.related[1];
+      pairLabel.textContent = relData.title + ' · Em comum com ' + firstRel.label + ' e ' + secondRel.label;
+      editorialText.textContent = relData.editorial;
+
+      jumpActions.innerHTML = '';
+      relData.related.forEach(function (item) {
+        const jumpBtn = document.createElement('button');
+        jumpBtn.type = 'button';
+        jumpBtn.className = 'relation-jump-btn';
+        jumpBtn.setAttribute('data-jump-room', item.id);
+        jumpBtn.textContent = 'Saltar para ' + item.label + ' →';
+        jumpBtn.addEventListener('click', function (clickEvent) {
+          clickEvent.stopPropagation();
+          navigateToRoute(item.id, true);
+        });
+        jumpActions.appendChild(jumpBtn);
+      });
+
+      banner.classList.add('is-visible');
+      banner.removeAttribute('inert');
+      banner.removeAttribute('aria-hidden');
+    }
+
+    drawAtlasCanvas();
+  }
+
+  function clearConceptualRelation() {
+    setConceptualRelation(null);
+  }
+
+  function indicateReturnOnArtifact(projectId) {
+    const artifactElement = document.getElementById('artifact-' + projectId);
+    if (!artifactElement) return;
+    artifactElement.classList.add('returned-pulse');
+    setTimeout(function () {
+      artifactElement.classList.remove('returned-pulse');
+    }, 460);
   }
 
   function drawAtlasCanvas() {
@@ -236,17 +403,36 @@
     });
 
     // Vetores de conexão entre o meridiano e cada objeto
-    atlasCanvasContext.strokeStyle = 'rgba(217, 67, 46, 0.32)';
-    atlasCanvasContext.lineWidth = 1.2;
-    atlasCanvasContext.setLineDash([4, 6]);
-
     const projectKeys = Object.keys(PROJECT_COORDINATES);
+    const relatedPartnerIds = (activeRelationProject && CONCEPTUAL_RELATIONS[activeRelationProject])
+      ? CONCEPTUAL_RELATIONS[activeRelationProject].related.map(function (relation) { return relation.id; })
+      : [];
+
     for (let i = 0; i < projectKeys.length; i += 1) {
       const pKey = projectKeys[i];
       const pLoc = PROJECT_COORDINATES[pKey];
       const pScreenX = worldCenterX + pLoc.coordX * currentScale;
       const pScreenY = worldCenterY + pLoc.coordY * currentScale;
       const labelClearance = 1 / Math.hypot(pLoc.coordX / 300, pLoc.coordY / 100);
+
+      const isPrimary = pKey === activeRelationProject;
+      const isPartner = relatedPartnerIds.indexOf(pKey) !== -1;
+
+      if (activeRelationProject) {
+        if (isPrimary || isPartner) {
+          atlasCanvasContext.strokeStyle = 'rgba(217, 67, 46, 0.65)';
+          atlasCanvasContext.lineWidth = 1.6;
+          atlasCanvasContext.setLineDash([4, 4]);
+        } else {
+          atlasCanvasContext.strokeStyle = 'rgba(14, 18, 24, 0.08)';
+          atlasCanvasContext.lineWidth = 0.8;
+          atlasCanvasContext.setLineDash([2, 6]);
+        }
+      } else {
+        atlasCanvasContext.strokeStyle = 'rgba(217, 67, 46, 0.32)';
+        atlasCanvasContext.lineWidth = 1.2;
+        atlasCanvasContext.setLineDash([4, 6]);
+      }
 
       atlasCanvasContext.beginPath();
       atlasCanvasContext.moveTo(
@@ -257,12 +443,54 @@
       atlasCanvasContext.stroke();
 
       // Ponto de mira no destino
-      atlasCanvasContext.fillStyle = 'rgba(217, 67, 46, 0.85)';
+      atlasCanvasContext.fillStyle = (activeRelationProject && !isPrimary && !isPartner)
+        ? 'rgba(14, 18, 24, 0.25)'
+        : 'rgba(217, 67, 46, 0.85)';
       atlasCanvasContext.beginPath();
-      atlasCanvasContext.arc(pScreenX, pScreenY, 3, 0, Math.PI * 2);
+      atlasCanvasContext.arc(pScreenX, pScreenY, isPrimary ? 4.5 : 3, 0, Math.PI * 2);
       atlasCanvasContext.fill();
     }
     atlasCanvasContext.setLineDash([]);
+
+    if (activeRelationProject && CONCEPTUAL_RELATIONS[activeRelationProject]) {
+      const sourceCoords = PROJECT_COORDINATES[activeRelationProject];
+      const sScreenX = worldCenterX + sourceCoords.coordX * currentScale;
+      const sScreenY = worldCenterY + sourceCoords.coordY * currentScale;
+      const relList = CONCEPTUAL_RELATIONS[activeRelationProject].related;
+
+      for (let rIdx = 0; rIdx < relList.length; rIdx += 1) {
+        const targetId = relList[rIdx].id;
+        const targetCoords = PROJECT_COORDINATES[targetId];
+        if (!targetCoords) continue;
+
+        const tScreenX = worldCenterX + targetCoords.coordX * currentScale;
+        const tScreenY = worldCenterY + targetCoords.coordY * currentScale;
+
+        const midX = (sScreenX + tScreenX) / 2;
+        const midY = (sScreenY + tScreenY) / 2;
+        const vecX = midX - worldCenterX;
+        const vecY = midY - worldCenterY;
+        const distToCenter = Math.hypot(vecX, vecY) || 1;
+        const radialPush = Math.max(90 * currentScale, 55);
+
+        const ctrlX = midX + (vecX / distToCenter) * radialPush;
+        const ctrlY = midY + (vecY / distToCenter) * radialPush;
+
+        atlasCanvasContext.strokeStyle = 'rgba(217, 67, 46, 0.72)';
+        atlasCanvasContext.lineWidth = 1.8 * currentScale;
+        atlasCanvasContext.setLineDash([5 * currentScale, 4 * currentScale]);
+        atlasCanvasContext.beginPath();
+        atlasCanvasContext.moveTo(sScreenX, sScreenY);
+        atlasCanvasContext.quadraticCurveTo(ctrlX, ctrlY, tScreenX, tScreenY);
+        atlasCanvasContext.stroke();
+
+        atlasCanvasContext.fillStyle = '#d9432e';
+        atlasCanvasContext.beginPath();
+        atlasCanvasContext.arc(ctrlX, ctrlY, 3 * currentScale, 0, Math.PI * 2);
+        atlasCanvasContext.fill();
+      }
+      atlasCanvasContext.setLineDash([]);
+    }
 
     atlasCanvasContext.restore();
   }
@@ -510,13 +738,36 @@
       isDirectReadingActive = false;
       updateDockActive(null);
       setSpatialViewportInert(false);
-      resetCameraToOverview(true);
+      clearConceptualRelation();
+
+      if (savedAtlasCamera) {
+        cameraState.targetPanX = savedAtlasCamera.panX;
+        cameraState.targetPanY = savedAtlasCamera.panY;
+        cameraState.targetZoom = savedAtlasCamera.zoom;
+        if (isMotionReduced) {
+          cameraState.currentPanX = savedAtlasCamera.panX;
+          cameraState.currentPanY = savedAtlasCamera.panY;
+          cameraState.currentZoom = savedAtlasCamera.zoom;
+          cameraState.isSettled = true;
+          applyWorldTransform();
+          drawAtlasCanvas();
+        } else {
+          cameraState.isSettled = false;
+          requestCameraWakeup();
+        }
+        savedAtlasCamera = null;
+      } else {
+        resetCameraToOverview(true);
+      }
 
       if (lastFocusedRoomId) {
-        const trigger = document.querySelector('[data-enter-room="' + lastFocusedRoomId + '"]');
+        const trigger = savedAtlasFocus && savedAtlasFocus.isConnected && !savedAtlasFocus.closest('[inert]') && savedAtlasFocus !== document.body ? savedAtlasFocus : document.querySelector('[data-enter-room="' + lastFocusedRoomId + '"]');
         if (trigger && typeof trigger.focus === 'function') {
-          trigger.focus();
+          trigger.focus({ preventScroll: true });
         }
+        const originArtifact = trigger && trigger.closest('.spatial-artifact');
+        indicateReturnOnArtifact(originArtifact ? originArtifact.getAttribute('data-project') : lastFocusedRoomId);
+        savedAtlasFocus = null;
       }
       announceLiveStatus('Retornou ao Atlas Espacial.');
       return;
@@ -548,6 +799,15 @@
 
     const resolvedProject = (route === 'laboratorio') ? 'financeiro' : route;
     if (PROJECT_COORDINATES[resolvedProject]) {
+      if (!currentActiveRoom && !isDirectReadingActive) {
+        savedAtlasFocus = document.activeElement;
+        savedAtlasCamera = {
+          panX: cameraState.currentPanX,
+          panY: cameraState.currentPanY,
+          zoom: cameraState.currentZoom
+        };
+      }
+      clearConceptualRelation();
       exitDirectReadingInternal();
       closeAllOverlaysInternal();
       openRoomInternal(resolvedProject);
@@ -590,23 +850,37 @@
     const targetRoomElement = document.getElementById('room-' + projectId);
     if (!targetRoomElement) return;
 
-    // Alinha a câmera ao objeto no atlas de fundo
-    const coords = PROJECT_COORDINATES[projectId];
-    if (coords) {
-      cameraState.targetPanX = clampValue(-coords.coordX * coords.zoom, cameraState.minPanX, cameraState.maxPanX);
-      cameraState.targetPanY = clampValue(-coords.coordY * coords.zoom, cameraState.minPanY, cameraState.maxPanY);
-      cameraState.targetZoom = coords.zoom;
-      if (isMotionReduced) {
-        cameraState.currentPanX = cameraState.targetPanX;
-        cameraState.currentPanY = cameraState.targetPanY;
-        cameraState.currentZoom = cameraState.targetZoom;
+    if (animationFrameHandle) {
+      cancelAnimationFrame(animationFrameHandle);
+      animationFrameHandle = null;
+    }
+
+    const artElement = document.getElementById('artifact-' + projectId);
+    let hasVisualOrigin = false;
+    if (artElement) {
+      const artRect = artElement.getBoundingClientRect();
+      const vpW = window.innerWidth || 1200;
+      const vpH = window.innerHeight || 800;
+      if (artRect.width > 0 && artRect.right > 20 && artRect.left < vpW - 20 && artRect.bottom > 20 && artRect.top < vpH - 20) {
+        const originX = Math.round(((artRect.left + artRect.width / 2) / vpW) * 100);
+        const originY = Math.round(((artRect.top + artRect.height / 2) / vpH) * 100);
+        targetRoomElement.style.setProperty('--room-origin-x', originX + '%');
+        targetRoomElement.style.setProperty('--room-origin-y', originY + '%');
+        targetRoomElement.classList.add('room-enter-expand');
+        hasVisualOrigin = true;
       }
-      requestCameraWakeup();
+    }
+    if (!hasVisualOrigin) {
+      targetRoomElement.style.removeProperty('--room-origin-x');
+      targetRoomElement.style.removeProperty('--room-origin-y');
+      targetRoomElement.classList.remove('room-enter-expand');
     }
 
     document.querySelectorAll('.project-room').forEach(function (room) {
-      room.classList.remove('is-active');
-      room.hidden = true;
+      if (room !== targetRoomElement) {
+        room.classList.remove('is-active', 'room-enter-expand');
+        room.hidden = true;
+      }
     });
 
     targetRoomElement.hidden = false;
@@ -620,12 +894,16 @@
 
   function closeAllRoomsInternal() {
     document.querySelectorAll('.project-room').forEach(function (room) {
-      room.classList.remove('is-active');
+      room.classList.remove('is-active', 'room-enter-expand');
       room.hidden = true;
     });
   }
 
   function enterDirectReadingInternal() {
+    if (animationFrameHandle) {
+      cancelAnimationFrame(animationFrameHandle);
+      animationFrameHandle = null;
+    }
     document.body.classList.remove('mode-atlas');
     document.body.classList.add('mode-direct');
     document.documentElement.setAttribute('data-view', 'direct');
@@ -824,8 +1102,12 @@
 
     if (isMotionReduced) {
       document.documentElement.setAttribute('data-motion', 'paused');
+      document.querySelectorAll('.room-enter-expand').forEach(function (room) {
+        room.classList.remove('room-enter-expand');
+      });
       if (motionButton) {
         motionButton.setAttribute('aria-pressed', 'true');
+        motionButton.setAttribute('aria-label', 'Ativar animações de câmera e partículas');
         motionButton.classList.add('active');
       }
       if (motionStatusLabel) {
@@ -845,6 +1127,7 @@
       document.documentElement.setAttribute('data-motion', 'active');
       if (motionButton) {
         motionButton.setAttribute('aria-pressed', 'false');
+        motionButton.setAttribute('aria-label', 'Pausar animações de câmera e partículas');
         motionButton.classList.remove('active');
       }
       if (motionStatusLabel) {
@@ -1330,6 +1613,65 @@
     const minimapRadar = document.getElementById('minimap-radar');
     if (minimapRadar) {
       minimapRadar.addEventListener('click', handleMinimapClick);
+      minimapRadar.addEventListener('keydown', function (keyboardEvent) {
+        if (keyboardEvent.key === 'Enter' || keyboardEvent.key === ' ' || keyboardEvent.key === 'Spacebar') {
+          keyboardEvent.preventDefault();
+          resetCameraToOverview();
+          announceLiveStatus('Enquadramento geral restaurado pelo radar.');
+        }
+      });
+    }
+
+    document.querySelectorAll('.spatial-artifact').forEach(function (artifact) {
+      const projId = artifact.getAttribute('data-project');
+      const trigger = artifact.querySelector('.artifact-trigger');
+
+      function onEnter() {
+        if (!currentActiveRoom && !isDirectReadingActive) {
+          setConceptualRelation(projId);
+        }
+      }
+
+      function onLeave(pointerEvent) {
+        if (pointerEvent && pointerEvent.relatedTarget && artifact.contains(pointerEvent.relatedTarget)) {
+          return;
+        }
+        if (!currentActiveRoom && !isDirectReadingActive) {
+          if (!artifact.contains(document.activeElement)) {
+            scheduleRelationDismissal();
+          }
+        }
+      }
+
+      artifact.addEventListener('pointerenter', onEnter);
+      artifact.addEventListener('pointerleave', onLeave);
+
+      if (trigger) {
+        trigger.addEventListener('focus', onEnter);
+        trigger.addEventListener('blur', function () {
+          if (!currentActiveRoom && !isDirectReadingActive) {
+            setTimeout(function () {
+              const activeEl = document.activeElement;
+              const banner = document.getElementById('atlas-relation-banner');
+              if (activeEl && (artifact.contains(activeEl) || (banner && banner.contains(activeEl)))) {
+                return;
+              }
+              if (activeRelationProject === projId) {
+                clearConceptualRelation();
+              }
+            }, 15);
+          }
+        });
+      }
+    });
+
+    const relationBanner = document.getElementById('atlas-relation-banner');
+    if (relationBanner) {
+      relationBanner.setAttribute('inert', '');
+      relationBanner.addEventListener('pointerenter', cancelRelationDismissal);
+      relationBanner.addEventListener('pointerleave', scheduleRelationDismissal);
+      relationBanner.addEventListener('focusin', cancelRelationDismissal);
+      relationBanner.addEventListener('focusout', scheduleRelationDismissal);
     }
 
     // Controles de Zoom do Dock
@@ -1435,7 +1777,7 @@
     const enterButtons = document.querySelectorAll('[data-enter-room]');
     enterButtons.forEach(function (btn) {
       btn.addEventListener('click', function (clickEvent) {
-        if (pointerState.totalDragDistance > 6 || pointerState.wasDragged) {
+        if (clickEvent.detail !== 0 && (pointerState.totalDragDistance > 6 || pointerState.wasDragged)) {
           clickEvent.preventDefault();
           clickEvent.stopPropagation();
           return;
@@ -1449,7 +1791,7 @@
     const spatialArtifacts = document.querySelectorAll('.spatial-artifact');
     spatialArtifacts.forEach(function (artifact) {
       artifact.addEventListener('click', function (clickEvent) {
-        if (pointerState.totalDragDistance > 6 || pointerState.wasDragged) {
+        if (clickEvent.detail !== 0 && (pointerState.totalDragDistance > 6 || pointerState.wasDragged)) {
           clickEvent.preventDefault();
           clickEvent.stopPropagation();
           return;
@@ -1510,6 +1852,14 @@
     // Visibilidade da Página (Zero RAF ao ocultar aba)
     document.addEventListener('visibilitychange', function () {
       isPageVisible = !document.hidden;
+      document.documentElement.toggleAttribute('data-page-hidden', !isPageVisible);
+      if (!isPageVisible) {
+        document.querySelectorAll('.room-enter-expand').forEach(function (room) {
+          room.classList.remove('room-enter-expand');
+        });
+        if (animationFrameHandle) cancelAnimationFrame(animationFrameHandle);
+        animationFrameHandle = null;
+      }
       if (isPageVisible) {
         requestCameraWakeup();
       }

@@ -4,7 +4,7 @@ Portfólio interativo de projetos desenvolvido sob uma interface bidimensional (
 
 - **Autor:** Arthur Kadri de Oliveira
 - **Formação:** Graduando na Universidade Federal do ABC (UFABC &mdash; 2º período)
-- **Objetivo Profissional:** Primeiro estágio em **análise de dados ou mercado financeiro** (sem reivindicação de experiência corporativa anterior nessas áreas)
+- **Objetivo Profissional:** Primeiro estágio em **análise de dados ou mercado financeiro**
 - **E-mail:** arthurkadri968@gmail.com
 - **GitHub:** [arthurMPBBY](https://github.com/arthurMPBBY)
 - **LinkedIn:** [Arthur Kadri de Oliveira](https://www.linkedin.com/in/arthur-kadri-de-oliveira-2586a12b2/)
@@ -19,8 +19,10 @@ O projeto oferece duas formas complementares de navegação:
 1. **Atlas Espacial (Navegação Não Linear):**
    - Sistema de coordenadas mundiais contínuo com origem centralizada em `(0, 0)`.
    - Âncora tipográfica central e 6 objetos arquiteturais livres dispostos em constelação espacial.
-   - Navegação por arrasto de ponteiro/touch, zoom ancorado no cursor do mouse e radar/minimapa de orientação.
-   - Controles visíveis de zoom no rodapé para uso confortável em dispositivos móveis e desktop.
+   - Navegação por arrasto de ponteiro/touch, zoom ancorado no cursor do mouse e radar/minimapa de orientação (agora acessível via teclado com `Enter` ou `Espaço` para restauração de visão geral).
+   - **Memória Espacial e Entrada Coesa:** Ao entrar em uma sala a partir do mapa, a câmera (pan e zoom) e o foco são preservados. Ao sair via `Esc` ou botão "Voltar", a visão retorna exatamente ao enquadramento anterior com micro-indicação visual no objeto de retorno.
+   - **Atlas de Relações Conceituais (Curatorial):** Ao passar o mouse ou focar via teclado em qualquer objeto, são destacadas conexões conceituais curatoriais ("Em comum" / "Conexões de ideias") acompanhadas de legenda editorial e botões de salto rápido, com arcos projetados na periferia sem interceptar títulos centrais.
+   - **Comportamento Material Derivado da Forma:** Cada escultura interage conforme sua própria natureza (YAHCW desliza lâminas de janelas Win32 DWM; Tuya expande órbitas e aquece o filamento; Gaming move o caliper de telemetria sobre a fita de pacing; Python tenciona treliças e nós de coleções; Spotifast rotaciona o vinil e posiciona o braço de leitura mecânico; Financeiro revela o arco da curva exponencial de juros compostos).
    - Detecção estrita de intenção: deslocamentos de ponteiro superiores a 6 pixels são classificados como arrasto e não ativam abertura indesejada de salas.
 
 2. **Modo Leitura Direta (Linear):**
@@ -93,6 +95,9 @@ O projeto oferece duas formas complementares de navegação:
 
 ## Verificação da entrega
 
+- Refinamentos relacionais: outputs/atlas-refinement-sol-review.cjs; relatório em outputs/atlas-refinement-sol-review.json. Inclui percurso real do ponteiro até os botões, largura interna da legenda nos seis contextos e quatro resoluções, memória de câmera, foco de origem após troca de salas e cancelamento de transições.
+- A legenda permanece disponível durante a passagem do ponteiro até os atalhos; sai após 1,2 segundo fora do objeto/legenda e sem foco nesses elementos. Quando oculta, seus botões ficam inertes.
+- Pausa, preferência de movimento reduzido e ocultação da página cancelam as animações de entrada; o retorno do movimento não repete uma entrada já descartada.
 - Revisão independente: outputs/atlas-sol-review.cjs; resultados em outputs/atlas-sol-review.json no workspace de desenvolvimento.
 - Entradas reais de mouse e toque, arrasto, zoom, histórico, Escape dentro de campos, isolamento do atlas e leitura sem captura de setas.
 - Testes das seis salas em 320, 390, 768 e 1440px, incluindo largura interna e acesso aos controles do cabeçalho e dock.

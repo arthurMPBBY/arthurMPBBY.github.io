@@ -502,9 +502,202 @@ select:focus-visible,
   outline-offset: 8px;
 }
 
-.spatial-artifact:hover .artifact-trigger {
-  transform: translateY(-6px) scale(1.02);
+.spatial-artifact:hover .artifact-trigger,
+.spatial-artifact:focus-within .artifact-trigger,
+.spatial-artifact.is-highlighted .artifact-trigger {
+  transform: translateY(-2px);
 }
+
+.spatial-artifact.is-highlighted .artifact-trigger {
+  outline: 2px solid var(--color-vermilion);
+  outline-offset: 8px;
+}
+
+.spatial-artifact.is-concept-connected {
+  z-index: 7;
+  opacity: 1;
+}
+
+.spatial-artifact.is-concept-connected .artifact-trigger {
+  outline: 1.5px dashed var(--color-vermilion);
+  outline-offset: 6px;
+}
+
+.spatial-artifact.is-concept-connected .label-category::after {
+  content: " ·  EM COMUM";
+  color: var(--color-vermilion);
+  font-weight: 800;
+}
+
+.spatial-artifact.is-concept-dimmed {
+  opacity: 0.35;
+  filter: grayscale(0.2);
+  transition: opacity 0.28s ease, filter 0.28s ease;
+}
+
+.spatial-artifact.returned-pulse {
+  animation: artifactReturnPulse 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes artifactReturnPulse {
+  0% { transform: translate(-50%, -50%) scale(1); filter: drop-shadow(0 0 0 rgba(217, 67, 46, 0)); }
+  40% { transform: translate(-50%, -50%) scale(1.03); filter: drop-shadow(0 0 16px rgba(217, 67, 46, 0.45)); }
+  100% { transform: translate(-50%, -50%) scale(1); filter: drop-shadow(0 12px 24px rgba(11, 15, 21, 0.08)); }
+}
+
+/* Comportamentos materiais singulares derivados da forma e assunto */
+
+/* 01. YAHCW: Lâminas de janelas Win32 DWM que se separam */
+.artifact-yahcw .stacked-window {
+  transition: transform 0.36s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.artifact-yahcw:hover .window-back,
+.artifact-yahcw:focus-within .window-back,
+.artifact-yahcw.is-highlighted .window-back {
+  transform: translate(148px, 14px);
+}
+.artifact-yahcw:hover .window-mid,
+.artifact-yahcw:focus-within .window-mid,
+.artifact-yahcw.is-highlighted .window-mid {
+  transform: translate(66px, 50px);
+}
+.artifact-yahcw:hover .window-front,
+.artifact-yahcw:focus-within .window-front,
+.artifact-yahcw.is-highlighted .window-front {
+  transform: translate(12px, 88px);
+}
+
+/* 02. Tuya: Órbita de rede e aquecimento sutil do filamento */
+.artifact-tuya .orbit-local,
+.artifact-tuya .orbit-cloud {
+  transition: transform 0.38s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.artifact-tuya:hover .orbit-local,
+.artifact-tuya:focus-within .orbit-local,
+.artifact-tuya.is-highlighted .orbit-local {
+  transform: translate(-8px, -2px);
+}
+.artifact-tuya:hover .orbit-cloud,
+.artifact-tuya:focus-within .orbit-cloud,
+.artifact-tuya.is-highlighted .orbit-cloud {
+  transform: translate(10px, 4px);
+}
+.artifact-tuya .sculpture-tuya path[stroke="#d9432e"] {
+  transition: stroke-width 0.3s ease, filter 0.3s ease;
+}
+.artifact-tuya:hover .sculpture-tuya path[stroke="#d9432e"],
+.artifact-tuya:focus-within .sculpture-tuya path[stroke="#d9432e"],
+.artifact-tuya.is-highlighted .sculpture-tuya path[stroke="#d9432e"] {
+  stroke-width: 3.4px;
+  filter: drop-shadow(0 0 4px rgba(217, 67, 46, 0.35));
+}
+
+/* 03. Gaming: Deslocamento do caliper de telemetria e pacing */
+.artifact-gaming .telemetry-caliper,
+.artifact-gaming .json-bracket {
+  transition: transform 0.34s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.artifact-gaming:hover .telemetry-caliper,
+.artifact-gaming:focus-within .telemetry-caliper,
+.artifact-gaming.is-highlighted .telemetry-caliper {
+  transform: translate(174px, 34px);
+}
+.artifact-gaming:hover .json-bracket,
+.artifact-gaming:focus-within .json-bracket,
+.artifact-gaming.is-highlighted .json-bracket {
+  transform: translate(285px, 20px);
+}
+.artifact-gaming .sculpture-gaming path[stroke="#0e1218"] {
+  transition: stroke-width 0.28s ease;
+}
+.artifact-gaming:hover .sculpture-gaming path[stroke="#0e1218"],
+.artifact-gaming:focus-within .sculpture-gaming path[stroke="#0e1218"],
+.artifact-gaming.is-highlighted .sculpture-gaming path[stroke="#0e1218"] {
+  stroke-width: 2.6px;
+}
+
+/* 04. Python: Tensão estrutural das treliças e nós de coleções */
+.artifact-python .sculpture-python rect[x="45"],
+.artifact-python .sculpture-python rect[x="35"] {
+  transition: transform 0.34s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.artifact-python:hover .sculpture-python rect[x="45"],
+.artifact-python:hover .sculpture-python rect[x="35"],
+.artifact-python:focus-within .sculpture-python rect[x="45"],
+.artifact-python:focus-within .sculpture-python rect[x="35"],
+.artifact-python.is-highlighted .sculpture-python rect[x="45"],
+.artifact-python.is-highlighted .sculpture-python rect[x="35"] {
+  transform: translateX(-6px);
+}
+.artifact-python .sculpture-python rect[x="290"],
+.artifact-python .sculpture-python rect[x="300"] {
+  transition: transform 0.34s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.artifact-python:hover .sculpture-python rect[x="290"],
+.artifact-python:hover .sculpture-python rect[x="300"],
+.artifact-python:focus-within .sculpture-python rect[x="290"],
+.artifact-python:focus-within .sculpture-python rect[x="300"],
+.artifact-python.is-highlighted .sculpture-python rect[x="290"],
+.artifact-python.is-highlighted .sculpture-python rect[x="300"] {
+  transform: translateX(6px);
+}
+.artifact-python .sculpture-python line {
+  transition: stroke-opacity 0.3s ease, stroke-width 0.3s ease;
+}
+.artifact-python:hover .sculpture-python line,
+.artifact-python:focus-within .sculpture-python line,
+.artifact-python.is-highlighted .sculpture-python line {
+  stroke-opacity: 0.65;
+  stroke-width: 1.6px;
+}
+
+/* 05. Spotifast: Pequena rotação mecânica do vinil e braço de leitura */
+.artifact-spotifast .sculpture-spotifast circle[cx="165"][r="85"] {
+  transform-origin: 165px 110px;
+  transition: transform 0.42s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.artifact-spotifast .sculpture-spotifast path[d*="M 330 26"] {
+  transform-origin: 330px 26px;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.artifact-spotifast .palette-swatches {
+  transition: transform 0.34s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.artifact-spotifast:hover .sculpture-spotifast circle[cx="165"][r="85"],
+.artifact-spotifast:focus-within .sculpture-spotifast circle[cx="165"][r="85"],
+.artifact-spotifast.is-highlighted .sculpture-spotifast circle[cx="165"][r="85"] {
+  transform: rotate(20deg);
+}
+.artifact-spotifast:hover .sculpture-spotifast path[d*="M 330 26"],
+.artifact-spotifast:focus-within .sculpture-spotifast path[d*="M 330 26"],
+.artifact-spotifast.is-highlighted .sculpture-spotifast path[d*="M 330 26"] {
+  transform: rotate(5deg);
+}
+.artifact-spotifast:hover .palette-swatches,
+.artifact-spotifast:focus-within .palette-swatches,
+.artifact-spotifast.is-highlighted .palette-swatches {
+  transform: translate(271px, 82px);
+}
+
+/* 06. Financeiro: Curva exponencial revelada e elevação do marco */
+.artifact-financeiro .milestone-plaque {
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.artifact-financeiro:hover .milestone-plaque,
+.artifact-financeiro:focus-within .milestone-plaque,
+.artifact-financeiro.is-highlighted .milestone-plaque {
+  transform: translate(245px, 12px);
+}
+.artifact-financeiro .sculpture-financeiro path[stroke="#d9432e"] {
+  transition: stroke-width 0.32s ease, filter 0.32s ease;
+}
+.artifact-financeiro:hover .sculpture-financeiro path[stroke="#d9432e"],
+.artifact-financeiro:focus-within .sculpture-financeiro path[stroke="#d9432e"],
+.artifact-financeiro.is-highlighted .sculpture-financeiro path[stroke="#d9432e"] {
+  stroke-width: 3.8px;
+  filter: drop-shadow(0 2px 6px rgba(217, 67, 46, 0.35));
+}
+
 
 /* R\u00f3tulo Editorial Compacto e Elegante */
 .object-editorial-label {
@@ -606,12 +799,27 @@ select:focus-visible,
   pointer-events: auto;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.25s ease, visibility 0.25s ease;
+  transition: opacity 0.32s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.32s ease;
 }
 
 .project-room.is-active {
   opacity: 1;
   visibility: visible;
+}
+
+.project-room.room-enter-expand.is-active {
+  animation: roomOriginExpand 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes roomOriginExpand {
+  0% {
+    opacity: 0.15;
+    clip-path: circle(12% at var(--room-origin-x, 50%) var(--room-origin-y, 50%));
+  }
+  100% {
+    opacity: 1;
+    clip-path: circle(150% at var(--room-origin-x, 50%) var(--room-origin-y, 50%));
+  }
 }
 
 .room-inner {
@@ -2450,5 +2658,185 @@ html[data-view="direct"] .dock-zoom-controls {
     font-size: 12px;
     color: var(--color-ink-muted);
     pointer-events: none;
+  }
+}
+
+/* Banner Editorial de Relações Conceituais (Curatorial) */
+.atlas-relation-banner {
+  position: absolute;
+  bottom: 106px;
+  left: 50%;
+  transform: translate(-50%, -8px);
+  width: calc(100% - 48px);
+  max-width: 860px;
+  z-index: 250;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.26s cubic-bezier(0.16, 1, 0.3, 1), transform 0.26s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.26s ease;
+}
+
+.atlas-relation-banner.is-visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translate(-50%, 0);
+}
+
+.relation-banner-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 16px;
+  background: rgba(244, 246, 249, 0.94);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(14, 18, 24, 0.12);
+  border-left: 3px solid var(--color-vermilion);
+  border-radius: 6px;
+  box-shadow: 0 4px 18px rgba(11, 15, 21, 0.08);
+}
+
+.relation-banner-badge {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 2px;
+}
+
+.relation-banner-tag {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--color-vermilion);
+}
+
+.relation-banner-pair {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-ink-primary);
+  overflow-wrap: anywhere;
+}
+
+.relation-banner-text {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  line-height: 1.35;
+  color: var(--color-ink-primary);
+  flex: 1;
+  grid-column: 1 / -1;
+  grid-row: 2;
+  min-width: 0;
+}
+
+.relation-banner-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.relation-jump-btn {
+  all: unset;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--color-ink-primary);
+  background: rgba(14, 18, 24, 0.05);
+  border: 1px solid rgba(14, 18, 24, 0.14);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.relation-jump-btn:hover,
+.relation-jump-btn:focus-visible {
+  background: var(--color-ink-primary);
+  color: #ffffff;
+  border-color: var(--color-ink-primary);
+  outline: 2px solid var(--color-vermilion);
+  outline-offset: 2px;
+}
+
+@media (max-width: 768px) {
+  .atlas-relation-banner {
+    bottom: 126px;
+    left: 8px;
+    right: 8px;
+    width: auto;
+    max-width: none;
+    transform: translateY(-6px);
+  }
+  .atlas-relation-banner.is-visible {
+    transform: translateY(0);
+  }
+  .relation-banner-inner {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: flex-start;
+    gap: 6px;
+    padding: 8px 12px;
+  }
+  .relation-banner-text {
+    font-size: 11.5px;
+    line-height: 1.3;
+  }
+  .relation-banner-actions {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    grid-row: 3;
+  }
+}
+
+html[data-motion="paused"] .stacked-window,
+html[data-motion="paused"] .orbit-local,
+html[data-motion="paused"] .orbit-cloud,
+html[data-motion="paused"] .telemetry-caliper,
+html[data-motion="paused"] .json-bracket,
+html[data-motion="paused"] .sculpture-python rect,
+html[data-motion="paused"] .palette-swatches,
+html[data-motion="paused"] .milestone-plaque,
+html[data-motion="paused"] .sculpture-spotifast circle,
+html[data-motion="paused"] .sculpture-spotifast path,
+html[data-motion="paused"] .spatial-artifact.returned-pulse,
+html[data-motion="paused"] .project-room,
+html[data-motion="paused"] .project-room.room-enter-expand.is-active,
+html[data-page-hidden] .project-room,
+html[data-page-hidden] .spatial-artifact,
+html[data-page-hidden] .spatial-artifact * {
+  animation: none !important;
+  transition: none !important;
+  clip-path: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stacked-window,
+  .orbit-local,
+  .orbit-cloud,
+  .telemetry-caliper,
+  .json-bracket,
+  .sculpture-python rect,
+  .palette-swatches,
+  .milestone-plaque,
+  .sculpture-spotifast circle,
+  .sculpture-spotifast path,
+  .spatial-artifact.returned-pulse,
+  .project-room,
+  .project-room.room-enter-expand.is-active {
+    animation: none !important;
+    transition: none !important;
+    clip-path: none !important;
   }
 }
