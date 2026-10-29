@@ -1,669 +1,834 @@
 (function () {
   'use strict';
 
+  if (typeof window === 'undefined' || typeof document === 'undefined') {
+    return;
+  }
+
   const EMAIL_ADDRESS = 'arthurkadri968@gmail.com';
-  const copyButtons = document.querySelectorAll('[data-copy-email]');
-  const liveStatus = document.getElementById('email-live-status');
-  const copyTimeoutMap = new WeakMap();
-  let statusTimeoutId = null;
+  const STORAGE_MOTION_KEY = 'arthur_portfolio_motion';
 
-  function announceStatus(message, isError = false) {
-    if (!liveStatus) return;
-    if (statusTimeoutId) clearTimeout(statusTimeoutId);
+  function safeStorageGet(storageKey) {
+    try {
+      return window.localStorage.getItem(storageKey);
+    } catch (storageError) {
+      return null;
+    }
+  }
 
-    liveStatus.textContent = message;
-    liveStatus.classList.toggle('error', isError);
+  function safeStorageSet(storageKey, storageValue) {
+    try {
+      window.localStorage.setItem(storageKey, storageValue);
+      return true;
+    } catch (storageError) {
+      return false;
+    }
+  }
 
-    statusTimeoutId = setTimeout(function () {
-      liveStatus.textContent = '';
-      liveStatus.classList.remove('error');
+  function announceLiveStatus(statusElementId, messageText, isErrorState) {
+    const liveElement = document.getElementById(statusElementId);
+    if (!liveElement) return;
+    liveElement.textContent = messageText;
+    if (isErrorState) {
+      liveElement.classList.add('error');
+    } else {
+      liveElement.classList.remove('error');
+    }
+    setTimeout(function () {
+      if (liveElement.textContent === messageText) {
+        liveElement.textContent = '';
+        liveElement.classList.remove('error');
+      }
     }, 4000);
   }
 
-  async function handleCopyEmail(clickEvent) {
-    clickEvent.preventDefault();
-    const actionButton = clickEvent.currentTarget;
-    let copiedSuccessfully = false;
+  function initializeEmailCopy() {
+    const copyButtons = document.querySelectorAll('[data-copy-email]');
+    copyButtons.forEach(function (copyButton) {
+      const originalContent = copyButton.innerHTML;
+      let restoreTimer = null;
+      copyButton.addEventListener('click', async function (clickEvent) {
+        clickEvent.preventDefault();
+        let copySuccessful = false;
 
-    if (navigator.clipboard && window.isSecureContext) {
-      try {
-        await navigator.clipboard.writeText(EMAIL_ADDRESS);
-        copiedSuccessfully = true;
-      } catch (clipboardError) {
-        copiedSuccessfully = false;
-      }
-    }
-
-    if (!copiedSuccessfully) {
-      try {
-        const textareaElement = document.createElement('textarea');
-        textareaElement.value = EMAIL_ADDRESS;
-        textareaElement.setAttribute('readonly', '');
-        textareaElement.style.position = 'absolute';
-        textareaElement.style.left = '-9999px';
-        document.body.appendChild(textareaElement);
-        textareaElement.select();
-        copiedSuccessfully = document.execCommand('copy');
-        document.body.removeChild(textareaElement);
-      } catch (fallbackError) {
-        copiedSuccessfully = false;
-      }
-    }
-
-    if (copiedSuccessfully) {
-      announceStatus('E-mail arthurkadri968@gmail.com copiado para a \u00e1rea de transfer\u00eancia!');
-
-      if (!actionButton.hasAttribute('data-original-label')) {
-        actionButton.setAttribute('data-original-label', actionButton.innerHTML);
-      }
-      const originalMarkup = actionButton.getAttribute('data-original-label');
-
-      if (copyTimeoutMap.has(actionButton)) {
-        clearTimeout(copyTimeoutMap.get(actionButton));
-      }
-
-      actionButton.innerHTML = '<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" width=\"14\" height=\"14\" aria-hidden=\"true\"><polyline points=\"20 6 9 17 4 12\"></polyline></svg><span>Copiado!</span>';
-
-      const timeoutId = setTimeout(function () {
-        actionButton.innerHTML = originalMarkup;
-        actionButton.removeAttribute('data-original-label');
-        copyTimeoutMap.delete(actionButton);
-      }, 2500);
-
-      copyTimeoutMap.set(actionButton, timeoutId);
-    } else {
-      announceStatus('N\u00e3o foi poss\u00edvel copiar automaticamente. Endere\u00e7o: ' + EMAIL_ADDRESS, true);
-    }
-  }
-
-  copyButtons.forEach(function (buttonItem) {
-    buttonItem.addEventListener('click', handleCopyEmail);
-  });
-
-  const internalNavLinks = document.querySelectorAll('a[href^=\"#\"]');
-  internalNavLinks.forEach(function (linkElement) {
-    linkElement.addEventListener('click', function () {
-      const targetIdentifier = this.getAttribute('href');
-      if (targetIdentifier && targetIdentifier !== '#') {
-        const targetElement = document.querySelector(targetIdentifier);
-        if (targetElement) {
-          targetElement.setAttribute('tabindex', '-1');
-          targetElement.focus({ preventScroll: true });
+        if (navigator.clipboard && window.isSecureContext) {
+          try {
+            await navigator.clipboard.writeText(EMAIL_ADDRESS);
+            copySuccessful = true;
+          } catch (clipboardError) {
+            copySuccessful = false;
+          }
         }
-      }
+
+        if (!copySuccessful) {
+          const previousFocus = document.activeElement;
+          try {
+            const hiddenTextarea = document.createElement('textarea');
+            hiddenTextarea.value = EMAIL_ADDRESS;
+            hiddenTextarea.setAttribute('readonly', '');
+            hiddenTextarea.style.position = 'absolute';
+            hiddenTextarea.style.left = '-9999px';
+            document.body.appendChild(hiddenTextarea);
+            hiddenTextarea.select();
+            copySuccessful = document.execCommand('copy');
+            document.body.removeChild(hiddenTextarea);
+          } catch (execCommandError) {
+            copySuccessful = false;
+          }
+          if (previousFocus && typeof previousFocus.focus === 'function') previousFocus.focus({ preventScroll: true });
+        }
+
+        if (copySuccessful) {
+          announceLiveStatus('email-live-status', 'E-mail ' + EMAIL_ADDRESS + ' copiado com sucesso!', false);
+          window.clearTimeout(restoreTimer);
+          copyButton.innerHTML = '<svg viewBox=\"0 0 16 16\" width=\"14\" height=\"14\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"2 8 6 12 14 3\"></polyline></svg><span>Copiado!</span>';
+          restoreTimer = setTimeout(function () {
+            copyButton.innerHTML = originalContent;
+          }, 2400);
+        } else {
+          announceLiveStatus('email-live-status', 'Endereço: ' + EMAIL_ADDRESS, true);
+        }
+      });
     });
-  });
-
-  document.documentElement.classList.add('js-ready');
-
-  const STORAGE_KEY = 'arthur_portfolio_motion';
-  const motionToggleButton = document.getElementById('motion-toggle-btn');
-  const motionToggleText = motionToggleButton ? motionToggleButton.querySelector('.motion-btn-text') : null;
-  const motionLiveStatus = document.getElementById('motion-live-status');
-
-  const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-  const finePointerQuery = window.matchMedia('(pointer: fine)');
-
-  let isEffectsPaused = false;
-  let savedPreference = null;
-  let isViewBrief = document.documentElement.getAttribute('data-view') === 'brief';
-
-  try {
-    savedPreference = localStorage.getItem(STORAGE_KEY);
-  } catch (storageError) {
-    savedPreference = null;
   }
 
-  if (savedPreference === 'paused') {
-    isEffectsPaused = true;
-  } else if (savedPreference === 'active') {
-    isEffectsPaused = false;
-  } else {
-    isEffectsPaused = reducedMotionQuery.matches;
-  }
+  function initializeMotionControls() {
+    const motionButton = document.getElementById('motion-toggle-btn');
+    const motionStatusText = document.getElementById('motion-status-label');
 
-  const artContainer = document.querySelector('.hero-art-container');
-  let cloudMorph = typeof window.createCloudMorph === 'function' && artContainer ? window.createCloudMorph(artContainer) : null;
-  let morphProgress = 0;
-  let morphFrameId = null;
-  let needsMorphMeasure = true;
-  let morphStart = 0;
-  let morphDistance = 1;
-  let isArtIntersecting = true;
+    const savedPreference = safeStorageGet(STORAGE_MOTION_KEY);
 
-  function clampUnit(value) {
-    return Math.max(0, Math.min(1, value));
-  }
-
-  function cancelMorphFrame() {
-    if (morphFrameId !== null) {
-      cancelAnimationFrame(morphFrameId);
-      morphFrameId = null;
-    }
-  }
-
-  function restoreSculpture() {
-    morphProgress = 0;
-    if (artContainer) {
-      artContainer.setAttribute('data-morph-progress', '0');
-    }
-    if (cloudMorph && typeof cloudMorph.draw === 'function') {
-      cloudMorph.draw(0);
-    }
-  }
-
-  function renderMorphFrame() {
-    morphFrameId = null;
-    if (isViewBrief || document.documentElement.getAttribute('data-view') === 'brief') return;
-    if (!cloudMorph || isEffectsPaused || document.hidden || !isArtIntersecting) return;
-
-    try {
-      if (needsMorphMeasure && artContainer) {
-        const rectangle = artContainer.getBoundingClientRect();
-        if (rectangle.width === 0 || rectangle.height === 0) {
-          return;
-        }
-        morphStart = Math.max(0, rectangle.top + window.scrollY - window.innerHeight * 0.7);
-        morphDistance = Math.max(180, Math.min(360, window.innerHeight * 0.45));
-        if (typeof cloudMorph.resize === 'function') {
-          cloudMorph.resize();
-        }
-        needsMorphMeasure = false;
-      }
-
-      morphProgress = clampUnit((window.scrollY - morphStart) / morphDistance);
-      if (artContainer) {
-        artContainer.setAttribute('data-morph-progress', morphProgress.toFixed(4));
-      }
-      if (typeof cloudMorph.draw === 'function') {
-        cloudMorph.draw(morphProgress);
-      }
-    } catch (morphError) {
-      if (cloudMorph && typeof cloudMorph.destroy === 'function') {
-        cloudMorph.destroy();
-      }
-      cloudMorph = null;
-      if (artContainer) {
-        artContainer.classList.remove('morph-ready');
-      }
-      restoreSculpture();
-    }
-  }
-
-  function scheduleMorphFrame(shouldMeasure = false) {
-    if (isViewBrief || document.documentElement.getAttribute('data-view') === 'brief') return;
-    if (shouldMeasure) needsMorphMeasure = true;
-    if (!cloudMorph || isEffectsPaused || document.hidden || !isArtIntersecting || morphFrameId !== null) return;
-    morphFrameId = requestAnimationFrame(renderMorphFrame);
-  }
-
-  function applyMotionState(shouldPause, shouldSaveToStorage) {
-    isEffectsPaused = shouldPause;
-
-    if (shouldPause) {
+    const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    if (savedPreference === 'paused' || reducedMotionQuery.matches) {
       document.documentElement.setAttribute('data-motion', 'paused');
-      cancelMorphFrame();
-      restoreSculpture();
+      if (motionButton) {
+        motionButton.setAttribute('aria-pressed', 'true');
+      }
+      if (motionStatusText) {
+        motionStatusText.textContent = 'Ativar animações';
+      }
     } else {
       document.documentElement.setAttribute('data-motion', 'active');
-      scheduleMorphFrame(true);
-    }
-
-    if (motionToggleButton) {
-      motionToggleButton.setAttribute('aria-pressed', shouldPause ? 'true' : 'false');
-      motionToggleButton.setAttribute('aria-label', shouldPause ? 'Ativar anima\u00e7\u00f5es decorativas' : 'Pausar anima\u00e7\u00f5es decorativas');
-      if (motionToggleText) {
-        motionToggleText.textContent = shouldPause ? 'Ativar anima\u00e7\u00f5es' : 'Pausar anima\u00e7\u00f5es';
+      if (motionButton) {
+        motionButton.setAttribute('aria-pressed', 'false');
+      }
+      if (motionStatusText) {
+        motionStatusText.textContent = 'Pausar animações';
       }
     }
 
-    if (motionLiveStatus) {
-      motionLiveStatus.textContent = shouldPause ? 'Anima\u00e7\u00f5es pausadas' : 'Anima\u00e7\u00f5es ativadas';
-    }
-
-    if (shouldSaveToStorage) {
-      savedPreference = shouldPause ? 'paused' : 'active';
-      try {
-        localStorage.setItem(STORAGE_KEY, savedPreference);
-      } catch (storageError) {
-        void storageError;
-      }
-    }
-
-    window.dispatchEvent(new CustomEvent('portfolio:motionchange', {
-      detail: {
-        paused: shouldPause
-      }
-    }));
-  }
-
-  applyMotionState(isEffectsPaused, false);
-
-  window.addEventListener('portfolio:viewchange', function (viewEvent) {
-    isViewBrief = Boolean(viewEvent.detail && viewEvent.detail.mode === 'brief');
-    if (isViewBrief) {
-      cancelMorphFrame();
-      restoreSculpture();
-    } else {
-      needsMorphMeasure = true;
-      scheduleMorphFrame(true);
-    }
-  });
-
-  window.addEventListener('portfolio:layoutchange', function () {
-    if (isViewBrief || document.documentElement.getAttribute('data-view') === 'brief') {
-      return;
-    }
-    scheduleMorphFrame(true);
-  });
-
-  if (motionToggleButton) {
-    motionToggleButton.addEventListener('click', function () {
-      applyMotionState(!isEffectsPaused, true);
+    if (motionButton) motionButton.setAttribute('aria-label', document.documentElement.getAttribute('data-motion') === 'paused' ? 'Ativar animações' : 'Pausar animações');
+    reducedMotionQuery.addEventListener('change', function () {
+      const shouldPause = reducedMotionQuery.matches || safeStorageGet(STORAGE_MOTION_KEY) === 'paused';
+      document.documentElement.setAttribute('data-motion', shouldPause ? 'paused' : 'active');
+      if (motionButton) motionButton.setAttribute('aria-pressed', shouldPause ? 'true' : 'false');
+      if (motionButton) motionButton.setAttribute('aria-label', shouldPause ? 'Ativar animações' : 'Pausar animações');
+      if (motionStatusText) motionStatusText.textContent = shouldPause ? 'Ativar animações' : 'Pausar animações';
+      window.dispatchEvent(new CustomEvent('portfolio:motionchange'));
     });
-  }
+    if (motionButton) {
+      motionButton.addEventListener('click', function () {
+        const isCurrentlyPaused = document.documentElement.getAttribute('data-motion') === 'paused';
+        const newMotionState = isCurrentlyPaused && !reducedMotionQuery.matches ? 'active' : 'paused';
 
-  if (typeof reducedMotionQuery.addEventListener === 'function') {
-    reducedMotionQuery.addEventListener('change', function (motionQueryEvent) {
-      if (savedPreference === null) {
-        applyMotionState(motionQueryEvent.matches, false);
-      }
-    });
-  }
-
-  document.addEventListener('visibilitychange', function () {
-    document.documentElement.toggleAttribute('data-page-hidden', document.hidden);
-    if (document.hidden || isViewBrief) {
-      cancelMorphFrame();
-    } else {
-      scheduleMorphFrame(true);
-    }
-  });
-
-  if (cloudMorph && artContainer) {
-    artContainer.classList.add('morph-ready');
-    window.addEventListener('scroll', function () {
-      if (isViewBrief || document.documentElement.getAttribute('data-view') === 'brief') return;
-      scheduleMorphFrame();
-    }, { passive: true });
-    window.addEventListener('resize', function () {
-      if (isViewBrief || document.documentElement.getAttribute('data-view') === 'brief') return;
-      scheduleMorphFrame(true);
-    }, { passive: true });
-    window.addEventListener('pageshow', function () {
-      if (isViewBrief || document.documentElement.getAttribute('data-view') === 'brief') return;
-      scheduleMorphFrame(true);
-    });
-
-    if (typeof window.ResizeObserver === 'function') {
-      const morphResizeObserver = new ResizeObserver(function () {
-        if (isViewBrief || document.documentElement.getAttribute('data-view') === 'brief') return;
-        scheduleMorphFrame(true);
-      });
-      morphResizeObserver.observe(artContainer);
-    }
-
-    if (typeof window.IntersectionObserver === 'function') {
-      const artObserver = new IntersectionObserver(function (artEntries) {
-        artEntries.forEach(function (artEntry) {
-          isArtIntersecting = artEntry.isIntersecting;
-          artContainer.setAttribute('data-effects-visible', String(isArtIntersecting));
-          if (isArtIntersecting) {
-            scheduleMorphFrame(true);
-          } else {
-            cancelMorphFrame();
-          }
-        });
-      });
-      artObserver.observe(artContainer);
-    }
-
-    if (document.fonts && document.fonts.ready) {
-      document.fonts.ready.then(function () {
-        if (isViewBrief || document.documentElement.getAttribute('data-view') === 'brief') return;
-        scheduleMorphFrame(true);
-      });
-    }
-    scheduleMorphFrame(true);
-  }
-
-  function initializeEntranceAnimation() {
-    const introOverlay = document.getElementById('intro-overlay');
-    const introCanvas = document.getElementById('intro-canvas');
-    const introSkipButton = document.getElementById('intro-skip-btn');
-
-    if (!introOverlay || !introCanvas) return;
-
-    let hasIntroSeen = false;
-    try {
-      hasIntroSeen = sessionStorage.getItem('arthur_intro_seen') === 'true';
-    } catch (storageException) {
-      hasIntroSeen = false;
-    }
-
-    if (hasIntroSeen || isEffectsPaused || reducedMotionQuery.matches || isViewBrief) {
-      introOverlay.setAttribute('hidden', '');
-      introOverlay.classList.add('intro-dismissed');
-      introOverlay.style.display = 'none';
-      if (introSkipButton) {
-        introSkipButton.setAttribute('tabindex', '-1');
-      }
-      return;
-    }
-
-    let canvasContext = null;
-    try {
-      canvasContext = introCanvas.getContext('2d');
-    } catch (contextError) {
-      canvasContext = null;
-    }
-
-    if (!canvasContext) {
-      introOverlay.setAttribute('hidden', '');
-      introOverlay.classList.add('intro-dismissed');
-      introOverlay.style.display = 'none';
-      if (introSkipButton) {
-        introSkipButton.setAttribute('tabindex', '-1');
-      }
-      return;
-    }
-
-    let isIntroDismissed = false;
-    let animationFrameId = null;
-    let animationStartTime = null;
-    const animationTotalDuration = 1600;
-    const totalBarsCount = 42;
-
-    let cachedDeviceRatio = 1;
-    let cachedViewportWidth = 0;
-    let cachedViewportHeight = 0;
-    let cachedBarPitch = 0;
-    let cachedCenterY = 0;
-    let cachedIsDesktopLayout = true;
-    let cachedBaseTitleSize = 64;
-    let cachedSubFontSize = 12;
-    let cachedLeftMargin = 48;
-    let cachedRightMargin = 800;
-    let cachedTopBaseline = 0;
-    let cachedBottomBaseline = 0;
-
-    function measureLayout() {
-      cachedDeviceRatio = Math.min(window.devicePixelRatio || 1, 2);
-      cachedViewportWidth = window.innerWidth;
-      cachedViewportHeight = window.innerHeight;
-
-      introCanvas.width = Math.round(cachedViewportWidth * cachedDeviceRatio);
-      introCanvas.height = Math.round(cachedViewportHeight * cachedDeviceRatio);
-      introCanvas.style.width = cachedViewportWidth + 'px';
-      introCanvas.style.height = cachedViewportHeight + 'px';
-
-      cachedBarPitch = cachedViewportWidth / totalBarsCount;
-      cachedCenterY = cachedViewportHeight * 0.48;
-
-      cachedIsDesktopLayout = cachedViewportWidth >= 768;
-      cachedBaseTitleSize = cachedIsDesktopLayout
-        ? Math.max(54, Math.min(115, cachedViewportWidth * 0.08))
-        : Math.max(42, Math.min(68, cachedViewportWidth * 0.12));
-      cachedSubFontSize = Math.max(11, Math.min(13, cachedViewportWidth * 0.012));
-
-      if (cachedIsDesktopLayout) {
-        cachedLeftMargin = Math.max(48, cachedViewportWidth * 0.08);
-        cachedRightMargin = cachedViewportWidth - cachedLeftMargin;
-        cachedTopBaseline = cachedCenterY - cachedBaseTitleSize * 0.25;
-        cachedBottomBaseline = cachedCenterY + cachedBaseTitleSize * 0.75;
-      }
-    }
-
-    function cleanupAllIntroListeners() {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('resize', handleResize);
-      introOverlay.removeEventListener('focusout', handleOverlayFocusOut);
-      if (introSkipButton) {
-        introSkipButton.removeEventListener('click', dismissIntro);
-      }
-      window.removeEventListener('portfolio:motionchange', handleMotionChange);
-      window.removeEventListener('portfolio:viewchange', handleViewChange);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      if (typeof reducedMotionQuery.removeEventListener === 'function') {
-        reducedMotionQuery.removeEventListener('change', handleReducedMotionChange);
-      } else if (typeof reducedMotionQuery.removeListener === 'function') {
-        reducedMotionQuery.removeListener(handleReducedMotionChange);
-      }
-    }
-
-    function dismissIntro() {
-      if (isIntroDismissed) return;
-      isIntroDismissed = true;
-
-      clearTimeout(failsafeTimerId);
-
-      if (animationFrameId !== null) {
-        cancelAnimationFrame(animationFrameId);
-        animationFrameId = null;
-      }
-
-      try {
-        sessionStorage.setItem('arthur_intro_seen', 'true');
-      } catch (storageException) {
-        void storageException;
-      }
-
-      const wasSkipFocused = document.activeElement === introSkipButton || (introOverlay && introOverlay.contains(document.activeElement));
-
-      cleanupAllIntroListeners();
-
-      if (introSkipButton) {
-        introSkipButton.setAttribute('tabindex', '-1');
-      }
-
-      introOverlay.classList.add('intro-dismissed');
-
-      if (wasSkipFocused) {
-        const focusTarget = document.getElementById('hero') || document.getElementById('main-content') || document.querySelector('h1');
-        if (focusTarget) {
-          if (!focusTarget.hasAttribute('tabindex')) {
-            focusTarget.setAttribute('tabindex', '-1');
-          }
-          try {
-            focusTarget.focus({ preventScroll: true });
-          } catch (focusException) {
-            focusTarget.focus();
-          }
+        document.documentElement.setAttribute('data-motion', newMotionState);
+        motionButton.setAttribute('aria-pressed', newMotionState === 'paused' ? 'true' : 'false');
+        motionButton.setAttribute('aria-label', newMotionState === 'paused' ? 'Ativar animações' : 'Pausar animações');
+        if (motionStatusText) {
+          motionStatusText.textContent = newMotionState === 'paused' ? 'Ativar animações' : 'Pausar animações';
         }
-      }
 
-      setTimeout(function () {
-        introOverlay.setAttribute('hidden', '');
-        introOverlay.style.display = 'none';
-      }, 320);
-    }
+        safeStorageSet(STORAGE_MOTION_KEY, newMotionState);
 
-    function handleKeyDown(keyboardEvent) {
-      if (keyboardEvent.key === 'Escape' || keyboardEvent.key === 'Esc' || keyboardEvent.key === 'Tab') {
-        dismissIntro();
-      }
-    }
-
-    function handleOverlayFocusOut(focusEvent) {
-      if (isIntroDismissed) return;
-      if (focusEvent.relatedTarget && !introOverlay.contains(focusEvent.relatedTarget)) {
-        dismissIntro();
-      }
-    }
-
-    function handleResize() {
-      measureLayout();
-    }
-
-    function handleMotionChange(motionEvent) {
-      if (motionEvent.detail && motionEvent.detail.paused) {
-        dismissIntro();
-      }
-    }
-
-    function handleViewChange(viewEvent) {
-      if (viewEvent.detail && viewEvent.detail.mode === 'brief') {
-        dismissIntro();
-      }
-    }
-
-    function handleVisibilityChange() {
-      if (document.hidden) {
-        dismissIntro();
-      }
-    }
-
-    function handleReducedMotionChange(queryEvent) {
-      if (queryEvent.matches) {
-        dismissIntro();
-      }
-    }
-
-    if (introSkipButton) {
-      introSkipButton.addEventListener('click', dismissIntro);
-    }
-    window.addEventListener('keydown', handleKeyDown);
-    introOverlay.addEventListener('focusout', handleOverlayFocusOut);
-    window.addEventListener('resize', handleResize, { passive: true });
-    window.addEventListener('portfolio:motionchange', handleMotionChange);
-    window.addEventListener('portfolio:viewchange', handleViewChange);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    if (typeof reducedMotionQuery.addEventListener === 'function') {
-      reducedMotionQuery.addEventListener('change', handleReducedMotionChange);
-    } else if (typeof reducedMotionQuery.addListener === 'function') {
-      reducedMotionQuery.addListener(handleReducedMotionChange);
-    }
-
-    if (document.fonts && document.fonts.ready) {
-      document.fonts.ready.then(function () {
-        if (!isIntroDismissed) measureLayout();
+        announceLiveStatus('motion-live-status', newMotionState === 'paused' ? 'Animações decorativas pausadas.' : 'Animações decorativas ativadas.', false);
+        window.dispatchEvent(new CustomEvent('portfolio:motionchange', { detail: { motion: newMotionState } }));
       });
     }
+  }
 
-    const failsafeTimerId = setTimeout(dismissIntro, 2150);
-    const wallClockStart = performance.now();
+  function initializeBriefMode() {
+    const briefButton = document.getElementById('brief-mode-toggle');
+    const briefStatusLabel = document.getElementById('brief-status-label');
 
-    measureLayout();
+    if (!briefButton) return;
 
-    function renderIntroFrame(timestamp) {
-      if (isIntroDismissed) return;
+    briefButton.addEventListener('click', function () {
+      const isCurrentlyBrief = document.documentElement.getAttribute('data-view') === 'brief';
+      const newViewState = isCurrentlyBrief ? 'full' : 'brief';
 
-      if (performance.now() - wallClockStart >= 2100) {
-        dismissIntro();
-        return;
+      document.documentElement.setAttribute('data-view', newViewState);
+      briefButton.setAttribute('aria-pressed', newViewState === 'brief' ? 'true' : 'false');
+
+      if (briefStatusLabel) {
+        briefStatusLabel.textContent = newViewState === 'brief' ? 'Modo completo' : 'Tenho 20 segundos';
       }
 
-      if (!animationStartTime) animationStartTime = timestamp;
-      const elapsedTime = timestamp - animationStartTime;
-      const progressRatio = Math.min(1, elapsedTime / animationTotalDuration);
+      briefButton.setAttribute('aria-label', newViewState === 'brief' ? 'Restaurar modo completo' : 'Ativar modo de 20 segundos');
+      briefButton.focus({ preventScroll: true });
 
-      canvasContext.setTransform(1, 0, 0, 1, 0, 0);
-      canvasContext.clearRect(0, 0, introCanvas.width, introCanvas.height);
-      canvasContext.setTransform(cachedDeviceRatio, 0, 0, cachedDeviceRatio, 0, 0);
-      canvasContext.fillStyle = '#fafaf9';
-      canvasContext.fillRect(0, 0, cachedViewportWidth, cachedViewportHeight);
+      const announcementMessage = newViewState === 'brief' ? 'Modo 20 segundos ativado: fatos essenciais e contatos.' : 'Modo completo restaurado.';
+      announceLiveStatus('brief-live-status', announcementMessage, false);
 
-      const peakHeight = cachedIsDesktopLayout ? 130 : 85;
-      const restHeight = 6;
+      window.dispatchEvent(new CustomEvent('portfolio:viewchange', { detail: { view: newViewState } }));
+      window.dispatchEvent(new CustomEvent('portfolio:motionchange'));
+    });
+  }
 
-      for (let barIndex = 0; barIndex < totalBarsCount; barIndex += 1) {
-        const normalizedBarIndex = barIndex / (totalBarsCount - 1);
-        const sweepDelay = normalizedBarIndex * 0.32;
-        const barGrowthPhase = Math.max(0, Math.min(1, (progressRatio - sweepDelay) / 0.32));
-        const smoothGrowth = barGrowthPhase * barGrowthPhase * (3 - 2 * barGrowthPhase);
+  let observatoryTabActivationFunction = null;
 
-        const decayPhase = Math.max(0, Math.min(1, (progressRatio - 0.62) / 0.36));
-        const smoothDecay = 1 - decayPhase * decayPhase * (3 - 2 * decayPhase);
+  function initializeProjectObservatory() {
+    const observatoryTabs = document.querySelectorAll('.observatory-tab[role=\"tab\"]');
+    const observatoryPanels = document.querySelectorAll('.observatory-panel[role=\"tabpanel\"]');
 
-        const barEnvelope = smoothGrowth * smoothDecay;
-        if (barEnvelope > 0.001) {
-          const waveHarmonic = Math.sin(normalizedBarIndex * Math.PI * 3 + progressRatio * Math.PI * 2) * 6;
-          const barHeight = restHeight + barEnvelope * (peakHeight - restHeight + waveHarmonic);
-          const barHorizontal = barIndex * cachedBarPitch;
-          const barTop = cachedCenterY - barHeight / 2;
-          const barWidth = Math.max(1.5, Math.min(2.4, cachedBarPitch * 0.18));
-          const barAlpha = barEnvelope * 0.72;
+    if (observatoryTabs.length === 0) return;
 
-          if (barIndex % 7 === 0) {
-            canvasContext.fillStyle = 'rgba(193, 107, 89, ' + (barAlpha * 0.88).toFixed(3) + ')';
-          } else {
-            canvasContext.fillStyle = 'rgba(27, 28, 27, ' + (barAlpha * 0.75).toFixed(3) + ')';
-          }
-          canvasContext.fillRect(barHorizontal, barTop, barWidth, barHeight);
-        }
-      }
-
-      if (progressRatio > 0.20) {
-        const textProgress = Math.min(1, (progressRatio - 0.20) / 0.35);
-        const easeOutText = 1 - Math.pow(1 - textProgress, 3);
-        const textOpacity = easeOutText;
-
-        canvasContext.save();
-
-        if (cachedIsDesktopLayout) {
-          canvasContext.font = '800 ' + Math.round(cachedBaseTitleSize) + 'px "Plus Jakarta Sans", system-ui, sans-serif';
-          canvasContext.fillStyle = 'rgba(27, 28, 27, ' + textOpacity.toFixed(3) + ')';
-
-          canvasContext.textAlign = 'left';
-          canvasContext.textBaseline = 'alphabetic';
-          canvasContext.fillText('Arthur', cachedLeftMargin, cachedTopBaseline);
-
-          canvasContext.textAlign = 'right';
-          canvasContext.fillText('Kadri.', cachedRightMargin, cachedBottomBaseline);
-
-          canvasContext.font = '600 ' + Math.round(cachedSubFontSize) + 'px "JetBrains Mono", monospace';
-          canvasContext.fillStyle = 'rgba(193, 107, 89, ' + (textOpacity * 0.95).toFixed(3) + ')';
-          canvasContext.textAlign = 'left';
-          canvasContext.fillText('UFABC \u00b7 2\u00ba PER\u00cdODO', cachedLeftMargin, cachedTopBaseline - cachedBaseTitleSize * 0.9);
-
-          canvasContext.font = '500 ' + Math.round(cachedSubFontSize * 0.95) + 'px "DM Sans", system-ui, sans-serif';
-          canvasContext.fillStyle = 'rgba(78, 83, 80, ' + (textOpacity * 0.85).toFixed(3) + ')';
-          canvasContext.textAlign = 'right';
-          canvasContext.fillText('PROGRAMA\u00c7\u00c3O PR\u00c1TICA \u00b7 DADOS & MERCADO FINANCEIRO', cachedRightMargin, cachedBottomBaseline + cachedBaseTitleSize * 0.35);
+    function activateTab(targetTab, shouldFocusTab) {
+      observatoryTabs.forEach(function (tabElement) {
+        const isSelected = tabElement === targetTab;
+        tabElement.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+        tabElement.setAttribute('tabindex', isSelected ? '0' : '-1');
+        if (isSelected) {
+          tabElement.classList.add('is-active');
         } else {
-          canvasContext.textAlign = 'center';
-          canvasContext.textBaseline = 'middle';
-
-          canvasContext.font = '800 ' + Math.round(cachedBaseTitleSize) + 'px "Plus Jakarta Sans", system-ui, sans-serif';
-          canvasContext.fillStyle = 'rgba(27, 28, 27, ' + textOpacity.toFixed(3) + ')';
-          canvasContext.fillText('Arthur Kadri.', cachedViewportWidth / 2, cachedCenterY - cachedBaseTitleSize * 0.3);
-
-          canvasContext.font = '600 ' + Math.round(cachedSubFontSize) + 'px "JetBrains Mono", monospace';
-          canvasContext.fillStyle = 'rgba(193, 107, 89, ' + (textOpacity * 0.95).toFixed(3) + ')';
-          canvasContext.fillText('UFABC \u00b7 2\u00ba PER\u00cdODO', cachedViewportWidth / 2, cachedCenterY + cachedBaseTitleSize * 0.45);
-
-          canvasContext.font = '500 ' + Math.round(cachedSubFontSize * 0.95) + 'px "DM Sans", system-ui, sans-serif';
-          canvasContext.fillStyle = 'rgba(78, 83, 80, ' + (textOpacity * 0.85).toFixed(3) + ')';
-          canvasContext.fillText('PROGRAMA\u00c7\u00c3O \u00b7 DADOS & FINAN\u00c7AS', cachedViewportWidth / 2, cachedCenterY + cachedBaseTitleSize * 0.8);
+          tabElement.classList.remove('is-active');
         }
+      });
 
-        canvasContext.restore();
+      const targetPanelId = targetTab.getAttribute('aria-controls');
+      observatoryPanels.forEach(function (panelElement) {
+        if (panelElement.id === targetPanelId) {
+          panelElement.hidden = false;
+          panelElement.classList.add('is-active');
+          panelElement.setAttribute('tabindex', '0');
+        } else {
+          panelElement.hidden = true;
+          panelElement.classList.remove('is-active');
+          panelElement.removeAttribute('tabindex');
+        }
+      });
+
+      if (shouldFocusTab) {
+        targetTab.focus();
       }
 
-      if (progressRatio >= 1) {
-        dismissIntro();
+      const associatedStateName = targetTab.getAttribute('data-scene-state') || 'hero';
+      if (window.ImmersiveScene && typeof window.ImmersiveScene.setState === 'function') {
+        window.ImmersiveScene.setState(associatedStateName);
+      }
+      window.dispatchEvent(new CustomEvent('portfolio:statechange', { detail: { state: associatedStateName } }));
+    }
+
+    observatoryTabActivationFunction = activateTab;
+
+    const initialActiveTab = document.querySelector('.observatory-tab.is-active') || observatoryTabs[0];
+    activateTab(initialActiveTab, false);
+
+    observatoryTabs.forEach(function (tabElement, tabIndex) {
+      tabElement.addEventListener('click', function () {
+        activateTab(tabElement, false);
+      });
+
+      tabElement.addEventListener('keydown', function (keyboardEvent) {
+        let destinationIndex = null;
+        if (keyboardEvent.key === 'ArrowRight' || keyboardEvent.key === 'ArrowDown') {
+          destinationIndex = (tabIndex + 1) % observatoryTabs.length;
+        } else if (keyboardEvent.key === 'ArrowLeft' || keyboardEvent.key === 'ArrowUp') {
+          destinationIndex = (tabIndex - 1 + observatoryTabs.length) % observatoryTabs.length;
+        } else if (keyboardEvent.key === 'Home') {
+          destinationIndex = 0;
+        } else if (keyboardEvent.key === 'End') {
+          destinationIndex = observatoryTabs.length - 1;
+        }
+
+        if (destinationIndex !== null) {
+          keyboardEvent.preventDefault();
+          activateTab(observatoryTabs[destinationIndex], true);
+        }
+      });
+    });
+  }
+
+  function initializeYahcwDemo() {
+    const triggerOverviewButtons = document.querySelectorAll('[data-yahcw-trigger]');
+    const closeOverviewButton = document.getElementById('yahcw-overview-close-btn');
+    const overviewModal = document.getElementById('yahcw-demo-overview');
+    const brightnessSlider = document.getElementById('yahcw-brightness-slider');
+    const brightnessValueDisplay = document.getElementById('yahcw-brightness-display');
+    const demoDesktopStage = document.getElementById('yahcw-demo-stage');
+    const audioSelectElement = document.getElementById('yahcw-audio-select');
+    const audioDisplayElement = document.getElementById('yahcw-audio-display');
+    const windowTiles = document.querySelectorAll('.yahcw-overview-tile');
+    const activeWindowTitleDisplay = document.getElementById('yahcw-active-window-title');
+    const hotCornerTriggerBox = document.getElementById('yahcw-corner-trigger-box');
+
+    if (!overviewModal) return;
+
+    let lastActiveTrigger = null;
+
+    function openOverview(triggerOrigin) {
+      lastActiveTrigger = triggerOrigin || triggerOverviewButtons[0] || null;
+      overviewModal.hidden = false;
+      overviewModal.classList.add('is-open');
+
+      const firstTile = overviewModal.querySelector('.yahcw-overview-tile');
+      if (firstTile) {
+        firstTile.focus();
+      } else if (closeOverviewButton) {
+        closeOverviewButton.focus();
+      }
+    }
+
+    function closeOverview() {
+      overviewModal.hidden = true;
+      overviewModal.classList.remove('is-open');
+
+      if (lastActiveTrigger && typeof lastActiveTrigger.focus === 'function') {
+        lastActiveTrigger.focus();
+      }
+    }
+
+    triggerOverviewButtons.forEach(function (triggerButton) {
+      triggerButton.addEventListener('click', function () {
+        if (overviewModal.hidden) {
+          openOverview(triggerButton);
+        } else {
+          closeOverview();
+        }
+      });
+    });
+
+    if (hotCornerTriggerBox) {
+      hotCornerTriggerBox.addEventListener('mouseenter', function () {
+        if (overviewModal.hidden) openOverview(hotCornerTriggerBox);
+      });
+      hotCornerTriggerBox.addEventListener('click', function () {
+        if (overviewModal.hidden) openOverview(hotCornerTriggerBox);
+      });
+    }
+
+    if (closeOverviewButton) {
+      closeOverviewButton.addEventListener('click', closeOverview);
+    }
+
+    overviewModal.addEventListener('keydown', function (keyboardEvent) {
+      if (keyboardEvent.key === 'Escape') {
+        keyboardEvent.preventDefault();
+        closeOverview();
+      }
+      if (keyboardEvent.key === 'Tab') {
+        const focusableItems = Array.from(overviewModal.querySelectorAll('button:not([disabled])'));
+        const firstItem = focusableItems[0];
+        const lastItem = focusableItems[focusableItems.length - 1];
+        if (keyboardEvent.shiftKey && document.activeElement === firstItem) {
+          keyboardEvent.preventDefault();
+          lastItem.focus();
+        } else if (!keyboardEvent.shiftKey && document.activeElement === lastItem) {
+          keyboardEvent.preventDefault();
+          firstItem.focus();
+        }
+      }
+    });
+
+    windowTiles.forEach(function (windowTile) {
+      windowTile.addEventListener('click', function () {
+        const windowTitle = windowTile.getAttribute('data-window-title') || 'FormOverview.cs';
+        if (activeWindowTitleDisplay) {
+          activeWindowTitleDisplay.textContent = windowTitle;
+        }
+        announceLiveStatus('yahcw-live-status', 'Janela em foco alterada para: ' + windowTitle, false);
+        closeOverview();
+      });
+    });
+
+    if (brightnessSlider) {
+      brightnessSlider.addEventListener('input', function () {
+        const brightnessPercentage = Number(brightnessSlider.value);
+        if (brightnessValueDisplay) {
+          brightnessValueDisplay.textContent = brightnessPercentage + '%';
+        }
+        if (demoDesktopStage) {
+          const brightnessFactor = 0.4 + (brightnessPercentage / 100) * 0.6;
+          demoDesktopStage.style.filter = 'brightness(' + brightnessFactor.toFixed(2) + ')';
+        }
+      });
+    }
+
+    if (audioSelectElement) {
+      audioSelectElement.addEventListener('change', function () {
+        const selectedDeviceName = audioSelectElement.options[audioSelectElement.selectedIndex].text;
+        if (audioDisplayElement) {
+          audioDisplayElement.textContent = selectedDeviceName;
+        }
+      });
+    }
+  }
+
+  function initializeTuyaDemo() {
+    const lampToggleButton = document.getElementById('tuya-lamp-toggle');
+    const lampStatusIndicator = document.getElementById('tuya-lamp-status-pill');
+    const lampBulbVisual = document.getElementById('tuya-lamp-visual');
+    const routeRadios = document.querySelectorAll('input[name=\"tuya-route-choice\"]');
+    const dropLocalCheckbox = document.getElementById('tuya-drop-local-toggle');
+    const latencyDisplay = document.getElementById('tuya-latency-display');
+    const activeRouteDisplay = document.getElementById('tuya-route-display');
+    const fallbackNotice = document.getElementById('tuya-fallback-notice');
+
+    let isLampTurnedOn = false;
+
+    function updateLampUi() {
+      if (!lampToggleButton || !lampStatusIndicator || !lampBulbVisual) return;
+
+      if (isLampTurnedOn) {
+        lampToggleButton.setAttribute('aria-pressed', 'true');
+        lampToggleButton.textContent = 'Desligar Lâmpada';
+        lampStatusIndicator.textContent = 'Ligada';
+        lampStatusIndicator.classList.add('is-lamp-on');
+        lampBulbVisual.classList.add('is-lit');
+      } else {
+        lampToggleButton.setAttribute('aria-pressed', 'false');
+        lampToggleButton.textContent = 'Ligar Lâmpada';
+        lampStatusIndicator.textContent = 'Desligada';
+        lampStatusIndicator.classList.remove('is-lamp-on');
+        lampBulbVisual.classList.remove('is-lit');
+      }
+    }
+
+    function computeActiveRoute() {
+      let chosenRoute = 'local';
+      routeRadios.forEach(function (radioElement) {
+        if (radioElement.checked) {
+          chosenRoute = radioElement.value;
+        }
+      });
+
+      const isLocalDropped = dropLocalCheckbox && dropLocalCheckbox.checked;
+
+      if (chosenRoute === 'local' && isLocalDropped) {
+        if (activeRouteDisplay) {
+          activeRouteDisplay.textContent = 'Contingência: Nuvem (Tuya OpenAPI - simulação)';
+        }
+        if (latencyDisplay) {
+          latencyDisplay.textContent = '~320 ms (valor simulado para demonstração)';
+        }
+        if (fallbackNotice) {
+          fallbackNotice.hidden = false;
+        }
+      } else if (chosenRoute === 'cloud') {
+        if (activeRouteDisplay) {
+          activeRouteDisplay.textContent = 'Nuvem (Tuya OpenAPI - simulação)';
+        }
+        if (latencyDisplay) {
+          latencyDisplay.textContent = '~280 ms (valor simulado para demonstração)';
+        }
+        if (fallbackNotice) {
+          fallbackNotice.hidden = true;
+        }
+      } else {
+        if (activeRouteDisplay) {
+          activeRouteDisplay.textContent = 'Local (TCP Direto / Porta 6668) [Simulação]';
+        }
+        if (latencyDisplay) {
+          latencyDisplay.textContent = '~14 ms (valor simulado para demonstração)';
+        }
+        if (fallbackNotice) {
+          fallbackNotice.hidden = true;
+        }
+      }
+    }
+
+    if (lampToggleButton) {
+      lampToggleButton.addEventListener('click', function () {
+        isLampTurnedOn = !isLampTurnedOn;
+        updateLampUi();
+      });
+    }
+
+    routeRadios.forEach(function (radioElement) {
+      radioElement.addEventListener('change', computeActiveRoute);
+    });
+
+    if (dropLocalCheckbox) {
+      dropLocalCheckbox.addEventListener('change', computeActiveRoute);
+    }
+  }
+
+  function initializeGamingHudDemo() {
+    const profileSelectElement = document.getElementById('gaming-hud-preset-select');
+    const frametimeDisplay = document.getElementById('gaming-frametime-value');
+    const fpsDisplay = document.getElementById('gaming-fps-value');
+    const lowOneDisplay = document.getElementById('gaming-low-value');
+    const presentCountDisplay = document.getElementById('gaming-presents-value');
+    const jsonOutputDisplay = document.getElementById('gaming-json-snapshot');
+
+    const telemetryProfiles = {
+      stable: {
+        frametimeMs: 6.94,
+        fpsEquivalent: 144,
+        lowOnePercentMs: 7.82,
+        presentsRecorded: 14420
+      },
+      shaderStutter: {
+        frametimeMs: 16.42,
+        fpsEquivalent: 61,
+        lowOnePercentMs: 33.10,
+        presentsRecorded: 6140
+      },
+      heavyLoad: {
+        frametimeMs: 22.22,
+        fpsEquivalent: 45,
+        lowOnePercentMs: 41.50,
+        presentsRecorded: 4500
+      }
+    };
+
+    function updateTelemetryUi(profileKey) {
+      const selectedData = telemetryProfiles[profileKey] || telemetryProfiles.stable;
+      if (frametimeDisplay) frametimeDisplay.textContent = selectedData.frametimeMs.toFixed(2) + ' ms';
+      if (fpsDisplay) fpsDisplay.textContent = selectedData.fpsEquivalent + ' FPS';
+      if (lowOneDisplay) lowOneDisplay.textContent = selectedData.lowOnePercentMs.toFixed(2) + ' ms';
+      if (presentCountDisplay) presentCountDisplay.textContent = selectedData.presentsRecorded.toLocaleString('pt-BR');
+
+      if (jsonOutputDisplay) {
+        const snapshotObject = {
+          source: 'vulkan_presentation_observer',
+          targetLayer: 'VK_LAYER_OBSERVE_PRESENT',
+          scenarioType: 'synthetic_benchmark_demo',
+          timestamp: new Date().toISOString(),
+          metrics: {
+            frametimeMs: selectedData.frametimeMs,
+            fps: selectedData.fpsEquivalent,
+            onePercentLowMs: selectedData.lowOnePercentMs,
+            presentsObserved: selectedData.presentsRecorded
+          }
+        };
+        jsonOutputDisplay.textContent = JSON.stringify(snapshotObject, null, 2);
+      }
+    }
+
+    if (profileSelectElement) {
+      profileSelectElement.addEventListener('change', function () {
+        updateTelemetryUi(profileSelectElement.value);
+      });
+      updateTelemetryUi(profileSelectElement.value);
+    }
+  }
+
+  function initializeFinanceLabIntegration() {
+    if (!window.PortfolioFinance || typeof window.PortfolioFinance.calculate !== 'function') {
+      return;
+    }
+
+    const initialInput = document.getElementById('finance-initial');
+    const monthlyInput = document.getElementById('finance-monthly');
+    const rateSlider = document.getElementById('finance-rate-slider');
+    const rateInput = document.getElementById('finance-rate-input');
+    const monthsSlider = document.getElementById('finance-months-slider');
+    const monthsInput = document.getElementById('finance-months-input');
+    const resetButton = document.getElementById('finance-reset-btn');
+
+    const resultContributed = document.getElementById('finance-res-contributed');
+    const resultInterest = document.getElementById('finance-res-interest');
+    const resultBalance = document.getElementById('finance-res-balance');
+    const chartSvg = document.getElementById('finance-chart-svg');
+    const tableBody = document.getElementById('finance-milestones-body');
+
+    const errorInitial = document.getElementById('error-finance-initial');
+    const errorMonthly = document.getElementById('error-finance-monthly');
+    const errorRate = document.getElementById('error-finance-rate');
+    const errorMonths = document.getElementById('error-finance-months');
+
+    const currencyFormatter = new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    });
+
+    function setFieldError(errorElement, inputElement, errorMessage) {
+      if (!errorElement) return;
+      if (errorMessage) {
+        errorElement.textContent = errorMessage;
+        errorElement.hidden = false;
+        if (inputElement) inputElement.setAttribute('aria-invalid', 'true');
+      } else {
+        errorElement.textContent = '';
+        errorElement.hidden = true;
+        if (inputElement) inputElement.removeAttribute('aria-invalid');
+      }
+    }
+
+    function renderDynamicSvgChart(calculationPoints) {
+      if (!chartSvg || !calculationPoints || calculationPoints.length === 0) return;
+
+      const chartWidth = 540;
+      const chartHeight = 240;
+      const paddingLeft = 44;
+      const paddingRight = 20;
+      const paddingTop = 24;
+      const paddingBottom = 34;
+
+      const plotWidth = chartWidth - paddingLeft - paddingRight;
+      const plotHeight = chartHeight - paddingTop - paddingBottom;
+
+      const lastPoint = calculationPoints[calculationPoints.length - 1];
+      const maximumValue = Math.max(10, lastPoint.balance);
+      const totalMonths = Math.max(1, lastPoint.month);
+
+      let balancePathString = '';
+      let contributedPathString = '';
+      let balanceAreaString = '';
+
+      calculationPoints.forEach(function (dataPoint, pointIndex) {
+        const coordinateX = paddingLeft + (dataPoint.month / totalMonths) * plotWidth;
+        const balanceY = paddingTop + plotHeight - (dataPoint.balance / maximumValue) * plotHeight;
+        const contributedY = paddingTop + plotHeight - (dataPoint.contributed / maximumValue) * plotHeight;
+
+        if (pointIndex === 0) {
+          balancePathString += 'M ' + coordinateX.toFixed(1) + ' ' + balanceY.toFixed(1);
+          contributedPathString += 'M ' + coordinateX.toFixed(1) + ' ' + contributedY.toFixed(1);
+          balanceAreaString += 'M ' + coordinateX.toFixed(1) + ' ' + (paddingTop + plotHeight) + ' L ' + coordinateX.toFixed(1) + ' ' + balanceY.toFixed(1);
+        } else {
+          balancePathString += ' L ' + coordinateX.toFixed(1) + ' ' + balanceY.toFixed(1);
+          contributedPathString += ' L ' + coordinateX.toFixed(1) + ' ' + balanceY.toFixed(1);
+          balanceAreaString += ' L ' + coordinateX.toFixed(1) + ' ' + balanceY.toFixed(1);
+        }
+      });
+
+      balanceAreaString += ' L ' + (paddingLeft + plotWidth).toFixed(1) + ' ' + (paddingTop + plotHeight) + ' Z';
+
+      chartSvg.innerHTML = `
+        <defs>
+          <linearGradient id=\"chartSeaglassAreaGradient\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\">
+            <stop offset=\"0%\" stop-color=\"#a6d6c0\" stop-opacity=\"0.24\" />
+            <stop offset=\"100%\" stop-color=\"#a6d6c0\" stop-opacity=\"0.0\" />
+          </linearGradient>
+        </defs>
+        <line x1=\"${paddingLeft}\" y1=\"${paddingTop + plotHeight}\" x2=\"${paddingLeft + plotWidth}\" y2=\"${paddingTop + plotHeight}\" stroke=\"#1c2430\" stroke-width=\"1\" />
+        <line x1=\"${paddingLeft}\" y1=\"${paddingTop}\" x2=\"${paddingLeft}\" y2=\"${paddingTop + plotHeight}\" stroke=\"#1c2430\" stroke-width=\"1\" />
+        <path d=\"${balanceAreaString}\" fill=\"url(#chartSeaglassAreaGradient)\" />
+        <path d=\"${contributedPathString}\" fill=\"none\" stroke=\"#64748b\" stroke-width=\"2\" stroke-dasharray=\"4 4\" />
+        <path d=\"${balancePathString}\" fill=\"none\" stroke=\"#a6d6c0\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" />
+      `;
+    }
+
+    function renderMilestonesTable(calculationPoints) {
+      if (!tableBody || !calculationPoints) return;
+      tableBody.innerHTML = '';
+
+      const milestonesPoints = calculationPoints.filter(function (pointItem) {
+        return pointItem.month > 0 && (pointItem.month % 12 === 0 || pointItem.month === calculationPoints.length - 1);
+      });
+
+      milestonesPoints.forEach(function (milestone) {
+        const yearNumber = Math.floor(milestone.month / 12);
+        const periodLabel = yearNumber > 0 ? 'Mês ' + milestone.month + ' (Ano ' + yearNumber + ')' : 'Mês ' + milestone.month;
+        const interestAmount = milestone.balance - milestone.contributed;
+
+        const tableRow = document.createElement('tr');
+        tableRow.innerHTML = `
+          <td>${periodLabel}</td>
+          <td>${currencyFormatter.format(milestone.contributed)}</td>
+          <td>${currencyFormatter.format(interestAmount)}</td>
+          <td><strong>${currencyFormatter.format(milestone.balance)}</strong></td>
+        `;
+        tableBody.appendChild(tableRow);
+      });
+    }
+
+    function recalculateFinance() {
+      if (!initialInput || !monthlyInput || !rateInput || !monthsInput) return;
+
+      const rawInitial = initialInput.value.trim();
+      const rawMonthly = monthlyInput.value.trim();
+      const rawRate = rateInput.value.trim();
+      const rawMonths = monthsInput.value.trim();
+
+      const initialValue = parseFloat(rawInitial);
+      const monthlyValue = parseFloat(rawMonthly);
+      const rateValue = parseFloat(rawRate);
+
+      const isStrictIntegerMonths = /^\d+$/.test(rawMonths);
+      const monthsValue = isStrictIntegerMonths ? parseInt(rawMonths, 10) : NaN;
+
+      let hasValidationError = false;
+
+      if (isNaN(initialValue) || initialValue < 0 || initialValue > 1000000) {
+        setFieldError(errorInitial, initialInput, 'Valor entre 0 e 1.000.000');
+        hasValidationError = true;
+      } else {
+        setFieldError(errorInitial, initialInput, '');
+      }
+
+      if (isNaN(monthlyValue) || monthlyValue < 0 || monthlyValue > 10000) {
+        setFieldError(errorMonthly, monthlyInput, 'Aporte entre 0 e 10.000');
+        hasValidationError = true;
+      } else {
+        setFieldError(errorMonthly, monthlyInput, '');
+      }
+
+      if (isNaN(rateValue) || rateValue < 0 || rateValue > 30) {
+        setFieldError(errorRate, rateInput, 'Taxa entre 0% e 30%');
+        hasValidationError = true;
+      } else {
+        setFieldError(errorRate, rateInput, '');
+      }
+
+      if (!isStrictIntegerMonths || isNaN(monthsValue) || monthsValue < 1 || monthsValue > 360) {
+        setFieldError(errorMonths, monthsInput, 'Prazo deve ser um número inteiro de meses (1 a 360)');
+        hasValidationError = true;
+      } else {
+        setFieldError(errorMonths, monthsInput, '');
+      }
+
+      if (hasValidationError) {
         return;
       }
 
-      if (!isIntroDismissed) {
-        animationFrameId = requestAnimationFrame(renderIntroFrame);
+      try {
+        const calculationResults = window.PortfolioFinance.calculate({
+          initialAmount: initialValue,
+          monthlyContribution: monthlyValue,
+          annualRatePercent: rateValue,
+          months: monthsValue
+        });
+
+        if (resultBalance) resultBalance.textContent = currencyFormatter.format(calculationResults.finalBalance);
+        if (resultContributed) resultContributed.textContent = currencyFormatter.format(calculationResults.totalContributed);
+        if (resultInterest) resultInterest.textContent = currencyFormatter.format(calculationResults.interest);
+
+        renderDynamicSvgChart(calculationResults.points);
+        renderMilestonesTable(calculationResults.points);
+      } catch (calculationError) {
+        // preserve previous valid results
       }
     }
 
-    try {
-      renderIntroFrame(performance.now());
-      introOverlay.removeAttribute('hidden');
-    } catch (startupError) {
-      dismissIntro();
-      introOverlay.setAttribute('hidden', '');
-      introOverlay.classList.add('intro-dismissed');
-      introOverlay.style.display = 'none';
+    if (rateSlider && rateInput) {
+      rateSlider.addEventListener('input', function () {
+        rateInput.value = rateSlider.value;
+        recalculateFinance();
+      });
+      rateInput.addEventListener('input', function () {
+        rateSlider.value = rateInput.value;
+        recalculateFinance();
+      });
     }
+
+    if (monthsSlider && monthsInput) {
+      monthsSlider.addEventListener('input', function () {
+        monthsInput.value = monthsSlider.value;
+        recalculateFinance();
+      });
+      monthsInput.addEventListener('input', function () {
+        monthsSlider.value = monthsInput.value;
+        recalculateFinance();
+      });
+    }
+
+    if (initialInput) initialInput.addEventListener('input', recalculateFinance);
+    if (monthlyInput) monthlyInput.addEventListener('input', recalculateFinance);
+
+    if (resetButton) {
+      resetButton.addEventListener('click', function () {
+        if (initialInput) initialInput.value = '1000';
+        if (monthlyInput) monthlyInput.value = '100';
+        if (rateInput) rateInput.value = '12';
+        if (rateSlider) rateSlider.value = '12';
+        if (monthsInput) monthsInput.value = '12';
+        if (monthsSlider) monthsSlider.value = '12';
+
+        setFieldError(errorInitial, initialInput, '');
+        setFieldError(errorMonthly, monthlyInput, '');
+        setFieldError(errorRate, rateInput, '');
+        setFieldError(errorMonths, monthsInput, '');
+
+        recalculateFinance();
+      });
+    }
+
+    recalculateFinance();
+  }
+
+  function handleHashNavigation() {
+    const currentHash = window.location.hash;
+    if (currentHash === '#laboratorio' || currentHash === '#panel-finance') {
+      if (document.documentElement.getAttribute('data-view') === 'brief') document.getElementById('brief-mode-toggle').click();
+      const financeTab = document.getElementById('tab-finance');
+      if (financeTab && typeof observatoryTabActivationFunction === 'function') {
+        observatoryTabActivationFunction(financeTab, false);
+      }
+      const financePanel = document.getElementById('panel-finance');
+      if (financePanel) {
+        financePanel.scrollIntoView({ behavior: document.documentElement.getAttribute('data-motion') === 'paused' ? 'instant' : 'smooth' });
+      }
+    }
+  }
+
+  function initializeNavigationFocus() {
+    const internalAnchors = document.querySelectorAll('a[href^=\"#\"]');
+    internalAnchors.forEach(function (anchorElement) {
+      anchorElement.addEventListener('click', function (event) {
+        const destinationHash = this.getAttribute('href');
+        if (destinationHash === '#laboratorio' || destinationHash === '#panel-finance') {
+          event.preventDefault();
+          if (document.documentElement.getAttribute('data-view') === 'brief') document.getElementById('brief-mode-toggle').click();
+          const financeTab = document.getElementById('tab-finance');
+          if (financeTab && typeof observatoryTabActivationFunction === 'function') {
+            observatoryTabActivationFunction(financeTab, false);
+          }
+          const financePanel = document.getElementById('panel-finance');
+          if (financePanel) {
+            financePanel.scrollIntoView({ behavior: document.documentElement.getAttribute('data-motion') === 'paused' ? 'instant' : 'smooth' });
+            financePanel.focus({ preventScroll: true });
+          }
+          history.pushState(null, '', '#laboratorio');
+          return;
+        }
+
+        if (destinationHash && destinationHash !== '#') {
+          const destinationElement = document.querySelector(destinationHash);
+          if (destinationElement) {
+            destinationElement.setAttribute('tabindex', '-1');
+            destinationElement.focus({ preventScroll: true });
+          }
+        }
+      });
+    });
+
+    window.addEventListener('hashchange', handleHashNavigation);
+    if (window.location.hash) {
+      setTimeout(handleHashNavigation, 80);
+    }
+  }
+
+  function initializeAboutCloudIllustration() {
+    const artContainers = document.querySelectorAll('.about-art-cloud');
+    if (window.createCloudMorph && typeof window.createCloudMorph === 'function') {
+      artContainers.forEach(function (artContainer) {
+        try {
+          window.createCloudMorph(artContainer);
+        } catch (cloudError) {
+          void cloudError;
+        }
+      });
+    }
+  }
+
+  function initializeApplication() {
+    document.documentElement.classList.add('js-ready');
+    initializeEmailCopy();
+    initializeMotionControls();
+    initializeBriefMode();
+    initializeProjectObservatory();
+    initializeYahcwDemo();
+    initializeTuyaDemo();
+    initializeGamingHudDemo();
+    initializeFinanceLabIntegration();
+    initializeNavigationFocus();
+    initializeAboutCloudIllustration();
   }
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeEntranceAnimation);
+    document.addEventListener('DOMContentLoaded', initializeApplication);
   } else {
-    initializeEntranceAnimation();
+    initializeApplication();
   }
 })();

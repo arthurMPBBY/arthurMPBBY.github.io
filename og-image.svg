@@ -1,47 +1,66 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
   <defs>
-    <pattern id="microbar-pattern" x="0" y="0" width="16" height="18" patternUnits="userSpaceOnUse">
-      <rect x="7.4" y="6" width="1.2" height="6" fill="#dec3b1" fill-opacity="0.5" />
-    </pattern>
+    <radialGradient id="ogBackdropGlow" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#141922" />
+      <stop offset="60%" stop-color="#0e1217" />
+      <stop offset="100%" stop-color="#080a0c" />
+    </radialGradient>
+    <radialGradient id="seaglassAccentGlow" cx="20%" cy="30%" r="40%">
+      <stop offset="0%" stop-color="#a6d6c0" stop-opacity="0.14" />
+      <stop offset="100%" stop-color="#a6d6c0" stop-opacity="0" />
+    </radialGradient>
   </defs>
 
-  <rect width="1200" height="630" fill="#fafaf9" />
-  <rect width="1200" height="630" fill="url(#microbar-pattern)" />
+  <rect width="1200" height="630" fill="url(#ogBackdropGlow)" />
+  <rect width="1200" height="630" fill="url(#seaglassAccentGlow)" />
+  <rect x="24" y="24" width="1152" height="582" rx="16" fill="none" stroke="#222b37" stroke-width="1.5" />
 
-  <line x1="60" y1="50" x2="1140" y2="50" stroke="#e6e4dc" stroke-width="1.2" />
-  <line x1="60" y1="580" x2="1140" y2="580" stroke="#e6e4dc" stroke-width="1.2" />
-
-  <rect x="60" y="75" width="220" height="32" rx="2" fill="#ffffff" stroke="#dedbd1" stroke-width="1" />
-  <circle cx="78" cy="91" r="3.5" fill="#c16b59" />
-  <text x="92" y="96" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="600" fill="#1b1c1b" letter-spacing="0.5">UFABC · 2º PERÍODO</text>
-
-  <text x="300" y="96" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="500" fill="#585852">PROGRAMAÇÃO NA PRÁTICA · DADOS &amp; FINANÇAS</text>
-
-  <text x="60" y="240" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-weight="800" font-size="115" fill="#1b1c1b" letter-spacing="-3.5">Arthur</text>
-  <text x="1140" y="360" text-anchor="end" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-weight="800" font-size="115" fill="#1b1c1b" letter-spacing="-3.5">Kadri<tspan fill="#c16b59">.</tspan></text>
-
-  <text x="64" y="325" font-family="'DM Sans', system-ui, sans-serif" font-weight="500" font-size="22" fill="#585852">
-    Programação prática em Python e C++.
-  </text>
-  <text x="64" y="358" font-family="'DM Sans', system-ui, sans-serif" font-weight="500" font-size="20" fill="#84847d">
-    Interesse em dados e mercado financeiro.
-  </text>
-
-  <rect x="64" y="390" width="460" height="38" rx="2" fill="rgba(193, 107, 89, 0.10)" stroke="#c16b59" stroke-width="1" />
-  <circle cx="84" cy="409" r="4" fill="#c16b59" />
-  <text x="98" y="414" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700" fill="#c16b59" letter-spacing="0.5">BUSCANDO ESTÁGIO // MERCADO FINANCEIRO &amp; DADOS</text>
-
-  <g transform="translate(680, 400)">
-    <rect x="0" y="0" width="460" height="150" rx="2" fill="#ffffff" stroke="#e6e4dc" stroke-width="1" />
-    <text x="24" y="32" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#c16b59">REPOSITÓRIOS NO GITHUB</text>
-
-    <text x="24" y="62" font-family="'JetBrains Mono', monospace" font-size="13" font-weight="600" fill="#1b1c1b">[01] gaming-fps-hud <tspan fill="#84847d" font-weight="400">· C++17 / Vulkan</tspan></text>
-    <text x="24" y="88" font-family="'JetBrains Mono', monospace" font-size="13" font-weight="600" fill="#1b1c1b">[02] tuya-smart-lamps <tspan fill="#84847d" font-weight="400">· Python / Android</tspan></text>
-    <text x="24" y="114" font-family="'JetBrains Mono', monospace" font-size="13" font-weight="600" fill="#1b1c1b">[03] python-curso <tspan fill="#84847d" font-weight="400">· Fundamentos</tspan></text>
-    <text x="24" y="140" font-family="'JetBrains Mono', monospace" font-size="13" font-weight="600" fill="#1b1c1b">[04] spotifast-neon-theme <tspan fill="#84847d" font-weight="400">· JSON</tspan></text>
+  <g transform="translate(72, 72)">
+    <rect x="0" y="0" width="220" height="34" rx="17" fill="#141922" stroke="#222b37" stroke-width="1" />
+    <circle cx="18" cy="17" r="4.5" fill="#a6d6c0" />
+    <text x="32" y="22" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700" fill="#a6d6c0" letter-spacing="0.5">UFABC &middot; 2º PERÍODO</text>
   </g>
 
-  <text x="64" y="555" font-family="'JetBrains Mono', monospace" font-size="13" fill="#84847d">github.com/arthurMPBBY</text>
-  <text x="320" y="555" font-family="'JetBrains Mono', monospace" font-size="13" fill="#84847d">linkedin.com/in/arthur-kadri-de-oliveira-2586a12b2</text>
-  <text x="820" y="555" font-family="'JetBrains Mono', monospace" font-size="13" fill="#84847d">arthurkadri968@gmail.com</text>
+  <text x="320" y="94" font-family="'JetBrains Mono', monospace" font-size="13" font-weight="500" fill="#64748b">OBSERVATÓRIO DE SISTEMAS &amp; ENGENHARIA DE SOFTWARE</text>
+
+  <text x="72" y="245" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-weight="800" font-size="118" fill="#f8fafc" letter-spacing="-4">Arthur</text>
+  <text x="72" y="360" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-weight="800" font-size="118" fill="#e2e8f0" letter-spacing="-4">Kadri<tspan fill="#a6d6c0">.</tspan></text>
+
+  <text x="72" y="420" font-family="'DM Sans', system-ui, sans-serif" font-weight="500" font-size="22" fill="#cbd5e1">
+    Programação prática em C#, Python e C++.
+  </text>
+  <text x="72" y="452" font-family="'DM Sans', system-ui, sans-serif" font-weight="500" font-size="20" fill="#94a3b8">
+    Foco em sistemas nativos, automação e análise quantitativa.
+  </text>
+
+  <rect x="72" y="482" width="460" height="40" rx="6" fill="rgba(166, 214, 192, 0.12)" stroke="#a6d6c0" stroke-width="1.2" />
+  <circle cx="92" cy="502" r="4" fill="#a6d6c0" />
+  <text x="108" y="507" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700" fill="#a6d6c0" letter-spacing="0.5">BUSCANDO ESTÁGIO // MERCADO FINANCEIRO &amp; DADOS</text>
+
+  <g transform="translate(640, 210)">
+    <rect x="0" y="0" width="480" height="312" rx="12" fill="#0e1217" stroke="#222b37" stroke-width="1.2" />
+    <text x="28" y="36" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700" fill="#a6d6c0" letter-spacing="0.5">REPOSITÓRIOS EM DESTAQUE (GITHUB)</text>
+
+    <g transform="translate(28, 64)">
+      <rect x="0" y="0" width="424" height="64" rx="6" fill="#141922" stroke="#181f28" stroke-width="1" />
+      <text x="16" y="26" font-family="'JetBrains Mono', monospace" font-size="14" font-weight="700" fill="#f8fafc">YAHCW <tspan font-size="11" fill="#a6d6c0">&middot; DESTAQUE</tspan></text>
+      <text x="16" y="48" font-family="'DM Sans', system-ui, sans-serif" font-size="12" fill="#94a3b8">Hot corners, DWM live window overview &amp; BrightTray &middot; C# / Win32</text>
+    </g>
+
+    <g transform="translate(28, 140)">
+      <rect x="0" y="0" width="424" height="64" rx="6" fill="#141922" stroke="#181f28" stroke-width="1" />
+      <text x="16" y="26" font-family="'JetBrains Mono', monospace" font-size="14" font-weight="700" fill="#f8fafc">tuya-smart-lamps</text>
+      <text x="16" y="48" font-family="'DM Sans', system-ui, sans-serif" font-size="12" fill="#94a3b8">Automação local TCP persistente, SSE &amp; contingência nuvem &middot; Python 3</text>
+    </g>
+
+    <g transform="translate(28, 216)">
+      <rect x="0" y="0" width="424" height="64" rx="6" fill="#141922" stroke="#181f28" stroke-width="1" />
+      <text x="16" y="26" font-family="'JetBrains Mono', monospace" font-size="14" font-weight="700" fill="#f8fafc">gaming-fps-hud</text>
+      <text x="16" y="48" font-family="'DM Sans', system-ui, sans-serif" font-size="12" fill="#94a3b8">Observador de apresentação Vulkan, snapshots JSON &amp; HUD Qt &middot; C++17</text>
+    </g>
+  </g>
+
+  <text x="72" y="565" font-family="'JetBrains Mono', monospace" font-size="12" fill="#64748b">github.com/arthurMPBBY</text>
+  <text x="320" y="565" font-family="'JetBrains Mono', monospace" font-size="12" fill="#64748b">linkedin.com/in/arthur-kadri-de-oliveira-2586a12b2</text>
+  <text x="780" y="565" font-family="'JetBrains Mono', monospace" font-size="12" fill="#64748b">arthurkadri968@gmail.com</text>
 </svg>

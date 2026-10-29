@@ -3,39 +3,30 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Arthur Kadri de Oliveira | Portfólio &amp; UFABC</title>
-  <meta name="description" content="Portfólio de Arthur Kadri de Oliveira. Graduação na Universidade Federal do ABC (UFABC), 2º período. Programação na prática em Python e C++, com interesse em dados e mercado financeiro.">
-  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <title>Arthur Kadri de Oliveira | Portfólio &amp; Observatório de Sistemas</title>
+  <meta name="description" content="Portfólio de Arthur Kadri de Oliveira. Graduação na UFABC (2º período). Programação prática em C#, Python e C++, com projetos de sistemas e busca por estágio em mercado financeiro ou análise de dados.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg?v=20261029-immersive">
   <link rel="canonical" href="https://arthurmpbby.github.io/">
-  <meta property="og:title" content="Arthur Kadri de Oliveira | Portfólio &amp; UFABC">
-  <meta property="og:description" content="Estudante na UFABC (2º período). Programação em Python e C++, projetos no GitHub e interesse em estágio de finanças e dados.">
+  <meta property="og:title" content="Arthur Kadri de Oliveira | Portfólio &amp; Observatório de Sistemas">
+  <meta property="og:description" content="Estudante na UFABC (2º período). C#, Python e C++, projetos abertos no GitHub (YAHCW, tuya-smart-lamps, gaming-fps-hud) e busca por estágio em mercado financeiro ou dados.">
   <meta property="og:image" content="https://arthurmpbby.github.io/og-image.png">
   <meta property="og:url" content="https://arthurmpbby.github.io/">
   <meta property="og:type" content="website">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20261028-smooth-neutral">
+  <link rel="stylesheet" href="styles.css?v=20261029-immersive">
 </head>
 <body>
-  <div id="intro-overlay" class="intro-overlay" hidden>
-    <canvas id="intro-canvas" class="intro-canvas" aria-hidden="true"></canvas>
-    <button id="intro-skip-btn" class="intro-skip-btn" type="button" aria-label="Pular introdução">Pular [Esc]</button>
-  </div>
-
   <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
 
   <header class="site-header">
     <div class="header-inner">
       <div class="header-brand-block">
         <a href="#hero" class="brand-link" aria-label="Arthur Kadri - Início">
-          <span class="brand-symbol" aria-hidden="true"></span>
+          <span class="brand-glyph" aria-hidden="true">AK</span>
           <span class="brand-text">Arthur Kadri</span>
         </a>
-        <span class="brand-badge" aria-label="Status atual: UFABC 2º Período">
-          <span class="status-live-indicator" aria-hidden="true"></span>
-          <span class="brand-badge-label">UFABC · 2º Período</span>
-        </span>
       </div>
 
       <nav class="site-nav" aria-label="Navegação principal">
@@ -50,13 +41,15 @@
       <div class="header-controls">
         <button id="brief-mode-toggle" class="control-btn brief-btn" type="button" aria-pressed="false" aria-label="Alternar para modo resumido de 20 segundos">
           <span class="control-indicator" aria-hidden="true"></span>
-          <span class="brief-btn-text">Tenho 20 segundos</span>
+          <span class="mobile-short-text" aria-hidden="true">20s</span>
+          <span id="brief-status-label" class="brief-btn-text">Tenho 20 segundos</span>
         </button>
         <span id="brief-live-status" class="sr-only" aria-live="polite"></span>
 
         <button id="motion-toggle-btn" class="control-btn motion-btn" type="button" aria-pressed="false" aria-label="Pausar animações decorativas">
           <span class="motion-icon" aria-hidden="true"></span>
-          <span class="motion-btn-text">Pausar animações</span>
+          <span class="mobile-short-text" aria-hidden="true">Motion</span>
+          <span id="motion-status-label" class="motion-btn-text">Pausar animações</span>
         </button>
         <span id="motion-live-status" class="sr-only" aria-live="polite"></span>
       </div>
@@ -65,650 +58,697 @@
 
   <main id="main-content">
     <section class="hero-section" id="hero" aria-labelledby="hero-title">
-      <div class="hero-stage">
-        <div class="hero-status-strip">
-          <span class="status-pill">
-            <span class="status-pulse-dot" aria-hidden="true"></span>
-            <span>UFABC · 2º Período · Em formação</span>
-          </span>
-          <span class="status-motto">Programação na prática · Interesse em dados e mercado financeiro</span>
+      <canvas id="immersive-scene-canvas" class="immersive-scene-canvas" aria-hidden="true"></canvas>
+
+      <div class="hero-viewport-container">
+        <div class="hero-monumental-container">
+          <h1 class="hero-monumental-title" id="hero-title">
+            <span class="hero-name-row">ARTHUR KADRI</span>
+          </h1>
         </div>
 
-        <div class="hero-diagonal-layout">
-          <h1 class="hero-title" id="hero-title">
-            <span class="hero-title-top">Arthur</span>
-            <span class="hero-title-bottom">Kadri<span class="hero-period">.</span></span>
-          </h1>
-
-          <div class="hero-floating-bio">
-            <p class="hero-bio-lead">
-              Estudante na <strong>Universidade Federal do ABC (UFABC &mdash; 2º período)</strong>. Programação na prática com foco em Python e C++, código aberto e interesse aplicado em análise de dados e mercado financeiro.
-            </p>
-            <div class="hero-opportunity-badge" aria-label="Objetivo de busca profissional">
-              <span class="opportunity-dot" aria-hidden="true"></span>
-              <span>Buscando estágio em mercado financeiro / dados</span>
-            </div>
-          </div>
-
-          <div class="hero-actions-cluster" data-full-only>
-            <div class="hero-cta-group">
-              <a href="#projetos" class="action-btn btn-primary">
-                <span>Ver projetos construídos</span>
-                <span class="btn-arrow" aria-hidden="true">&darr;</span>
-              </a>
-              <a href="#contato" class="action-btn btn-secondary">
-                <span>Entrar em contato</span>
-                <span class="btn-arrow" aria-hidden="true">&nearr;</span>
-              </a>
-            </div>
-            <p class="hero-repos-indicator">4 projetos com código aberto no GitHub</p>
+        <div class="hero-floated-intro">
+          <p class="hero-intro-text">
+            Estudante na <strong>Universidade Federal do ABC (UFABC &mdash; 2º período)</strong>.<br>
+            Projetos em C#, Python e C++. Busco estágio em dados ou mercado financeiro.
+          </p>
+          <div class="hero-quiet-actions" data-full-only>
+            <a href="#projetos" class="quiet-cta-link cta-primary">
+              <span>Explorar observatório</span>
+              <span class="cta-glyph" aria-hidden="true">&darr;</span>
+            </a>
+            <a href="#contato" class="quiet-cta-link cta-secondary">
+              <span>Contato</span>
+              <span class="cta-glyph" aria-hidden="true">&nearr;</span>
+            </a>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="section-block" id="projetos" aria-labelledby="projetos-title">
+    <section class="section-block observatory-section" id="projetos" aria-labelledby="projetos-title">
       <div class="section-container">
         <header class="section-header">
           <div class="section-index-badge">
             <span class="section-index-num">01</span>
-            <span class="section-index-label">/ Projetos pessoais</span>
+            <span class="section-index-label">/ Observatório de Sistemas</span>
           </div>
-          <h2 class="section-title" id="projetos-title">Código no GitHub</h2>
+          <h2 class="section-title" id="projetos-title">Projetos, por dentro.</h2>
           <p class="section-subtitle">
-            Implementações práticas para exercitar telemetria em C++, automação de redes em Python e estruturação de dados.
+            Implementações com código aberto no GitHub. Selecione um projeto para visualizar arquitetura e interagir com simulações no navegador.
           </p>
         </header>
 
-        <div class="projects-ledger" role="list">
-          <article class="project-compact-card" role="listitem" aria-labelledby="pcard-title-1">
-            <div class="pcard-main-row">
-              <div class="pcard-identity">
-                <div class="pcard-badge-row">
-                  <span class="pcard-num">[01]</span>
-                  <span class="category-tag">Telemetria &amp; Sistemas</span>
+        <div class="brief-project-list" aria-label="Projetos em resumo">
+          <a href="https://github.com/arthurMPBBY/YAHCW" target="_blank" rel="noopener noreferrer"><strong>YAHCW</strong><small>C# · Janelas, brilho e áudio ↗</small></a>
+          <a href="https://github.com/arthurMPBBY/tuya-smart-lamps" target="_blank" rel="noopener noreferrer"><strong>Tuya Smart Lamps</strong><small>Python · Automação local ↗</small></a>
+          <a href="https://github.com/arthurMPBBY/gaming-fps-hud" target="_blank" rel="noopener noreferrer"><strong>Gaming FPS HUD</strong><small>C++ · Telemetria Vulkan ↗</small></a>
+          <a href="https://github.com/arthurMPBBY/python-curso" target="_blank" rel="noopener noreferrer"><strong>Fundamentos em Python</strong><small>Exercícios ↗</small></a>
+          <a href="https://github.com/arthurMPBBY/spotifast-neon-theme" target="_blank" rel="noopener noreferrer"><strong>Spotifast</strong><small>Paleta em JSON ↗</small></a>
+        </div>
+        <div class="observatory-explorer">
+          <div class="observatory-navigation-bar" role="tablist" aria-label="Seleção de projetos do observatório">
+            <button id="tab-yahcw" class="observatory-tab is-active" type="button" role="tab" aria-selected="true" aria-controls="panel-yahcw" tabindex="0" data-scene-state="yahcw">
+              <span class="tab-indicator" aria-hidden="true"></span>
+              <span class="tab-title">YAHCW (Hot Corners)</span>
+              <span class="tab-badge">C# / Win32</span>
+            </button>
+            <button id="tab-tuya" class="observatory-tab" type="button" role="tab" aria-selected="false" aria-controls="panel-tuya" tabindex="-1" data-scene-state="tuya">
+              <span class="tab-indicator" aria-hidden="true"></span>
+              <span class="tab-title">tuya-smart-lamps</span>
+              <span class="tab-badge">Python / TCP</span>
+            </button>
+            <button id="tab-gaming" class="observatory-tab" type="button" role="tab" aria-selected="false" aria-controls="panel-gaming" tabindex="-1" data-scene-state="gaming-fps-hud">
+              <span class="tab-indicator" aria-hidden="true"></span>
+              <span class="tab-title">gaming-fps-hud</span>
+              <span class="tab-badge">C++17 / Vulkan</span>
+            </button>
+            <button id="tab-finance" class="observatory-tab" type="button" role="tab" aria-selected="false" aria-controls="panel-finance" tabindex="-1" data-scene-state="laboratorio">
+              <span class="tab-indicator" aria-hidden="true"></span>
+              <span class="tab-title">Simulador Financeiro</span>
+              <span class="tab-badge">Laboratório</span>
+            </button>
+          </div>
+
+          <div class="observatory-stage-panels">
+            <article id="panel-yahcw" class="observatory-panel is-active" role="tabpanel" aria-labelledby="tab-yahcw" tabindex="0">
+              <div class="panel-two-column-layout">
+                <div class="panel-details-column">
+                  <div class="panel-meta-strip">
+                    <span class="panel-category-pill">Windows Desktop &middot; DWM &amp; Win32</span>
+                    <span class="panel-version-pill">C# / .NET 4.5+</span>
+                  </div>
+
+                  <h3 class="panel-project-title">
+                    <a href="https://github.com/arthurMPBBY/YAHCW" target="_blank" rel="noopener noreferrer" class="panel-title-link">
+                      YAHCW
+                      <svg viewBox="0 0 16 16" width="16" height="16" class="external-icon" aria-hidden="true">
+                        <path d="M4 12l8-8m0 0H6m6 0v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </a>
+                  </h3>
+                  <p class="panel-tagline">Janelas, brilho e áudio. No mesmo lugar.</p>
+
+                  <p class="panel-summary-text">
+                    Utilitário nativo para Windows que integra navegação rápida por cantos de tela com visão geral de janelas em execução, controle de brilho dos monitores e seleção ágil de saídas de áudio.
+                  </p>
+
+                  <div class="panel-tech-chips">
+                    <span class="tech-chip">C# / WinForms</span>
+                    <span class="tech-chip">DWM API</span>
+                    <span class="tech-chip">Win32</span>
+                  </div>
+
+                  <p class="panel-scope-warning">
+                    <strong>Demonstração ilustrativa.</strong> Não controla este computador.
+                  </p>
+
+                  <details class="panel-technical-details">
+                    <summary class="details-summary">Detalhes técnicos e limites de escopo</summary>
+                    <p class="details-body">
+                      No software nativo, a visão geral consulta o Desktop Window Manager (DWM). O controle de brilho comunica com o serviço auxiliar BrightTray via Named Pipe local protegido e depende de suporte do hardware a DDC/CI ou WMI. A seleção de áudio utiliza a interface COM IPolicyConfig. Não há sobreposição garantida em jogos com tela cheia exclusiva ou sob anti-cheats de kernel.
+                    </p>
+                  </details>
+
+                  <div class="panel-actions-row">
+                    <a href="https://github.com/arthurMPBBY/YAHCW" class="action-btn btn-primary" target="_blank" rel="noopener noreferrer">
+                      <span>Ver repositório no GitHub</span>
+                      <span class="btn-arrow" aria-hidden="true">&nearr;</span>
+                    </a>
+                    <button type="button" class="action-btn btn-secondary" data-yahcw-trigger aria-haspopup="dialog">
+                      <span>Simular Canto / Visão Geral</span>
+                    </button>
+                  </div>
+                  <span id="yahcw-live-status" class="sr-only" aria-live="polite"></span>
                 </div>
-                <h3 class="pcard-title" id="pcard-title-1">
-                  <a href="https://github.com/arthurMPBBY/gaming-fps-hud" target="_blank" rel="noopener noreferrer">
-                    gaming-fps-hud
-                    <svg viewBox="0 0 16 16" class="pcard-ext-icon" aria-hidden="true">
-                      <path d="M4 12l8-8m0 0H6m6 0v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                  </a>
-                </h3>
-              </div>
 
-              <div class="pcard-content-block">
-                <p class="pcard-desc" data-full-only>
-                  Monitor de desempenho em C++ para Linux. Mede a apresentação de quadros via Vulkan e exibe as métricas em uma camada independente no KDE Wayland.
-                </p>
-
-                <div class="tech-spec-pills" data-full-only>
-                  <span class="spec-pill">C++17</span>
-                  <span class="spec-pill">Vulkan API</span>
-                  <span class="spec-pill">Qt 6 Quick</span>
-                  <span class="spec-pill">Wayland</span>
-                </div>
-
-                <details class="project-xray" id="xray-1" data-full-only>
-                  <summary class="xray-summary">
-                    <span class="xray-summary-icon" aria-hidden="true">+</span>
-                    <span class="xray-summary-text">Como funciona (Raio-X Técnico)</span>
-                  </summary>
-                  <div class="xray-body">
-                    <div class="xray-flow" aria-label="Fluxo de execução do gaming-fps-hud">
-                      <div class="xray-step">
-                        <span class="xray-step-idx">01</span>
-                        <span class="xray-step-title">Camada Vulkan</span>
-                        <span class="xray-step-desc">Observa chamadas de apresentação de quadros</span>
+                <div class="panel-interactive-demo-column">
+                  <div class="demo-card-frame">
+                    <div class="demo-card-header">
+                      <div class="demo-card-dots" aria-hidden="true">
+                        <span class="dot-red"></span>
+                        <span class="dot-yellow"></span>
+                        <span class="dot-green"></span>
                       </div>
-                      <div class="xray-arrow" aria-hidden="true">&rarr;</div>
-                      <div class="xray-step">
-                        <span class="xray-step-idx">02</span>
-                        <span class="xray-step-title">Amostragem</span>
-                        <span class="xray-step-desc">Mede os intervalos entre apresentações</span>
-                      </div>
-                      <div class="xray-arrow" aria-hidden="true">&rarr;</div>
-                      <div class="xray-step">
-                        <span class="xray-step-idx">03</span>
-                        <span class="xray-step-title">Snapshot JSON</span>
-                        <span class="xray-step-desc">Publica métricas em um arquivo local</span>
-                      </div>
-                      <div class="xray-arrow" aria-hidden="true">&rarr;</div>
-                      <div class="xray-step">
-                        <span class="xray-step-idx">04</span>
-                        <span class="xray-step-title">Overlay Qt</span>
-                        <span class="xray-step-desc">Lê as métricas e exibe um HUD independente</span>
-                      </div>
+                      <span class="demo-card-caption">Demonstração ilustrativa &mdash; não controla este computador</span>
                     </div>
-                    <div class="xray-meta">
-                      <span class="xray-tag">Estrutura:</span> Medição e visualização em processos separados, sem capturar o teclado ou o mouse.
+
+                    <div id="yahcw-demo-stage" class="yahcw-simulated-desktop">
+                      <div id="yahcw-corner-trigger-box" class="yahcw-corner-box top-left" title="Passe o cursor ou clique aqui para disparar a visão geral do canto">
+                        <span class="corner-radar-pulse" aria-hidden="true"></span>
+                        <span class="corner-label">Canto Superior Esquerdo</span>
+                      </div>
+
+                      <div class="simulated-desktop-workarea">
+                        <div class="simulated-sample-window active-window">
+                          <div class="sample-window-header">
+                            <span class="sample-window-icon">📄</span>
+                            <span id="yahcw-active-window-title" class="sample-window-title">FormOverview.cs &mdash; C# WinForms / DWM</span>
+                          </div>
+                          <div class="sample-window-body">
+                            <div class="sample-code-skeleton" aria-hidden="true">
+                              <span class="code-line wide mint"></span>
+                              <span class="code-line medium"></span>
+                              <span class="code-line narrow"></span>
+                              <span class="code-line wide"></span>
+                            </div>
+                            <p class="sample-window-hint">
+                              Janela simulada em primeiro plano. Dispare o canto superior esquerdo ou utilize o botão para abrir a visão geral de miniaturas.
+                            </p>
+                          </div>
+                        </div>
+
+                        <div id="yahcw-demo-overview" class="yahcw-overview-overlay" hidden role="dialog" aria-modal="true" aria-label="Visão Geral de Janelas">
+                          <div class="overview-modal-content">
+                            <div class="overview-modal-header">
+                              <h4 class="overview-modal-title">Visão Geral DWM &mdash; Janelas em Execução</h4>
+                              <button id="yahcw-overview-close-btn" class="overview-close-btn" type="button" aria-label="Fechar visão geral">Fechar [Esc]</button>
+                            </div>
+                            <div class="overview-grid" role="list">
+                              <button type="button" class="yahcw-overview-tile" data-window-title="Editor C# — FormOverview.cs">
+                                <span class="tile-icon">⌨️</span>
+                                <span class="tile-label">Editor C# (FormOverview.cs)</span>
+                                <span class="tile-dwm-tag">DWM Ativo</span>
+                              </button>
+                              <button type="button" class="yahcw-overview-tile" data-window-title="Terminal PowerShell — YAHCW.exe --diagnose">
+                                <span class="tile-icon">⬛</span>
+                                <span class="tile-label">PowerShell (YAHCW.exe)</span>
+                                <span class="tile-dwm-tag">DWM Ativo</span>
+                              </button>
+                              <button type="button" class="yahcw-overview-tile" data-window-title="Navegador Web — Documentação DWM API">
+                                <span class="tile-icon">🌐</span>
+                                <span class="tile-label">Navegador (Documentação DWM)</span>
+                                <span class="tile-dwm-tag">DWM Ativo</span>
+                              </button>
+                              <button type="button" class="yahcw-overview-tile" data-window-title="BrightTray — Assistente de Brilho Named Pipe">
+                                <span class="tile-icon">☀️</span>
+                                <span class="tile-label">BrightTray (Named Pipe)</span>
+                                <span class="tile-dwm-tag">DWM Ativo</span>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="simulated-desktop-bar">
+                        <div class="demo-bar-control-group brightness-group">
+                          <label for="yahcw-brightness-slider" class="demo-bar-label">
+                            <span class="control-name">Brilho:</span>
+                            <span id="yahcw-brightness-display" class="control-value-pill">85%</span>
+                          </label>
+                          <input type="range" id="yahcw-brightness-slider" class="demo-slider" min="15" max="100" value="85" aria-label="Ajuste ilustrativo de brilho">
+                        </div>
+
+                        <div class="demo-bar-control-group audio-group">
+                          <label for="yahcw-audio-select" class="demo-bar-label">
+                            <span class="control-name">Saída de Áudio:</span>
+                            <span id="yahcw-audio-display" class="sr-only">Fones de Ouvido (Realtek High Definition)</span>
+                          </label>
+                          <select id="yahcw-audio-select" class="demo-select" aria-label="Seleção ilustrativa de dispositivo de áudio">
+                            <option value="headphones" selected>Fones de Ouvido (Realtek High Definition)</option>
+                            <option value="speakers">Alto-falantes (USB Audio Codec)</option>
+                            <option value="displayport">Monitor DisplayPort (NVIDIA High Definition)</option>
+                          </select>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </details>
+                </div>
               </div>
+            </article>
 
-              <div class="pcard-action-block">
-                <a href="https://github.com/arthurMPBBY/gaming-fps-hud" class="pcard-action-link" target="_blank" rel="noopener noreferrer">
-                  <span>Repositório</span>
-                  <span aria-hidden="true">&nearr;</span>
-                </a>
+            <article id="panel-tuya" class="observatory-panel" role="tabpanel" aria-labelledby="tab-tuya">
+              <div class="panel-two-column-layout">
+                <div class="panel-details-column">
+                  <div class="panel-meta-strip">
+                    <span class="panel-category-pill">Automação Residencial &amp; Redes</span>
+                    <span class="panel-version-pill">Python 3 / TCP &amp; SSE</span>
+                  </div>
+
+                  <h3 class="panel-project-title">
+                    <a href="https://github.com/arthurMPBBY/tuya-smart-lamps" target="_blank" rel="noopener noreferrer" class="panel-title-link">
+                      tuya-smart-lamps
+                      <svg viewBox="0 0 16 16" width="16" height="16" class="external-icon" aria-hidden="true">
+                        <path d="M4 12l8-8m0 0H6m6 0v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </a>
+                  </h3>
+                  <p class="panel-tagline">Controle local resiliente de lâmpadas inteligentes.</p>
+
+                  <p class="panel-summary-text">
+                    Sistema de controle com backend Python e aplicativo Android, priorizando conexões TCP diretas na rede Wi-Fi local e alternando automaticamente para a Tuya OpenAPI em nuvem caso a rede local não responda.
+                  </p>
+
+                  <div class="panel-tech-chips">
+                    <span class="tech-chip">Python 3</span>
+                    <span class="tech-chip">TCP Sockets</span>
+                    <span class="tech-chip">Server-Sent Events</span>
+                  </div>
+
+                  <p class="panel-scope-warning">
+                    <strong>Simulação de protocolo:</strong> O playground abaixo demonstra a lógica de contingência sem comunicar com lâmpadas físicas reais.
+                  </p>
+
+                  <div class="panel-actions-row">
+                    <a href="https://github.com/arthurMPBBY/tuya-smart-lamps" class="action-btn btn-primary" target="_blank" rel="noopener noreferrer">
+                      <span>Ver repositório no GitHub</span>
+                      <span class="btn-arrow" aria-hidden="true">&nearr;</span>
+                    </a>
+                  </div>
+                </div>
+
+                <div class="panel-interactive-demo-column">
+                  <div class="demo-card-frame">
+                    <div class="demo-card-header">
+                      <div class="demo-card-dots" aria-hidden="true">
+                        <span class="dot-red"></span>
+                        <span class="dot-yellow"></span>
+                        <span class="dot-green"></span>
+                      </div>
+                      <span class="demo-card-caption">Playground ilustrativo de protocolo &mdash; rede local vs nuvem</span>
+                    </div>
+
+                    <div class="tuya-playground-box">
+                      <div class="tuya-lamp-display">
+                        <div id="tuya-lamp-visual" class="lamp-visual-fixture" aria-hidden="true">
+                          <div class="fixture-cord"></div>
+                          <div class="fixture-bulb"></div>
+                        </div>
+                        <div class="lamp-state-details">
+                          <span class="lamp-name-label">Lâmpada Escritório (Tuya GU10)</span>
+                          <span id="tuya-lamp-status-pill" class="status-indicator-tag">Desligada</span>
+                        </div>
+                        <button type="button" id="tuya-lamp-toggle" class="action-btn btn-secondary" aria-pressed="false">Ligar Lâmpada</button>
+                      </div>
+
+                      <div class="tuya-network-inspector">
+                        <h4 class="inspector-heading">Roteamento de Comandos</h4>
+                        <div class="radio-options-cluster">
+                          <label class="radio-option-item">
+                            <input type="radio" name="tuya-route-choice" value="local" checked>
+                            <span>Priorizar Caminho Local TCP</span>
+                          </label>
+                          <label class="radio-option-item">
+                            <input type="radio" name="tuya-route-choice" value="cloud">
+                            <span>Usar Caminho Nuvem (Tuya OpenAPI)</span>
+                          </label>
+                        </div>
+
+                        <div class="checkbox-option-item">
+                          <label>
+                            <input type="checkbox" id="tuya-drop-local-toggle">
+                            <span>Simular perda da rede local Wi-Fi</span>
+                          </label>
+                        </div>
+
+                        <div class="tuya-telemetry-panel">
+                          <div class="telemetry-item">
+                            <span class="telemetry-label">Rota ativa:</span>
+                            <strong id="tuya-route-display" class="telemetry-value">Local (TCP Direto / Porta 6668) [Simulação]</strong>
+                          </div>
+                          <div class="telemetry-item">
+                            <span class="telemetry-label">Status do enlace:</span>
+                            <strong id="tuya-latency-display" class="telemetry-value mint">~14 ms (valor simulado para demonstração)</strong>
+                          </div>
+                        </div>
+
+                        <div id="tuya-fallback-notice" class="fallback-warning-box" hidden>
+                          <span class="warning-icon" aria-hidden="true">⚠️</span>
+                          <span>Queda local simulada: comando roteado via contingência automática Tuya OpenAPI.</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
+            </article>
+
+            <article id="panel-gaming" class="observatory-panel" role="tabpanel" aria-labelledby="tab-gaming">
+              <div class="panel-two-column-layout">
+                <div class="panel-details-column">
+                  <div class="panel-meta-strip">
+                    <span class="panel-category-pill">Telemetria Gráfica &amp; Baixo Nível</span>
+                    <span class="panel-version-pill">C++17 / Vulkan API</span>
+                  </div>
+
+                  <h3 class="panel-project-title">
+                    <a href="https://github.com/arthurMPBBY/gaming-fps-hud" target="_blank" rel="noopener noreferrer" class="panel-title-link">
+                      gaming-fps-hud
+                      <svg viewBox="0 0 16 16" width="16" height="16" class="external-icon" aria-hidden="true">
+                        <path d="M4 12l8-8m0 0H6m6 0v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </a>
+                  </h3>
+                  <p class="panel-tagline">Telemetria gráfica desacoplada em Wayland.</p>
+
+                  <p class="panel-summary-text">
+                    Camada em C++17 para Linux/Wayland que observa chamadas de apresentação da Vulkan API e gera snapshots JSON atômicos com métricas de tempo de quadro e 1% lows, consumidos por um HUD leve em Qt.
+                  </p>
+
+                  <div class="panel-tech-chips">
+                    <span class="tech-chip">C++17</span>
+                    <span class="tech-chip">Vulkan API</span>
+                    <span class="tech-chip">Qt 6 Quick</span>
+                  </div>
+
+                  <p class="panel-scope-warning">
+                    <strong>Processos desacoplados:</strong> Comunicação unilateral via arquivos temporários atômicos, sem injeção de código ou hooks de teclado.
+                  </p>
+
+                  <div class="panel-actions-row">
+                    <a href="https://github.com/arthurMPBBY/gaming-fps-hud" class="action-btn btn-primary" target="_blank" rel="noopener noreferrer">
+                      <span>Ver repositório no GitHub</span>
+                      <span class="btn-arrow" aria-hidden="true">&nearr;</span>
+                    </a>
+                  </div>
+                </div>
+
+                <div class="panel-interactive-demo-column">
+                  <div class="demo-card-frame">
+                    <div class="demo-card-header">
+                      <div class="demo-card-dots" aria-hidden="true">
+                        <span class="dot-red"></span>
+                        <span class="dot-yellow"></span>
+                        <span class="dot-green"></span>
+                      </div>
+                      <span class="demo-card-caption">Observador de telemetria &mdash; cenários de teste sintéticos</span>
+                    </div>
+
+                    <div class="gaming-telemetry-box">
+                      <div class="gaming-hud-controls-row">
+                        <label for="gaming-hud-preset-select" class="demo-bar-label">
+                          <span class="control-name">Cenário Sintético de Apresentação Gráfica:</span>
+                        </label>
+                        <select id="gaming-hud-preset-select" class="demo-select">
+                          <option value="stable" selected>Carga Estável &mdash; 144 FPS / 6.94 ms</option>
+                          <option value="shaderStutter">Compilação de Shaders &mdash; Queda 1% Lows</option>
+                          <option value="heavyLoad">Carga Elevada &mdash; 45 FPS / 22.2 ms</option>
+                        </select>
+                      </div>
+
+                      <div class="telemetry-hud-readout">
+                        <div class="hud-metric-tile">
+                          <span class="metric-title">Frametime Médio</span>
+                          <span id="gaming-frametime-value" class="metric-number mint">6.94 ms</span>
+                        </div>
+                        <div class="hud-metric-tile">
+                          <span class="metric-title">Taxa Equivalente</span>
+                          <span id="gaming-fps-value" class="metric-number">144 FPS</span>
+                        </div>
+                        <div class="hud-metric-tile">
+                          <span class="metric-title">1% Lows</span>
+                          <span id="gaming-low-value" class="metric-number">7.82 ms</span>
+                        </div>
+                        <div class="hud-metric-tile">
+                          <span class="metric-title">Quadros Observados</span>
+                          <span id="gaming-presents-value" class="metric-number">14.420</span>
+                        </div>
+                      </div>
+
+                      <div class="snapshot-json-preview">
+                        <div class="json-header-label">Snapshot JSON atômico sintético (demonstração):</div>
+                        <pre id="gaming-json-snapshot" class="json-code-block"></pre>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <article id="panel-finance" class="observatory-panel" role="tabpanel" aria-labelledby="tab-finance">
+              <div class="finance-lab-embedded-wrapper">
+                <header class="finance-inner-header">
+                  <h3 class="finance-inner-title">Simulador de Juros Compostos: Aportes &amp; Taxa Efetiva</h3>
+                  <p class="finance-inner-desc">
+                    Explore juros compostos com taxa anual efetiva convertida para a taxa mensal equivalente e aportes ao fim de cada mês. Exemplo didático, sem recomendação de investimento.
+                  </p>
+                </header>
+
+                <div class="flab-grid">
+                  <div class="flab-controls">
+                    <div class="flab-field">
+                      <label for="finance-initial" class="flab-label">
+                        <span class="flab-label-text">Valor Inicial (R$)</span>
+                        <span class="flab-label-hint">0 a 1.000.000</span>
+                      </label>
+                      <div class="flab-input-prefix">
+                        <span class="currency-symbol">R$</span>
+                        <input type="number" id="finance-initial" class="flab-input" value="1000" min="0" max="1000000" step="100" aria-describedby="error-finance-initial">
+                      </div>
+                      <span id="error-finance-initial" class="flab-error" role="alert" hidden></span>
+                    </div>
+
+                    <div class="flab-field">
+                      <label for="finance-monthly" class="flab-label">
+                        <span class="flab-label-text">Aporte Mensal (R$)</span>
+                        <span class="flab-label-hint">0 a 10.000</span>
+                      </label>
+                      <div class="flab-input-prefix">
+                        <span class="currency-symbol">R$</span>
+                        <input type="number" id="finance-monthly" class="flab-input" value="100" min="0" max="10000" step="50" aria-describedby="error-finance-monthly">
+                      </div>
+                      <span id="error-finance-monthly" class="flab-error" role="alert" hidden></span>
+                    </div>
+
+                    <div class="flab-field">
+                      <label for="finance-rate-input" class="flab-label">
+                        <span class="flab-label-text">Taxa Anual Efetiva (%)</span>
+                        <span class="flab-label-hint">0% a 30%</span>
+                      </label>
+                      <div class="flab-slider-row">
+                        <input type="range" id="finance-rate-slider" class="flab-slider" min="0" max="30" step="0.25" value="12" aria-label="Taxa anual em porcentagem (slider)">
+                        <input type="number" id="finance-rate-input" class="flab-input flab-input-compact" min="0" max="30" step="0.25" value="12" aria-describedby="error-finance-rate" aria-label="Taxa anual em porcentagem (numérico)">
+                      </div>
+                      <span id="error-finance-rate" class="flab-error" role="alert" hidden></span>
+                    </div>
+
+                    <div class="flab-field">
+                      <label for="finance-months-input" class="flab-label">
+                        <span class="flab-label-text">Prazo (meses)</span>
+                        <span class="flab-label-hint">1 a 360 meses (inteiro)</span>
+                      </label>
+                      <div class="flab-slider-row">
+                        <input type="range" id="finance-months-slider" class="flab-slider" min="1" max="360" step="1" value="12" aria-label="Prazo em meses (slider)">
+                        <input type="number" id="finance-months-input" class="flab-input flab-input-compact" min="1" max="360" step="1" value="12" aria-describedby="error-finance-months" aria-label="Prazo em meses (numérico)">
+                      </div>
+                      <span id="error-finance-months" class="flab-error" role="alert" hidden></span>
+                    </div>
+
+                    <div class="flab-actions">
+                      <button type="button" id="finance-reset-btn" class="flab-reset-btn">Restaurar Valores Padrão</button>
+                    </div>
+                  </div>
+
+                  <div class="flab-display">
+                    <div class="flab-results-grid">
+                      <div class="flab-card flab-card-main">
+                        <span class="flab-card-label">Saldo Final Projetado</span>
+                        <strong class="flab-card-value mint" id="finance-res-balance">R$ 2.384,65</strong>
+                      </div>
+                      <div class="flab-card">
+                        <span class="flab-card-label">Total Aportado</span>
+                        <span class="flab-card-subvalue" id="finance-res-contributed">R$ 2.200,00</span>
+                      </div>
+                      <div class="flab-card">
+                        <span class="flab-card-label">Juros Acumulados</span>
+                        <span class="flab-card-subvalue flab-interest" id="finance-res-interest">R$ 184,65</span>
+                      </div>
+                    </div>
+
+                    <div class="flab-chart-wrapper">
+                      <div class="chart-header-row">
+                        <span class="chart-title">Evolução de Saldo vs. Aportes</span>
+                        <div class="chart-legend">
+                          <span class="legend-item"><span class="legend-dot dot-mint"></span>Saldo Projetado</span>
+                          <span class="legend-item"><span class="legend-dot dot-contributed"></span>Aportes</span>
+                        </div>
+                      </div>
+                      <svg id="finance-chart-svg" class="finance-chart-svg" viewBox="0 0 540 240" preserveAspectRatio="none" role="img" aria-label="Gráfico de evolução do saldo ao longo dos meses">
+                        <rect width="540" height="240" fill="transparent"/>
+                      </svg>
+                    </div>
+
+                    <details class="flab-milestones-details">
+                      <summary class="milestones-summary">Tabela de Marcos Anuais</summary>
+                      <div class="milestones-table-scroll">
+                        <table class="milestones-table">
+                          <thead>
+                            <tr>
+                              <th scope="col">Período</th>
+                              <th scope="col">Total Aportado</th>
+                              <th scope="col">Juros Acumulados</th>
+                              <th scope="col">Saldo Total</th>
+                            </tr>
+                          </thead>
+                          <tbody id="finance-milestones-body">
+                            <tr>
+                              <td>Mês 12 (Ano 1)</td>
+                              <td>R$ 2.200,00</td>
+                              <td>R$ 184,65</td>
+                              <td>R$ 2.384,65</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </details>
+                  </div>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <div class="secondary-projects-grid">
+          <article class="secondary-project-card">
+            <div class="secondary-card-header">
+              <span class="secondary-card-tag">Python &amp; Lógica</span>
+              <a href="https://github.com/arthurMPBBY/python-curso" class="secondary-link" target="_blank" rel="noopener noreferrer">
+                python-curso &nearr;
+              </a>
             </div>
+            <p class="secondary-card-desc">
+              Exercícios práticos de fundamentos em Python: cálculos numéricos e manipulação de listas e conjuntos.
+            </p>
           </article>
 
-          <article class="project-compact-card" role="listitem" aria-labelledby="pcard-title-2">
-            <div class="pcard-main-row">
-              <div class="pcard-identity">
-                <div class="pcard-badge-row">
-                  <span class="pcard-num">[02]</span>
-                  <span class="category-tag">Automação &amp; Redes</span>
-                </div>
-                <h3 class="pcard-title" id="pcard-title-2">
-                  <a href="https://github.com/arthurMPBBY/tuya-smart-lamps" target="_blank" rel="noopener noreferrer">
-                    tuya-smart-lamps
-                    <svg viewBox="0 0 16 16" class="pcard-ext-icon" aria-hidden="true">
-                      <path d="M4 12l8-8m0 0H6m6 0v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                  </a>
-                </h3>
-              </div>
-
-              <div class="pcard-content-block">
-                <p class="pcard-desc" data-full-only>
-                  Controle de lâmpadas Tuya com backend Python e aplicativo Android. Prioriza a rede local e usa a API em nuvem como alternativa.
-                </p>
-
-                <div class="tech-spec-pills" data-full-only>
-                  <span class="spec-pill">Python 3</span>
-                  <span class="spec-pill">Tuya IoT API</span>
-                  <span class="spec-pill">TCP / SSE</span>
-                  <span class="spec-pill">Android</span>
-                </div>
-
-                <details class="project-xray" id="xray-2" data-full-only>
-                  <summary class="xray-summary">
-                    <span class="xray-summary-icon" aria-hidden="true">+</span>
-                    <span class="xray-summary-text">Como funciona (Raio-X Técnico)</span>
-                  </summary>
-                  <div class="xray-body">
-                    <div class="xray-flow" aria-label="Fluxo de execução do tuya-smart-lamps">
-                      <div class="xray-step">
-                        <span class="xray-step-idx">01</span>
-                        <span class="xray-step-title">Interfaces</span>
-                        <span class="xray-step-desc">Aplicativo Android, widget e bandeja do desktop</span>
-                      </div>
-                      <div class="xray-arrow" aria-hidden="true">&rarr;</div>
-                      <div class="xray-step">
-                        <span class="xray-step-idx">02</span>
-                        <span class="xray-step-title">Backend Python</span>
-                        <span class="xray-step-desc">Recebe comandos e compartilha atualizações por SSE</span>
-                      </div>
-                      <div class="xray-arrow" aria-hidden="true">&rarr;</div>
-                      <div class="xray-step">
-                        <span class="xray-step-idx">03</span>
-                        <span class="xray-step-title">Rede local</span>
-                        <span class="xray-step-desc">Mantém conexões TCP com as lâmpadas</span>
-                      </div>
-                      <div class="xray-arrow" aria-hidden="true">&rarr;</div>
-                      <div class="xray-step">
-                        <span class="xray-step-idx">04</span>
-                        <span class="xray-step-title">Alternativa em nuvem</span>
-                        <span class="xray-step-desc">Usa a Tuya OpenAPI quando o caminho local não está disponível</span>
-                      </div>
-                    </div>
-                    <div class="xray-meta">
-                      <span class="xray-tag">Estrutura:</span> Controle local como caminho principal; nuvem como contingência.
-                    </div>
-                  </div>
-                </details>
-              </div>
-
-              <div class="pcard-action-block">
-                <a href="https://github.com/arthurMPBBY/tuya-smart-lamps" class="pcard-action-link" target="_blank" rel="noopener noreferrer">
-                  <span>Repositório</span>
-                  <span aria-hidden="true">&nearr;</span>
-                </a>
-              </div>
+          <article class="secondary-project-card">
+            <div class="secondary-card-header">
+              <span class="secondary-card-tag">Interface &amp; JSON</span>
+              <a href="https://github.com/arthurMPBBY/spotifast-neon-theme" class="secondary-link" target="_blank" rel="noopener noreferrer">
+                spotifast-neon-theme &nearr;
+              </a>
             </div>
-          </article>
-
-          <article class="project-compact-card" role="listitem" aria-labelledby="pcard-title-3">
-            <div class="pcard-main-row">
-              <div class="pcard-identity">
-                <div class="pcard-badge-row">
-                  <span class="pcard-num">[03]</span>
-                  <span class="category-tag">Algoritmos &amp; Dados</span>
-                </div>
-                <h3 class="pcard-title" id="pcard-title-3">
-                  <a href="https://github.com/arthurMPBBY/python-curso" target="_blank" rel="noopener noreferrer">
-                    python-curso
-                    <svg viewBox="0 0 16 16" class="pcard-ext-icon" aria-hidden="true">
-                      <path d="M4 12l8-8m0 0H6m6 0v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                  </a>
-                </h3>
-              </div>
-
-              <div class="pcard-content-block">
-                <p class="pcard-desc" data-full-only>
-                  Exercícios de fundamentos em Python: cálculos, conversões de unidades e operações com conjuntos.
-                </p>
-
-                <div class="tech-spec-pills" data-full-only>
-                  <span class="spec-pill">Python 3</span>
-                  <span class="spec-pill">Lógica</span>
-                  <span class="spec-pill">Cálculos</span>
-                  <span class="spec-pill">Conjuntos</span>
-                </div>
-
-                <details class="project-xray" id="xray-3" data-full-only>
-                  <summary class="xray-summary">
-                    <span class="xray-summary-icon" aria-hidden="true">+</span>
-                    <span class="xray-summary-text">Como funciona (Raio-X Técnico)</span>
-                  </summary>
-                  <div class="xray-body">
-                    <div class="xray-flow" aria-label="Estrutura do repositório python-curso">
-                      <div class="xray-step">
-                        <span class="xray-step-idx">01</span>
-                        <span class="xray-step-title">Fundamentos</span>
-                        <span class="xray-step-desc">Prática de variáveis e controle de fluxo</span>
-                      </div>
-                      <div class="xray-arrow" aria-hidden="true">&rarr;</div>
-                      <div class="xray-step">
-                        <span class="xray-step-idx">02</span>
-                        <span class="xray-step-title">Cálculos</span>
-                        <span class="xray-step-desc">Bhaskara, regra de três e área do círculo</span>
-                      </div>
-                      <div class="xray-arrow" aria-hidden="true">&rarr;</div>
-                      <div class="xray-step">
-                        <span class="xray-step-idx">03</span>
-                        <span class="xray-step-title">Conjuntos</span>
-                        <span class="xray-step-desc">Exercícios com operações de interseção</span>
-                      </div>
-                      <div class="xray-arrow" aria-hidden="true">&rarr;</div>
-                      <div class="xray-step">
-                        <span class="xray-step-idx">04</span>
-                        <span class="xray-step-title">Conversões</span>
-                        <span class="xray-step-desc">Temperatura de Celsius para Fahrenheit</span>
-                      </div>
-                    </div>
-                    <div class="xray-meta">
-                      <span class="xray-tag">Foco de aprendizado:</span> Fundamentos da linguagem em exercícios pequenos.
-                    </div>
-                  </div>
-                </details>
-              </div>
-
-              <div class="pcard-action-block">
-                <a href="https://github.com/arthurMPBBY/python-curso" class="pcard-action-link" target="_blank" rel="noopener noreferrer">
-                  <span>Repositório</span>
-                  <span aria-hidden="true">&nearr;</span>
-                </a>
-              </div>
-            </div>
-          </article>
-
-          <article class="project-compact-card" role="listitem" aria-labelledby="pcard-title-4">
-            <div class="pcard-main-row">
-              <div class="pcard-identity">
-                <div class="pcard-badge-row">
-                  <span class="pcard-num">[04]</span>
-                  <span class="category-tag">Interface &amp; Estilização</span>
-                </div>
-                <h3 class="pcard-title" id="pcard-title-4">
-                  <a href="https://github.com/arthurMPBBY/spotifast-neon-theme" target="_blank" rel="noopener noreferrer">
-                    spotifast-neon-theme
-                    <svg viewBox="0 0 16 16" class="pcard-ext-icon" aria-hidden="true">
-                      <path d="M4 12l8-8m0 0H6m6 0v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                  </a>
-                </h3>
-              </div>
-
-              <div class="pcard-content-block">
-                <p class="pcard-desc" data-full-only>
-                  Paleta visual para o Spotifast, definida em um arquivo JSON. Explora cores e contraste na interface de um aplicativo de música.
-                </p>
-
-                <div class="tech-spec-pills" data-full-only>
-                  <span class="spec-pill">JSON</span>
-                  <span class="spec-pill">Spotifast</span>
-                  <span class="spec-pill">Tema visual</span>
-                </div>
-
-                <details class="project-xray" id="xray-4" data-full-only>
-                  <summary class="xray-summary">
-                    <span class="xray-summary-icon" aria-hidden="true">+</span>
-                    <span class="xray-summary-text">Como funciona (Raio-X Técnico)</span>
-                  </summary>
-                  <div class="xray-body">
-                    <div class="xray-flow" aria-label="Configuração do tema Spotifast">
-                      <div class="xray-step">
-                        <span class="xray-step-idx">01</span>
-                        <span class="xray-step-title">Arquivo de tema</span>
-                        <span class="xray-step-desc">neon.json reúne a paleta de cores</span>
-                      </div>
-                      <div class="xray-arrow" aria-hidden="true">&rarr;</div>
-                      <div class="xray-step">
-                        <span class="xray-step-idx">02</span>
-                        <span class="xray-step-title">Instalação</span>
-                        <span class="xray-step-desc">O arquivo vai para a pasta de temas do Spotifast</span>
-                      </div>
-                      <div class="xray-arrow" aria-hidden="true">&rarr;</div>
-                      <div class="xray-step">
-                        <span class="xray-step-idx">03</span>
-                        <span class="xray-step-title">Seleção</span>
-                        <span class="xray-step-desc">A paleta é escolhida nas configurações de aparência</span>
-                      </div>
-                      <div class="xray-arrow" aria-hidden="true">&rarr;</div>
-                      <div class="xray-step">
-                        <span class="xray-step-idx">04</span>
-                        <span class="xray-step-title">Integração</span>
-                        <span class="xray-step-desc">Efeitos animados dependem do suporte no aplicativo</span>
-                      </div>
-                    </div>
-                    <div class="xray-meta">
-                      <span class="xray-tag">Escopo:</span> Este repositório fornece a paleta; a integração dos efeitos pertence ao aplicativo.
-                    </div>
-                  </div>
-                </details>
-              </div>
-
-              <div class="pcard-action-block">
-                <a href="https://github.com/arthurMPBBY/spotifast-neon-theme" class="pcard-action-link" target="_blank" rel="noopener noreferrer">
-                  <span>Repositório</span>
-                  <span aria-hidden="true">&nearr;</span>
-                </a>
-              </div>
-            </div>
+            <p class="secondary-card-desc">
+              Paleta visual escura com destaques em contraste definida em arquivo <code>neon.json</code> para o aplicativo Spotifast.
+            </p>
           </article>
         </div>
       </div>
     </section>
 
-    <section class="section-block section-finance-lab" id="laboratorio" aria-labelledby="finance-lab-title" data-full-only>
+    <section class="section-block section-finance-anchor" id="laboratorio" aria-labelledby="finance-anchor-title" data-full-only>
       <div class="section-container">
         <header class="section-header">
           <div class="section-index-badge">
             <span class="section-index-num">02</span>
-            <span class="section-index-label">/ Laboratório interativo</span>
+            <span class="section-index-label">/ Laboratório Matemático</span>
           </div>
-          <h2 class="section-title" id="finance-lab-title">Simulador de Juros Compostos</h2>
+          <h2 class="section-title" id="finance-anchor-title">Experimente os números.</h2>
           <p class="section-subtitle">
-            Veja como o prazo e os aportes mudam um saldo. Simulação didática, sem cotações de mercado nem recomendação de investimento.
+            Um pequeno laboratório para explorar como prazo, taxa e aportes alteram o resultado ao longo do tempo.
           </p>
         </header>
-
-        <details class="finance-lab-details" id="finance-lab">
-          <summary class="finance-lab-summary">
-            <span class="flab-toggle-icon" aria-hidden="true">+</span>
-            <span class="flab-toggle-title">Simulador Financeiro: Aporte Mensal &amp; Taxa Anual Efetiva</span>
-            <span class="flab-toggle-tag">MÓDULO INTERATIVO</span>
-          </summary>
-
-          <div class="finance-lab-panel">
-            <p class="flab-method-note">Taxa anual efetiva convertida para mensal, com aportes no fim de cada mês. Não inclui impostos, taxas ou inflação.</p>
-            <div class="flab-grid">
-              <div class="flab-controls">
-                <div class="flab-field">
-                  <label for="finance-initial" class="flab-label">
-                    <span class="flab-label-text">Valor Inicial (R$)</span>
-                    <span class="flab-label-hint">0 a 1.000.000</span>
-                  </label>
-                  <div class="flab-input-prefix">
-                    <span class="currency-symbol">R$</span>
-                    <input type="number" id="finance-initial" class="flab-input" value="1000" min="0" max="1000000" step="100" aria-describedby="error-finance-initial">
-                  </div>
-                  <span id="error-finance-initial" class="flab-error" role="alert" hidden></span>
-                </div>
-
-                <div class="flab-field">
-                  <label for="finance-monthly" class="flab-label">
-                    <span class="flab-label-text">Aporte Mensal (R$)</span>
-                    <span class="flab-label-hint">0 a 10.000</span>
-                  </label>
-                  <div class="flab-input-prefix">
-                    <span class="currency-symbol">R$</span>
-                    <input type="number" id="finance-monthly" class="flab-input" value="100" min="0" max="10000" step="50" aria-describedby="error-finance-monthly">
-                  </div>
-                  <span id="error-finance-monthly" class="flab-error" role="alert" hidden></span>
-                </div>
-
-                <div class="flab-field">
-                  <label for="finance-rate-input" class="flab-label">
-                    <span class="flab-label-text">Taxa Anual Efetiva (%)</span>
-                    <span class="flab-label-hint">0% a 30%</span>
-                  </label>
-                  <div class="flab-slider-row">
-                    <input type="range" id="finance-rate-slider" class="flab-slider" min="0" max="30" step="0.25" value="12" aria-label="Taxa anual em porcentagem (slider)">
-                    <input type="number" id="finance-rate-input" class="flab-input flab-input-compact" min="0" max="30" step="0.25" value="12" aria-describedby="error-finance-rate" aria-label="Taxa anual em porcentagem (numérico)">
-                  </div>
-                  <span id="error-finance-rate" class="flab-error" role="alert" hidden></span>
-                </div>
-
-                <div class="flab-field">
-                  <label for="finance-months-input" class="flab-label">
-                    <span class="flab-label-text">Prazo (meses)</span>
-                    <span class="flab-label-hint">1 a 360 meses (até 30 anos)</span>
-                  </label>
-                  <div class="flab-slider-row">
-                    <input type="range" id="finance-months-slider" class="flab-slider" min="1" max="360" step="1" value="12" aria-label="Prazo em meses (slider)">
-                    <input type="number" id="finance-months-input" class="flab-input flab-input-compact" min="1" max="360" step="1" value="12" aria-describedby="error-finance-months" aria-label="Prazo em meses (numérico)">
-                  </div>
-                  <span id="error-finance-months" class="flab-error" role="alert" hidden></span>
-                </div>
-
-                <div class="flab-actions">
-                  <button type="button" id="finance-reset-btn" class="flab-reset-btn">Restaurar Valores Padrão</button>
-                </div>
-              </div>
-
-              <div class="flab-display">
-                <div class="flab-results-grid">
-                  <div class="flab-card flab-card-main">
-                    <span class="flab-card-label">Saldo Final Projetado</span>
-                    <strong class="flab-card-value" id="finance-res-balance">R$ 2.384,65</strong>
-                  </div>
-                  <div class="flab-card">
-                    <span class="flab-card-label">Total Aportado</span>
-                    <span class="flab-card-subvalue" id="finance-res-contributed">R$ 2.200,00</span>
-                  </div>
-                  <div class="flab-card">
-                    <span class="flab-card-label">Juros Acumulados</span>
-                    <span class="flab-card-subvalue flab-interest" id="finance-res-interest">R$ 184,65</span>
-                  </div>
-                </div>
-
-                <div class="flab-chart-wrapper">
-                  <div class="chart-header-row">
-                    <span class="chart-title">Evolução do Saldo vs. Aportes</span>
-                    <div class="chart-legend">
-                      <span class="legend-item"><span class="legend-dot dot-balance"></span>Saldo</span>
-                      <span class="legend-item"><span class="legend-dot dot-contributed"></span>Aportado</span>
-                    </div>
-                  </div>
-                  <svg id="finance-chart-svg" class="finance-chart-svg" viewBox="0 0 540 240" preserveAspectRatio="none" role="img" aria-label="Gráfico de evolução do saldo ao longo dos meses">
-                    <rect width="540" height="240" fill="transparent"/>
-                  </svg>
-                </div>
-
-                <details class="flab-milestones-details">
-                  <summary class="milestones-summary">Tabela de Marcos Anuais</summary>
-                  <div class="milestones-table-scroll">
-                    <table class="milestones-table">
-                      <thead>
-                        <tr>
-                          <th scope="col">Período</th>
-                          <th scope="col">Total Aportado</th>
-                          <th scope="col">Juros Acumulados</th>
-                          <th scope="col">Saldo Total</th>
-                        </tr>
-                      </thead>
-                      <tbody id="finance-milestones-body">
-                        <tr>
-                          <td>Mês 12 (Ano 1)</td>
-                          <td>R$ 2.200,00</td>
-                          <td>R$ 184,65</td>
-                          <td>R$ 2.384,65</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </details>
-              </div>
-            </div>
-
-            <noscript>
-              <div class="flab-noscript-notice">
-                <p><strong>Sem JavaScript:</strong> os valores exibidos são um exemplo fixo de 12 meses, com R$ 1.000 iniciais, R$ 100 por mês e taxa de 12% ao ano.</p>
-              </div>
-            </noscript>
-          </div>
-        </details>
+        <div class="finance-jump-card">
+          <p class="jump-card-text">
+            O laboratório usa taxa anual efetiva e aportes ao fim de cada mês. Teste os parâmetros na aba dedicada do observatório.
+          </p>
+          <a href="#panel-finance" class="action-btn btn-secondary">
+            <span>Acessar Simulador no Observatório</span>
+            <span class="btn-arrow" aria-hidden="true">&uarr;</span>
+          </a>
+        </div>
       </div>
     </section>
 
-    <section class="section-block" id="sobre" aria-labelledby="sobre-title">
+    <section class="section-block sobre-section" id="sobre" aria-labelledby="sobre-title">
       <div class="section-container">
         <header class="section-header">
           <div class="section-index-badge">
             <span class="section-index-num">03</span>
-            <span class="section-index-label">/ Em formação</span>
+            <span class="section-index-label">/ Trajetória &amp; Foco</span>
           </div>
           <h2 class="section-title" id="sobre-title">Sobre mim</h2>
           <p class="section-subtitle">
-            UFABC, 2º período. Aprendizado colocado em prática no código.
+            Universidade Federal do ABC &mdash; 2º período. Prática de programação e aspiração aplicada no mercado.
           </p>
         </header>
 
         <div class="sobre-editorial-grid">
           <div class="sobre-primary-column">
             <p class="sobre-lead-paragraph">
-              Sou Arthur Kadri de Oliveira, estudante na <strong>Universidade Federal do ABC, no 2º período</strong>. Meus projetos no GitHub passam por programação em C++ e Python, de telemetria a automação local.
+              Sou <strong>Arthur Kadri de Oliveira</strong>, estudante do <strong>2º período na Universidade Federal do ABC (UFABC)</strong>. Crio utilitários para Windows em C#, automações em Python e projetos de telemetria gráfica em C++.
             </p>
             <p class="sobre-body-paragraph">
-              Busco um <strong>estágio em mercado financeiro ou dados</strong> para aprender as rotinas da área e aplicar programação no tratamento de informações.
+              Busco meu primeiro <strong>estágio em mercado financeiro ou análise de dados</strong>, com espaço para aprender e aplicar programação na resolução de problemas reais.
             </p>
+            <div class="sobre-focus-points">
+              <div class="focus-item">
+                <span class="focus-bullet mint" aria-hidden="true">&#9632;</span>
+                <span><strong>Formação acadêmica:</strong> UFABC (2º período), base interdisciplinar.</span>
+              </div>
+              <div class="focus-item">
+                <span class="focus-bullet silver" aria-hidden="true">&#9632;</span>
+                <span><strong>Programação prática:</strong> C#, Python e C++ com código aberto.</span>
+              </div>
+              <div class="focus-item">
+                <span class="focus-bullet mint" aria-hidden="true">&#9632;</span>
+                <span><strong>Objetivo profissional:</strong> Estágio em mercado financeiro ou equipes de dados.</span>
+              </div>
+            </div>
           </div>
 
           <aside class="sobre-sidebar-column" data-full-only aria-hidden="true">
-            <div class="hero-art-container about-art-cloud" data-morph-progress="0" aria-label="Escultura vetorial perolada representando nuvem de dados" data-full-only>
+            <div class="hero-art-container about-art-cloud" data-morph-progress="0" aria-label="Escultura vetorial representando nuvem de dados">
               <svg class="art-svg-stage" aria-hidden="true" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <defs>
                   <radialGradient id="sunCoronaGlow" cx="50%" cy="50%" r="50%">
-                    <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95" />
-                    <stop offset="38%" stop-color="#fdf8f6" stop-opacity="0.75" />
-                    <stop offset="68%" stop-color="#ebd7d1" stop-opacity="0.32" />
-                    <stop offset="86%" stop-color="#c16b59" stop-opacity="0.12" />
-                    <stop offset="100%" stop-color="#f5f5f3" stop-opacity="0" />
+                    <stop offset="0%" stop-color="#ffffff" stop-opacity="0.8" />
+                    <stop offset="50%" stop-color="#a6d6c0" stop-opacity="0.25" />
+                    <stop offset="100%" stop-color="#080a0c" stop-opacity="0" />
                   </radialGradient>
                   <radialGradient id="pearlescentCore" cx="44%" cy="36%" r="62%">
-                    <stop offset="0%" stop-color="#ffffff" stop-opacity="0.98" />
-                    <stop offset="35%" stop-color="#fcf9f7" stop-opacity="0.92" />
-                    <stop offset="70%" stop-color="#f2e2de" stop-opacity="0.84" />
-                    <stop offset="100%" stop-color="#dfb3a7" stop-opacity="0.58" />
+                    <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95" />
+                    <stop offset="60%" stop-color="#e2e8f0" stop-opacity="0.8" />
+                    <stop offset="100%" stop-color="#a6d6c0" stop-opacity="0.35" />
                   </radialGradient>
                   <radialGradient id="pearlUnderlay" cx="52%" cy="64%" r="58%">
-                    <stop offset="0%" stop-color="#ffffff" stop-opacity="0.75" />
-                    <stop offset="55%" stop-color="#dfb3a7" stop-opacity="0.45" />
-                    <stop offset="100%" stop-color="#585d66" stop-opacity="0.18" />
+                    <stop offset="0%" stop-color="#ffffff" stop-opacity="0.5" />
+                    <stop offset="100%" stop-color="#141922" stop-opacity="0.2" />
                   </radialGradient>
-                  <linearGradient id="orbitRingGradient1" x1="40" y1="40" x2="460" y2="460" gradientUnits="userSpaceOnUse">
-                    <stop offset="0%" stop-color="#c16b59" stop-opacity="0.88" />
-                    <stop offset="48%" stop-color="#dfb3a7" stop-opacity="0.6" />
-                    <stop offset="78%" stop-color="#585d66" stop-opacity="0.3" />
-                    <stop offset="100%" stop-color="#25272b" stop-opacity="0.08" />
-                  </linearGradient>
-                  <linearGradient id="orbitRingGradient2" x1="460" y1="60" x2="60" y2="440" gradientUnits="userSpaceOnUse">
-                    <stop offset="0%" stop-color="#25272b" stop-opacity="0.45" />
-                    <stop offset="36%" stop-color="#c16b59" stop-opacity="0.75" />
-                    <stop offset="72%" stop-color="#dfb3a7" stop-opacity="0.3" />
-                    <stop offset="100%" stop-color="#ffffff" stop-opacity="0.1" />
-                  </linearGradient>
-                  <linearGradient id="orbitRingGradient3" x1="120" y1="250" x2="380" y2="250" gradientUnits="userSpaceOnUse">
-                    <stop offset="0%" stop-color="#c16b59" stop-opacity="0.65" />
-                    <stop offset="50%" stop-color="#25272b" stop-opacity="0.25" />
-                    <stop offset="100%" stop-color="#c16b59" stop-opacity="0.5" />
-                  </linearGradient>
                 </defs>
 
                 <g class="sculpture-layer layer-corona">
                   <circle cx="250" cy="250" r="162" fill="url(#sunCoronaGlow)" />
-                  <ellipse cx="250" cy="250" rx="196" ry="196" stroke="#c16b59" stroke-opacity="0.14" stroke-width="1" stroke-dasharray="2 12" />
-                  <ellipse cx="250" cy="250" rx="172" ry="172" stroke="#585d66" stroke-opacity="0.1" stroke-width="0.8" stroke-dasharray="4 8" />
                 </g>
-
-                <g class="sculpture-layer layer-ribbons-outer">
-                  <ellipse cx="250" cy="250" rx="198" ry="76" stroke="url(#orbitRingGradient1)" stroke-width="1.8" stroke-dasharray="8 6" transform="rotate(-26 250 250)" class="svg-orbit-outer" />
-                  <circle cx="418" cy="172" r="7.5" fill="#c16b59" class="svg-sat-coral-large" />
-                  <circle cx="418" cy="172" r="12" stroke="#c16b59" stroke-width="1" stroke-opacity="0.25" />
-                  <circle cx="82" cy="328" r="4.5" fill="#25272b" fill-opacity="0.6" />
-                </g>
-
-                <g class="sculpture-layer layer-ribbons-tertiary">
-                  <ellipse cx="250" cy="250" rx="162" ry="58" stroke="url(#orbitRingGradient3)" stroke-width="1.3" stroke-dasharray="5 7" transform="rotate(-62 250 250)" class="svg-orbit-tertiary" />
-                  <circle cx="250" cy="92" r="4" fill="#c16b59" fill-opacity="0.9" />
-                  <circle cx="250" cy="408" r="3.5" fill="#585d66" fill-opacity="0.5" />
-                </g>
-
-                <g class="sculpture-layer layer-ribbons-inner">
-                  <ellipse cx="250" cy="250" rx="136" ry="52" stroke="url(#orbitRingGradient2)" stroke-width="1.5" stroke-dasharray="5 5" transform="rotate(35 250 250)" class="svg-orbit-inner" />
-                  <circle cx="158" cy="190" r="4.5" fill="#c16b59" />
-                  <circle cx="342" cy="310" r="5.5" fill="#585d66" fill-opacity="0.55" />
-                  <circle cx="342" cy="310" r="9.5" stroke="#c16b59" stroke-width="1" stroke-opacity="0.2" />
-                </g>
-
                 <g class="sculpture-layer layer-core-sculpture svg-cloud-sculpture">
-                  <path d="M 162 284 C 136 284 116 262 116 236 C 116 211 133 190 156 188 C 164 156 192 133 228 133 C 267 133 297 160 303 196 C 310 193 318 191 326 191 C 349 191 368 209 368 232 C 368 235 367 238 366 241 C 379 246 388 260 388 275 C 388 297 371 314 348 314 L 162 314 Z" fill="url(#pearlUnderlay)" stroke="#dfb3a7" stroke-width="1" stroke-opacity="0.45" class="sculpture-underbillow" />
-                  <path d="M 170 280 C 145 280 125 260 125 235 C 125 212 142 193 164 191 C 172 163 198 142 230 142 C 265 142 293 167 298 200 C 304 197 311 195 318 195 C 339 195 356 212 356 233 C 356 235 355 238 355 240 C 367 245 375 258 375 272 C 375 292 359 308 339 308 L 170 308 C 150 308 135 296 135 280 Z" fill="url(#pearlescentCore)" stroke="#e4e4de" stroke-width="1.6" class="sculpture-mainbillow" />
-                  <path d="M 145 263 C 210 306 326 144 355 223" stroke="#c16b59" stroke-width="1.4" stroke-linecap="round" fill="none" stroke-opacity="0.4" class="sculpture-filament-primary" />
-                  <path d="M 153 251 C 218 294 326 133 361 214" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" fill="none" stroke-opacity="0.8" class="sculpture-filament-secondary" />
-                </g>
-
-                <g class="sculpture-layer layer-sparks">
-                  <circle cx="185" cy="145" r="2.2" fill="#c16b59" fill-opacity="0.75" class="sculpture-spark spark-1" />
-                  <circle cx="325" cy="158" r="1.8" fill="#585d66" fill-opacity="0.5" class="sculpture-spark spark-2" />
-                  <circle cx="385" cy="215" r="2.8" fill="#dfb3a7" fill-opacity="0.8" class="sculpture-spark spark-3" />
-                  <circle cx="125" cy="265" r="2.2" fill="#c16b59" fill-opacity="0.65" class="sculpture-spark spark-4" />
-                  <circle cx="295" cy="335" r="1.8" fill="#25272b" fill-opacity="0.45" class="sculpture-spark spark-5" />
+                  <path d="M 162 284 C 136 284 116 262 116 236 C 116 211 133 190 156 188 C 164 156 192 133 228 133 C 267 133 297 160 303 196 C 310 193 318 191 326 191 C 349 191 368 209 368 232 C 368 235 367 238 366 241 C 379 246 388 260 388 275 C 388 297 371 314 348 314 L 162 314 Z" fill="url(#pearlUnderlay)" stroke="#a6d6c0" stroke-width="1" stroke-opacity="0.35" class="sculpture-underbillow" />
+                  <path d="M 170 280 C 145 280 125 260 125 235 C 125 212 142 193 164 191 C 172 163 198 142 230 142 C 265 142 293 167 298 200 C 304 197 311 195 318 195 C 339 195 356 212 356 233 C 356 235 355 238 355 240 C 367 245 375 258 375 272 C 375 292 359 308 339 308 L 170 308 C 150 308 135 296 135 280 Z" fill="url(#pearlescentCore)" stroke="#e2e8f0" stroke-width="1.6" class="sculpture-mainbillow" />
                 </g>
               </svg>
             </div>
-
           </aside>
         </div>
       </div>
     </section>
 
-    <section class="section-block" id="contato" aria-labelledby="contato-title">
+    <section class="section-block contact-section" id="contato" aria-labelledby="contato-title">
       <div class="section-container">
         <header class="section-header">
           <div class="section-index-badge">
             <span class="section-index-num">04</span>
-            <span class="section-index-label">/ Contato</span>
+            <span class="section-index-label">/ Conexão</span>
           </div>
-          <h2 class="section-title contact-title" id="contato-title">Vamos conversar?</h2>
+          <h2 class="section-title" id="contato-title">Vamos conversar?</h2>
           <p class="section-subtitle">
-            Aberto a conversas sobre oportunidades de estágio em tecnologia, análise de dados e mercado financeiro.
+            Disponível para contato e aberto a oportunidades de estágio em mercado financeiro, análise de dados e engenharia de software.
           </p>
         </header>
 
         <div class="contact-editorial-card">
           <div class="contact-main-info">
-            <p class="contact-card-kicker">CANAL DE CONTATO DIRETO</p>
+            <span class="contact-card-kicker">CANAL DE CONTATO DIRETO</span>
             <div class="contact-email-box">
               <span class="email-display" id="contact-email-text">arthurkadri968@gmail.com</span>
               <div class="contact-btn-group">
-                <button class="copy-email-btn" type="button" data-copy-email aria-label="Copiar endereço de e-mail para a área de transferência">
-                  <svg viewBox="0 0 16 16" class="copy-icon" aria-hidden="true">
-                    <path d="M5 2h7a1 1 0 011 1v7m-3 4H4a1 1 0 01-1-1V6a1 1 0 011-1h6a1 1 0 011 1v7a1 1 0 01-1 1z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                <button class="action-btn btn-primary" type="button" data-copy-email aria-label="Copiar endereço de e-mail para a área de transferência">
+                  <svg viewBox="0 0 16 16" width="14" height="14" class="copy-icon" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M5 2h7a1 1 0 011 1v7m-3 4H4a1 1 0 01-1-1V6a1 1 0 011-1h6a1 1 0 011 1v7a1 1 0 01-1 1z"/>
                   </svg>
-                  <span class="copy-btn-label">Copiar E-mail</span>
+                  <span>Copiar E-mail</span>
                 </button>
-                <a href="mailto:arthurkadri968@gmail.com" class="mailto-link-btn" aria-label="Enviar e-mail para arthurkadri968@gmail.com">
-                  <svg viewBox="0 0 16 16" class="copy-icon" aria-hidden="true">
-                    <path d="M2 3.5A1.5 1.5 0 0 1 3.5 2h9A1.5 1.5 0 0 1 14 3.5v9a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 12.5v-9zm1.75.5a.25.25 0 0 0-.25.25v.379l4.5 3.15 4.5-3.15V4.25a.25.25 0 0 0-.25-.25h-8.5zm8.5 7.75V6.321L8.28 9.098a.5.5 0 0 1-.56 0L3.5 6.321v5.429c0 .138.112.25.25.25h8.5a.25.25 0 0 0 .25-.25z" fill="currentColor"/>
+                <a href="mailto:arthurkadri968@gmail.com" class="action-btn btn-secondary" aria-label="Enviar e-mail para arthurkadri968@gmail.com">
+                  <svg viewBox="0 0 16 16" width="14" height="14" class="copy-icon" aria-hidden="true" fill="currentColor">
+                    <path d="M2 3.5A1.5 1.5 0 0 1 3.5 2h9A1.5 1.5 0 0 1 14 3.5v9a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 12.5v-9zm1.75.5a.25.25 0 0 0-.25.25v.379l4.5 3.15 4.5-3.15V4.25a.25.25 0 0 0-.25-.25h-8.5zm8.5 7.75V6.321L8.28 9.098a.5.5 0 0 1-.56 0L3.5 6.321v5.429c0 .138.112.25.25.25h8.5a.25.25 0 0 0 .25-.25z"/>
                   </svg>
                   <span>Abrir</span>
                 </a>
@@ -721,18 +761,22 @@
           </div>
 
           <div class="contact-profiles-block">
-            <h4>Perfis Profissionais</h4>
+            <h4 class="contact-profiles-heading">Perfis Profissionais</h4>
             <div class="contact-links-grid">
-              <a href="https://github.com/arthurMPBBY" class="contact-profile-link" target="_blank" rel="noopener noreferrer">
-                <span class="profile-network-name">GitHub</span>
+              <a href="https://github.com/arthurMPBBY" class="contact-profile-card" target="_blank" rel="noopener noreferrer">
+                <div class="profile-card-top">
+                  <span class="profile-network-name">GitHub</span>
+                  <span class="profile-arrow" aria-hidden="true">&nearr;</span>
+                </div>
                 <span class="profile-network-handle">github.com/arthurMPBBY</span>
-                <span class="profile-arrow" aria-hidden="true">&nearr;</span>
               </a>
 
-              <a href="https://www.linkedin.com/in/arthur-kadri-de-oliveira-2586a12b2/" class="contact-profile-link" target="_blank" rel="noopener noreferrer">
-                <span class="profile-network-name">LinkedIn</span>
+              <a href="https://www.linkedin.com/in/arthur-kadri-de-oliveira-2586a12b2/" class="contact-profile-card" target="_blank" rel="noopener noreferrer">
+                <div class="profile-card-top">
+                  <span class="profile-network-name">LinkedIn</span>
+                  <span class="profile-arrow" aria-hidden="true">&nearr;</span>
+                </div>
                 <span class="profile-network-handle">Arthur Kadri de Oliveira</span>
-                <span class="profile-arrow" aria-hidden="true">&nearr;</span>
               </a>
             </div>
           </div>
@@ -745,19 +789,18 @@
     <div class="footer-inner">
       <div class="footer-left">
         <span class="footer-brand">Arthur Kadri de Oliveira</span>
-        <span class="footer-sep">·</span>
-        <span class="footer-academic">UFABC · 2º Período</span>
+        <span class="footer-sep" aria-hidden="true">&middot;</span>
+        <span class="footer-academic">UFABC &middot; 2º Período</span>
       </div>
       <div class="footer-right">
-        <span class="footer-copy">Projetos pessoais e código aberto no GitHub.</span>
+        <span class="footer-copy">Portfólio estático com projetos abertos no GitHub.</span>
       </div>
     </div>
   </footer>
 
-  <script src="cloud-morph.js?v=20261028-smooth-neutral"></script>
-  <script src="finance-lab.js?v=20261028-smooth-neutral"></script>
-  <script src="portfolio-extras.js?v=20261028-smooth-neutral"></script>
-  <script src="reactive-dots.js?v=20261028-smooth-neutral"></script>
-  <script src="script.js?v=20261028-smooth-neutral"></script>
+  <script src="cloud-morph.js?v=20261029-immersive"></script>
+  <script src="finance-lab.js?v=20261029-immersive"></script>
+  <script src="immersive-scene.js?v=20261029-immersive"></script>
+  <script src="script.js?v=20261029-immersive"></script>
 </body>
 </html>
