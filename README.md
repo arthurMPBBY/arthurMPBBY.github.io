@@ -1,79 +1,101 @@
-# Arthur Kadri — Portfólio & Observatório de Sistemas
+# Arthur Kadri de Oliveira &mdash; Portfólio de Projetos &amp; Atlas Espacial
 
-Portfólio estático pessoal desenvolvido para apresentar projetos práticos de programação em C#, Python e C++, demonstrando implementações de utilitários de sistema, automação de rede e modelagem quantitativa, além da busca por estágio no mercado financeiro ou em análise de dados.
+Portfólio interativo de projetos desenvolvido sob uma interface bidimensional (Atlas Espacial) e modo editorial de leitura direta. Reúne projetos práticos desenvolvidos em C#, Python e C++, abrangendo utilitários para Windows, automação de rede, observação gráfica e modelagem quantitativa.
 
-Publicação de referência: https://arthurmpbby.github.io/
-
----
-
-## Direção Visual & Arquitetura
-
-Experiência imersiva inspirada na sofisticação tipográfica editorial e cenários espaciais interativos (como Remix e o portfólio de Guillaume Colombel), desenvolvida inteiramente com código e identidade gráfica próprios, sem cópia de marcas, ativos externos ou dependências de runtime.
-
-- **Paleta de cores:** Base em grafite profundo (`#080a0c`, `#0e1217`, `#141922`), superfícies translúcidas em vidro escuro e tinta clara (`#f8fafc`, `#e2e8f0`, `#94a3b8`), com realces comedidos em verde marinho desaturado sea-glass (`#a6d6c0`, `rgba(166, 214, 192, 0.16)`) e prata (`#e2e8f0`). Cores como roxo, azul neon e preenchimentos marrons foram expressamente evitados.
-- **Tipografia editorial:** Títulos monumentais e cabeçalhos em Plus Jakarta Sans com tracking preciso, corpo de leitura em DM Sans e identificadores/telemetria em JetBrains Mono.
-- **Hero Landscape integrado:** Composição de abertura em paisagem contínua de largura total. Título monumental `ARTHUR KADRI` sobreposto a uma malha densa de partículas e nota pessoal flutuada no quadrante inferior esquerdo com links discretos de navegação, sem caixas de bio opacas ou badges duplicados.
-- **Cenário espacial determinístico (`immersive-scene.js`):** Malha em Canvas 2D com projeção tridimensional em perspectiva, sem WebGL ou biblioteca 3D. Opera com 6.400 partículas em desktop (grade 80×80) e 1.600 em telas menores que 768px (40×40); o tamanho projetado varia com a profundidade. O canvas fixo fica fora dos contêineres recortados, aparece na abertura e nos projetos e é ocultado quando ambos saem da tela. As abas alteram sua geometria:
-  - *Visão Geral / Hero:* Terreno com um vale de partículas, sem rotação automática ou carregamento bloqueante.
-  - *YAHCW:* Planos quadrangulares de janelas suspensas em camadas de profundidade z com âncoras de canto.
-  - *tuya-smart-lamps:* Barramento local com nós de comunicação e órbita elíptica tridimensional representando a nuvem.
-  - *gaming-fps-hud:* Corredor de telemetria em 8 faixas paralelas com ondas harmônicas e perfil de oscilação 1% low.
-  - *Laboratório Financeiro:* Superfície geométrica exponencial de juros compostos com nervuras em profundidade.
-- **Eficiência e repouso de animação:** Bounded RAF settling que interrompe a execução contínua de quadros quando a interpolação atinge estabilidade ou quando o cursor permanece estático. O DPR é limitado a 2 com limpeza integral de backing store. A execução é suspensa via `IntersectionObserver` quando a área visível sai da tela, quando a aba fica oculta (`document.hidden`), quando as animações são pausadas ou no modo resumido.
+- **Autor:** Arthur Kadri de Oliveira
+- **Formação:** Graduando na Universidade Federal do ABC (UFABC &mdash; 2º período)
+- **Objetivo Profissional:** Primeiro estágio em **análise de dados ou mercado financeiro** (sem reivindicação de experiência corporativa anterior nessas áreas)
+- **E-mail:** arthurkadri968@gmail.com
+- **GitHub:** [arthurMPBBY](https://github.com/arthurMPBBY)
+- **LinkedIn:** [Arthur Kadri de Oliveira](https://www.linkedin.com/in/arthur-kadri-de-oliveira-2586a12b2/)
+- **Publicação:** https://arthurmpbby.github.io/
 
 ---
 
-## Projetos Apresentados & Demonstrações Interativas
+## Estrutura do Atlas e Modos de Navegação
+
+O projeto oferece duas formas complementares de navegação:
+
+1. **Atlas Espacial (Navegação Não Linear):**
+   - Sistema de coordenadas mundiais contínuo com origem centralizada em `(0, 0)`.
+   - Âncora tipográfica central e 6 objetos arquiteturais livres dispostos em constelação espacial.
+   - Navegação por arrasto de ponteiro/touch, zoom ancorado no cursor do mouse e radar/minimapa de orientação.
+   - Controles visíveis de zoom no rodapé para uso confortável em dispositivos móveis e desktop.
+   - Detecção estrita de intenção: deslocamentos de ponteiro superiores a 6 pixels são classificados como arrasto e não ativam abertura indesejada de salas.
+
+2. **Modo Leitura Direta (Linear):**
+   - Acessível pelo cabeçalho ("Leitura direta") ou via hash `#leitura`.
+   - Layout linear focado em leitura sequencial e impressão/revisão ágil por recrutadores.
+   - Desativa a captura de teclado e gestos da câmera para permitir rolagem vertical nativa.
+
+---
+
+## Projetos em Destaque
 
 ### 1. YAHCW (Yet Another Hot Corners for Windows)
-- **Tecnologias:** C# / .NET 4.5+, WinForms, Win32 API, Desktop Window Manager (DWM).
-- **Descrição:** Utilitário nativo para Windows que combina navegação por cantos de tela com visão geral de miniaturas em tempo real (DWM API), ajuste de brilho dos monitores via Named Pipe local seguro com o assistente BrightTray e comutação ágil de dispositivos de saída de áudio via interface COM `IPolicyConfig`.
-- **Demonstração interativa in-page:** Mini-desktop ilustrativo com gatilho de canto superior esquerdo e botão direto para abrir a Visão Geral de Janelas, ajuste de brilho no slider que altera a luminosidade da demonstração e seletor de áudio dinâmico responsivo sem sobreposição.
-- **Transparência técnica:** A demonstração no navegador é estritamente ilustrativa e não controla o computador hospedeiro. No software nativo, o ajuste de brilho depende de suporte do monitor a DDC/CI ou WMI, e o utilitário não oferece garantia de sobreposição em jogos executando em modo exclusivo ou sob anti-cheats de kernel.
+- **Tecnologias:** C#, .NET, WinForms, Win32 API, Desktop Window Manager (DWM).
+- **Descrição:** Utilitário nativo de produtividade para Windows que ativa cantos de tela (hot corners), compõe miniaturas em tempo real via DWM, comuta endpoints de áudio via interface COM `IPolicyConfig` e integra ajuste de luminância via DDC/CI com o processo auxiliar `BrightTray`.
+- **Ressalva Técnica & Demonstração Web:** A demonstração integrada no navegador é ilustrativa e utiliza filtro CSS de brilho para visualização conceitual; o projeto desktop em C# comunica-se com os monitores externos via barramento I2C/DDC (opcodes VCP `0x10`) e WMI.
+- **Repositório:** [github.com/arthurMPBBY/YAHCW](https://github.com/arthurMPBBY/YAHCW)
 
 ### 2. tuya-smart-lamps
-- **Tecnologias:** Python 3, Sockets TCP, Server-Sent Events (SSE), Tuya Cloud OpenAPI, Android.
-- **Descrição:** Sistema de controle para lâmpadas inteligentes priorizando conexões TCP locais persistentes na rede Wi-Fi e alternando automaticamente para a Tuya OpenAPI em nuvem caso a rota local não responda.
-- **Playground in-page:** Simulação ilustrativa com chaveamento de lâmpada, seleção de rota (Local vs Nuvem) e teste de contingência ao simular perda do enlace local.
+- **Tecnologias:** Python 3, Sockets TCP, OpenAPI Tuya.
+- **Descrição:** Automação de rede para lâmpadas inteligentes priorizando comunicação persistente direta via socket TCP na rede local (porta 6668). Em caso de queda ou timeout local, aciona automaticamente o fallback para a OpenAPI da Tuya em nuvem.
+- **Ressalva Técnica & Demonstração Web:** Os tempos de latência exibidos no simulador didático (4ms local vs 148ms nuvem) são valores simulados para exemplificar a transição entre rede local e trânsito externo; SSE é empregado como evento de UI na aplicação.
+- **Repositório:** [github.com/arthurMPBBY/tuya-smart-lamps](https://github.com/arthurMPBBY/tuya-smart-lamps)
 
 ### 3. gaming-fps-hud
 - **Tecnologias:** C++17, Vulkan API (`vkQueuePresentKHR`), Qt 6 Quick, KDE Wayland.
-- **Descrição:** Camada em C++17 para ambientes Linux/Wayland que observa chamadas de apresentação da API Vulkan, calculando métricas de tempo de quadro e 1% lows. Emite snapshots JSON atômicos consumidos por um HUD independente em Qt sem bloquear o pipeline gráfico da aplicação.
-- **Demonstração in-page:** Observador com três cenários de teste sintéticos (carga estável, compilação de shaders e carga elevada) e visualização do payload JSON gerado.
+- **Descrição:** Camada de observação em C++17 para chamadas `vkQueuePresentKHR` na fila gráfica da GPU, capturando tempos de quadro e 1% lows através de relógio monotônico de alta precisão (`std::chrono::steady_clock`), estruturados em snapshots JSON atômicos consumidos por um HUD independente em Qt 6.
+- **Ressalva Técnica & Demonstração Web:** A demonstração na página exibe cenários sintéticos pré-calculados (144 FPS estável, stutter de shaders e carga em 60 FPS) para validação da interface.
+- **Repositório:** [github.com/arthurMPBBY/gaming-fps-hud](https://github.com/arthurMPBBY/gaming-fps-hud)
 
-### 4. Simulador de Juros Compostos (Laboratório Financeiro)
-- **Motor matemático (`finance-lab.js`):** Implementação pura preservada, convertendo taxa anual efetiva para taxa mensal equivalente `taxaMensal = (1 + taxaAnual / 100) ** (1 / 12) - 1`, com aportes no final de cada período e visualização gráfica em SVG reativo. Validação estrita de número inteiro de meses (1 a 360), preservando gráficos anteriores em caso de entrada incorreta.
-- **Propósito:** Demonstração didática de modelagem quantitativa, sem fins de consultoria ou recomendação de investimentos.
+### 4. python-curso (Fundamentos & Algoritmos)
+- **Tecnologias:** Python 3, Estruturas de Dados Básicas, UFABC.
+- **Descrição:** Repositório de exercícios práticos desenvolvidos durante a graduação na UFABC, cobrindo operações fundamentais com conjuntos (`set.difference`), manipulação de listas, cálculos numéricos de capitalização e leitura defensiva de arquivos com context managers.
+- **Repositório:** [github.com/arthurMPBBY/python-curso](https://github.com/arthurMPBBY/python-curso)
 
-### 5. Repositórios Complementares
-- `python-curso`: Exercícios práticos de fundamentos da linguagem Python: cálculos numéricos e manipulação de listas e conjuntos.
-- `spotifast-neon-theme`: Paleta de cores em formato JSON para o tema escuro do aplicativo Spotifast.
+### 5. spotifast-neon-theme
+- **Tecnologias:** JSON, Design Tokens.
+- **Descrição:** Especificação estruturada de paleta de cores e tokens em formato JSON (`neon.json`) para tema de alto contraste, com documentação clara de valores hexadecimais para fundos, superfícies e cores de destaque.
+- **Repositório:** [github.com/arthurMPBBY/spotifast-neon-theme](https://github.com/arthurMPBBY/spotifast-neon-theme)
+
+### 6. Laboratório Financeiro (Simulador de Juros Compostos)
+- **Tecnologias:** Modelagem Quantitativa, Taxa Efetiva, JavaScript determinístico (`finance-lab.js`), SVG Reativo.
+- **Descrição:** Simulador de evolução patrimonial com cálculo rigoroso de taxa equivalente mensal a partir da taxa anual efetiva fornecida:
+  $$\text{taxaMensal} = (1 + \text{taxaAnual} / 100)^{1/12} - 1$$
+  calculada via `Math.expm1(Math.log1p(annualRatePercent / 100) / 12)`.
+- **Caso de Validação Canônico:** R$ 1.000 de valor inicial + R$ 100/mês a 12% a.a. efetiva por 12 meses resulta em:
+  - Saldo final acumulado: **R$ 2.384,65**
+  - Total aportado: **R$ 2.200,00**
+  - Juros acumulados: **R$ 184,65**
+  - Taxa mensal equivalente: **0,95% a.m.**
+- **Validação Estrita:** Prazos fracionários (ex: 12.5 meses) ou entradas inválidas são rejeitadas pelo formulário com mensagem diagnóstica clara, preservando intactos o gráfico e os resultados do último cálculo válido.
 
 ---
 
-## Acessibilidade, Controles e Resiliência
+## Acessibilidade & Recursos Técnicos
 
-- **Navegação nativa e sem hijacking:** Rolagem nativa do navegador e navegação direta por fragmentos hash (`#hero`, `#projetos`, `#laboratorio`, `#sobre`, `#contato`) totalmente preservadas. O hash `#laboratorio` ativa a aba de cálculo financeiro e rola o simulador diretamente à visualização.
-- **Controle de Animações:** Botão acessível com persistência em `localStorage` sob a chave `arthur_portfolio_motion` com guarda contra falhas (`try/catch` para modo anônimo ou restrições de sandbox). Respeita preferência do sistema operacional `prefers-reduced-motion`.
-- **Modo "Tenho 20 segundos":** Alternador rápido que oculta blocos detalhados e apresenta os fatos essenciais e contatos imediatamente, preservando o foco do teclado no botão acionador.
-- **Degradação graciosa (Sem JavaScript):** Toda a estrutura semântica de textos, links de repositórios, advertências técnicas e canais de contato permanece visível no fluxo normal do documento caso o JavaScript esteja desabilitado.
-- **Responsividade:** Testado sem transbordamento horizontal em larguras de 320px, 390px, 768px e 1440px; há verificação adicional de buffer em 800×1600 com DPR 2. São emulações no Edge, não testes em aparelhos físicos.
+- **Navegação Completa por Teclado:**
+  - `Esc`: fecha salas ativas, modais ou modo de leitura, restaurando a visão geral do Atlas e reposicionando o foco no objeto de origem (inclusive quando o foco está em inputs ou selects).
+  - `Setas Esquerda/Direita`: navegam entre projetos adjacentes quando dentro de uma sala.
+  - `Setas do Teclado`: deslocam a câmera espacial quando no modo Atlas.
+  - `+` / `-`: ajuste gradual de zoom espacial.
+  - `0`: restaura o enquadramento de visão geral (Overview Fit).
+- **Semântica e Leitores de Tela:**
+  - Estrutura de títulos semânticos (`h1` central acessível, `h2` em cada objeto e sala).
+  - Região de anúncios dinâmicos (`aria-live="polite"`).
+  - Atributo `inert` aplicado ao viewport quando uma sala ou leitura direta está aberta, impedindo que o foco vaze para o plano de fundo.
+- **Degradação sem JavaScript:**
+  - Disponibilidade de bloco `<noscript>` com sumário completo, links diretos e dados de contato.
+- **Respeito a Preferências de Movimento:**
+  - Suporte à media query `prefers-reduced-motion: reduce` e botão manual para pausar animações na interface.
 
----
+## Verificação da entrega
 
-## Verificação Automatizada (QA Headless CDP)
-
-A validação de integridade foi executada via Microsoft Edge headless utilizando o protocolo Chrome DevTools (CDP) através do script `outputs/immersive-qa.cjs`, registrando resultados em `outputs/immersive-qa.json` e capturas de tela:
-
-- `outputs/immersive-desktophero.png`: Composição de abertura monumental em desktop 1440x900.
-- `outputs/immersive-explorerYAHCW.png`: Observatório com aba YAHCW ativa, controles alinhados e mini-desktop interativo.
-- `outputs/immersive-project-tuya.png`: Transição do observatório para tuya-smart-lamps.
-- `outputs/immersive-project-gaming.png`: Transição do observatório para gaming-fps-hud.
-- `outputs/immersive-brief.png`: Modo "Tenho 20 segundos" ativado.
-- `outputs/immersive-contact.png`: Seção de contato com botão de cópia de e-mail.
-- `outputs/immersive-mobile.png`: Layout renderizado em viewport móvel de 390x844.
-- `outputs/immersive-nojs.png`: Layout estático com JavaScript desabilitado demonstrando leitura integral de todos os projetos.
-
-Revisão independente do coordenador: `outputs/immersive-sol-review.cjs`, com relatório em `outputs/immersive-sol-review.json`. A suíte abre perfil temporário em porta dinâmica, sem desabilitar a segurança do navegador. O teste gráfico usa renderização por software (`--disable-gpu`): uma execução com aceleração travou na captura de screenshot deste ambiente e foi encerrada, sem que isso fosse contado como aprovação. A suíte concluída instrumenta callbacks reais de RAF e lê pixels do canvas para diferenciar terreno, janelas e rota Tuya; também cobre preferência real de movimento reduzido via CDP, repouso com ponteiro parado, canvas fora da tela, modo resumido, controles móveis, foco/Escape, prazo fracionário inválido, execução sem JS e falhas lançadas por Canvas e Storage.
-
-O laboratório usa números de ponto flutuante JavaScript, sem arredondamento intermediário e com formatação monetária apenas na apresentação; não representa aritmética decimal exata nem um produto de investimento. As demonstrações de Windows, lâmpadas e HUD não acessam hardware ou métricas reais. `cloud-morph.js` permanece intacto e é usado como ilustração secundária; os arquivos legados `reactive-dots.js` e `portfolio-extras.js` não são carregados. Fontes externas usam fallback de sistema. Os resultados automatizados não substituem verificação em Safari, Firefox ou dispositivos físicos.
+- Revisão independente: outputs/atlas-sol-review.cjs; resultados em outputs/atlas-sol-review.json no workspace de desenvolvimento.
+- Entradas reais de mouse e toque, arrasto, zoom, histórico, Escape dentro de campos, isolamento do atlas e leitura sem captura de setas.
+- Testes das seis salas em 320, 390, 768 e 1440px, incluindo largura interna e acesso aos controles do cabeçalho e dock.
+- Falhas de Canvas e Storage injetadas antes da inicialização, movimento reduzido dinâmico, repouso de RAF e fallback sem JavaScript com rolagem nativa.
+- Demonstrações são ilustrativas: métricas e mudanças visuais no navegador não medem nem controlam o hardware real.
+- Testes feitos em Edge headless com renderização por software. Não equivalem a validação em aparelhos físicos, Safari ou Firefox.

@@ -8,10 +8,22 @@
   const EMAIL_ADDRESS = 'arthurkadri968@gmail.com';
   const STORAGE_MOTION_KEY = 'arthur_portfolio_motion';
 
+  // Coordenadas espaciais dos 6 objetos livres (origem 0,0 centralizada)
+  const PROJECT_COORDINATES = {
+    yahcw: { coordX: -440, coordY: -220, zoom: 1.15 },
+    tuya: { coordX: 440, coordY: -220, zoom: 1.15 },
+    gaming: { coordX: -450, coordY: 220, zoom: 1.15 },
+    python: { coordX: 450, coordY: 220, zoom: 1.15 },
+    spotifast: { coordX: 0, coordY: -350, zoom: 1.15 },
+    financeiro: { coordX: 0, coordY: 350, zoom: 1.15 }
+  };
+
+  const PROJECT_SEQUENCE = ['yahcw', 'tuya', 'gaming', 'python', 'spotifast', 'financeiro'];
+
   function safeStorageGet(storageKey) {
     try {
       return window.localStorage.getItem(storageKey);
-    } catch (storageError) {
+    } catch (_) {
       return null;
     }
   }
@@ -20,48 +32,850 @@
     try {
       window.localStorage.setItem(storageKey, storageValue);
       return true;
-    } catch (storageError) {
+    } catch (_) {
       return false;
     }
   }
 
-  function announceLiveStatus(statusElementId, messageText, isErrorState) {
-    const liveElement = document.getElementById(statusElementId);
+  function announceLiveStatus(statusMessage) {
+    const liveElement = document.getElementById('live-announcer');
     if (!liveElement) return;
-    liveElement.textContent = messageText;
-    if (isErrorState) {
-      liveElement.classList.add('error');
-    } else {
-      liveElement.classList.remove('error');
-    }
+    liveElement.textContent = statusMessage;
     setTimeout(function () {
-      if (liveElement.textContent === messageText) {
+      if (liveElement.textContent === statusMessage) {
         liveElement.textContent = '';
-        liveElement.classList.remove('error');
       }
-    }, 4000);
+    }, 3500);
+  }
+
+  const cameraState = {
+    currentPanX: 0,
+    currentPanY: 0,
+    currentZoom: 0.85,
+    targetPanX: 0,
+    targetPanY: 0,
+    targetZoom: 0.85,
+    isSettled: false,
+    minZoom: 0.35,
+    maxZoom: 1.85,
+    minPanX: -900,
+    maxPanX: 900,
+    minPanY: -800,
+    maxPanY: 800
+  };
+
+  const pointerState = {
+    isPointerDown: false,
+    isDragging: false,
+    wasDragged: false,
+    startPointerX: 0,
+    startPointerY: 0,
+    previousPointerX: 0,
+    previousPointerY: 0,
+    totalDragDistance: 0,
+    activePointerId: null
+  };
+
+  let animationFrameHandle = null;
+  let isPageVisible = true;
+  let isMotionReduced = false;
+  let currentActiveRoom = null;
+  let isDirectReadingActive = false;
+  let lastFocusedRoomId = null;
+
+  const spatialViewport = document.getElementById('spatial-viewport');
+  const spatialWorld = document.getElementById('spatial-world');
+  const atlasCanvas = document.getElementById('atlas-canvas');
+  let atlasCanvasContext = null;
+
+  try {
+    if (atlasCanvas && typeof atlasCanvas.getContext === 'function') {
+      atlasCanvasContext = atlasCanvas.getContext('2d');
+    }
+  } catch (_) {
+    atlasCanvasContext = null;
+  }
+
+  // Cálculo real de FIT com bounding boxes dos objetos + safe area de header e dock
+  function calculateOverviewFit() {
+    const viewportWidth = window.innerWidth || 1440;
+    const viewportHeight = window.innerHeight || 900;
+
+    // Dimensões do envelope mundial (inclui raio dos objetos e margens de respiração)
+    // Coordenadas: X [-450 a +450] + meio-objeto 190px = 1280px span
+    // Coordenadas: Y [-350 a +350] + meio-objeto 135px = 970px span
+    const worldEnvelopeWidth = 1280;
+    const worldEnvelopeHeight = 970;
+
+    // Safe areas: Header (~84px), Dock (~96px), Margens laterais (~72px)
+    const availableWidth = Math.max(viewportWidth - 72, 280);
+    const availableHeight = Math.max(viewportHeight - 180, 260);
+
+    const fitScaleX = availableWidth / worldEnvelopeWidth;
+    const fitScaleY = availableHeight / worldEnvelopeHeight;
+    let idealZoom = Math.min(fitScaleX, fitScaleY) * 0.98;
+
+    // Em telas mobile, garante zoom legível e composição apropriada
+    if (viewportWidth < 500) {
+      idealZoom = Math.max(0.42, Math.min(idealZoom, 0.58));
+    } else {
+      idealZoom = Math.max(cameraState.minZoom, Math.min(idealZoom, 1.05));
+    }
+
+    return idealZoom;
+  }
+
+  function clampValue(unclampedValue, minimumAllowed, maximumAllowed) {
+    return Math.max(minimumAllowed, Math.min(maximumAllowed, unclampedValue));
+  }
+
+  function resetCameraToOverview(snap) {
+    const calculatedFitZoom = calculateOverviewFit();
+    cameraState.targetPanX = 0;
+    cameraState.targetPanY = 0;
+    cameraState.targetZoom = calculatedFitZoom;
+
+    if (isMotionReduced || snap) {
+      cameraState.currentPanX = 0;
+      cameraState.currentPanY = 0;
+      cameraState.currentZoom = calculatedFitZoom;
+      cameraState.isSettled = true;
+      applyWorldTransform();
+      drawAtlasCanvas();
+    } else {
+      cameraState.isSettled = false;
+    }
+
+    requestCameraWakeup();
+    announceLiveStatus('Enquadramento geral do Atlas restaurado.');
+  }
+
+  function requestCameraWakeup() {
+    if (!isPageVisible) {
+      return;
+    }
+    if (animationFrameHandle === null) {
+      animationFrameHandle = window.requestAnimationFrame(runSpatialRenderLoop);
+    }
+  }
+
+  // Aplicação da transformação espacial (origem 0,0 do mundo no centro da tela)
+  function applyWorldTransform() {
+    if (!spatialWorld) return;
+    const windowHalfWidth = (window.innerWidth || 1200) / 2;
+    const windowHalfHeight = (window.innerHeight || 800) / 2;
+    const translateX = windowHalfWidth + cameraState.currentPanX;
+    const translateY = windowHalfHeight + cameraState.currentPanY;
+
+    spatialWorld.style.transform = 'translate3d(' + translateX.toFixed(1) + 'px, ' + translateY.toFixed(1) + 'px, 0) scale(' + cameraState.currentZoom.toFixed(4) + ')';
+    updateMinimapFrustum();
+  }
+
+  function drawAtlasCanvas() {
+    if (!atlasCanvas || !atlasCanvasContext) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const viewportWidth = window.innerWidth || 1200;
+    const viewportHeight = window.innerHeight || 800;
+
+    const scaledWidth = Math.floor(viewportWidth * dpr);
+    const scaledHeight = Math.floor(viewportHeight * dpr);
+
+    if (atlasCanvas.width !== scaledWidth || atlasCanvas.height !== scaledHeight) {
+      atlasCanvas.width = scaledWidth;
+      atlasCanvas.height = scaledHeight;
+      atlasCanvas.style.width = viewportWidth + 'px';
+      atlasCanvas.style.height = viewportHeight + 'px';
+    }
+
+    atlasCanvasContext.save();
+    atlasCanvasContext.scale(dpr, dpr);
+    atlasCanvasContext.clearRect(0, 0, viewportWidth, viewportHeight);
+
+    const worldCenterX = viewportWidth / 2 + cameraState.currentPanX;
+    const worldCenterY = viewportHeight / 2 + cameraState.currentPanY;
+    const currentScale = cameraState.currentZoom;
+
+    // Grade técnica ortogonal
+    atlasCanvasContext.strokeStyle = 'rgba(14, 18, 24, 0.05)';
+    atlasCanvasContext.lineWidth = 1;
+
+    const majorGridStep = 180 * currentScale;
+    if (majorGridStep > 24) {
+      const offsetX = worldCenterX % majorGridStep;
+      const offsetY = worldCenterY % majorGridStep;
+
+      atlasCanvasContext.beginPath();
+      for (let gridX = offsetX; gridX < viewportWidth; gridX += majorGridStep) {
+        atlasCanvasContext.moveTo(gridX, 0);
+        atlasCanvasContext.lineTo(gridX, viewportHeight);
+      }
+      for (let gridY = offsetY; gridY < viewportHeight; gridY += majorGridStep) {
+        atlasCanvasContext.moveTo(0, gridY);
+        atlasCanvasContext.lineTo(viewportWidth, gridY);
+      }
+      atlasCanvasContext.stroke();
+    }
+
+    // Eixos principais cartográficos passando por (0, 0)
+    atlasCanvasContext.strokeStyle = 'rgba(14, 18, 24, 0.16)';
+    atlasCanvasContext.lineWidth = 1;
+    atlasCanvasContext.beginPath();
+    atlasCanvasContext.moveTo(worldCenterX, 0);
+    atlasCanvasContext.lineTo(worldCenterX, viewportHeight);
+    atlasCanvasContext.moveTo(0, worldCenterY);
+    atlasCanvasContext.lineTo(viewportWidth, worldCenterY);
+    atlasCanvasContext.stroke();
+
+    // Raios de anéis astronômicos concêntricos
+    atlasCanvasContext.strokeStyle = 'rgba(14, 18, 24, 0.06)';
+    atlasCanvasContext.lineWidth = 1;
+    [260, 480, 720].forEach(function (radius) {
+      atlasCanvasContext.beginPath();
+      atlasCanvasContext.arc(worldCenterX, worldCenterY, radius * currentScale, 0, Math.PI * 2);
+      atlasCanvasContext.stroke();
+    });
+
+    // Vetores de conexão entre o meridiano e cada objeto
+    atlasCanvasContext.strokeStyle = 'rgba(217, 67, 46, 0.32)';
+    atlasCanvasContext.lineWidth = 1.2;
+    atlasCanvasContext.setLineDash([4, 6]);
+
+    const projectKeys = Object.keys(PROJECT_COORDINATES);
+    for (let i = 0; i < projectKeys.length; i += 1) {
+      const pKey = projectKeys[i];
+      const pLoc = PROJECT_COORDINATES[pKey];
+      const pScreenX = worldCenterX + pLoc.coordX * currentScale;
+      const pScreenY = worldCenterY + pLoc.coordY * currentScale;
+      const labelClearance = 1 / Math.hypot(pLoc.coordX / 300, pLoc.coordY / 100);
+
+      atlasCanvasContext.beginPath();
+      atlasCanvasContext.moveTo(
+        worldCenterX + pLoc.coordX * currentScale * labelClearance,
+        worldCenterY + pLoc.coordY * currentScale * labelClearance
+      );
+      atlasCanvasContext.lineTo(pScreenX, pScreenY);
+      atlasCanvasContext.stroke();
+
+      // Ponto de mira no destino
+      atlasCanvasContext.fillStyle = 'rgba(217, 67, 46, 0.85)';
+      atlasCanvasContext.beginPath();
+      atlasCanvasContext.arc(pScreenX, pScreenY, 3, 0, Math.PI * 2);
+      atlasCanvasContext.fill();
+    }
+    atlasCanvasContext.setLineDash([]);
+
+    atlasCanvasContext.restore();
+  }
+
+  function runSpatialRenderLoop() {
+    animationFrameHandle = null;
+
+    if (!isPageVisible) {
+      return;
+    }
+
+    if (isMotionReduced) {
+      cameraState.currentPanX = cameraState.targetPanX;
+      cameraState.currentPanY = cameraState.targetPanY;
+      cameraState.currentZoom = cameraState.targetZoom;
+      cameraState.isSettled = true;
+      applyWorldTransform();
+      drawAtlasCanvas();
+      return; // Zero RAF quando idle em reduced motion
+    }
+
+    const lerpRate = pointerState.isDragging ? 0.35 : 0.22;
+    const deltaPanX = cameraState.targetPanX - cameraState.currentPanX;
+    const deltaPanY = cameraState.targetPanY - cameraState.currentPanY;
+    const deltaZoom = cameraState.targetZoom - cameraState.currentZoom;
+
+    cameraState.currentPanX += deltaPanX * lerpRate;
+    cameraState.currentPanY += deltaPanY * lerpRate;
+    cameraState.currentZoom += deltaZoom * lerpRate;
+
+    applyWorldTransform();
+    drawAtlasCanvas();
+
+    const isPanSettled = Math.abs(deltaPanX) < 0.15 && Math.abs(deltaPanY) < 0.15;
+    const isZoomSettled = Math.abs(deltaZoom) < 0.001;
+
+    if (isPanSettled && isZoomSettled && !pointerState.isDragging) {
+      cameraState.currentPanX = cameraState.targetPanX;
+      cameraState.currentPanY = cameraState.targetPanY;
+      cameraState.currentZoom = cameraState.targetZoom;
+      cameraState.isSettled = true;
+      applyWorldTransform();
+      drawAtlasCanvas();
+      // Não solicita novo frame: RAF para no estado idle!
+    } else {
+      cameraState.isSettled = false;
+      requestCameraWakeup();
+    }
+  }
+
+  // Captura de ponteiro: NUNCA capturar em pointerdown para não sequestrar cliques!
+  // Somente capturar após ultrapassar limiar de 6px (arrasto confirmado)
+  function handlePointerDown(pointerEvent) {
+    if (pointerEvent.button !== 0 && pointerEvent.pointerType === 'mouse') {
+      return;
+    }
+    pointerState.isPointerDown = true;
+    pointerState.isDragging = false;
+    pointerState.wasDragged = false;
+    pointerState.activePointerId = pointerEvent.pointerId;
+    pointerState.startPointerX = pointerEvent.clientX;
+    pointerState.startPointerY = pointerEvent.clientY;
+    pointerState.previousPointerX = pointerEvent.clientX;
+    pointerState.previousPointerY = pointerEvent.clientY;
+    pointerState.totalDragDistance = 0;
+  }
+
+  function handlePointerMove(pointerEvent) {
+    if (!pointerState.isPointerDown) {
+      return;
+    }
+    const movementX = pointerEvent.clientX - pointerState.previousPointerX;
+    const movementY = pointerEvent.clientY - pointerState.previousPointerY;
+    pointerState.previousPointerX = pointerEvent.clientX;
+    pointerState.previousPointerY = pointerEvent.clientY;
+
+    const distanceFromStart = Math.hypot(
+      pointerEvent.clientX - pointerState.startPointerX,
+      pointerEvent.clientY - pointerState.startPointerY
+    );
+    pointerState.totalDragDistance = distanceFromStart;
+
+    if (distanceFromStart > 6 && !pointerState.isDragging) {
+      pointerState.isDragging = true;
+      pointerState.wasDragged = true;
+      if (spatialViewport) {
+        spatialViewport.classList.add('is-dragging');
+        if (typeof spatialViewport.setPointerCapture === 'function' && pointerState.activePointerId !== null) {
+          try {
+            spatialViewport.setPointerCapture(pointerState.activePointerId);
+          } catch (_) {}
+        }
+      }
+    }
+
+    if (pointerState.isDragging) {
+      cameraState.targetPanX = clampValue(
+        cameraState.targetPanX + movementX,
+        cameraState.minPanX,
+        cameraState.maxPanX
+      );
+      cameraState.targetPanY = clampValue(
+        cameraState.targetPanY + movementY,
+        cameraState.minPanY,
+        cameraState.maxPanY
+      );
+      requestCameraWakeup();
+    }
+  }
+
+  function handlePointerUp(pointerEvent) {
+    if (!pointerState.isPointerDown) {
+      return;
+    }
+    pointerState.isPointerDown = false;
+
+    if (spatialViewport) {
+      spatialViewport.classList.remove('is-dragging');
+      if (typeof spatialViewport.releasePointerCapture === 'function' && pointerState.activePointerId !== null) {
+        try {
+          spatialViewport.releasePointerCapture(pointerState.activePointerId);
+        } catch (_) {}
+      }
+    }
+    pointerState.activePointerId = null;
+
+    // Mantém flag wasDragged por breve instante para prevenir evento de clique concorrente após drag
+    setTimeout(function () {
+      pointerState.totalDragDistance = 0;
+      pointerState.isDragging = false;
+      pointerState.wasDragged = false;
+    }, 60);
+  }
+
+  // Zoom ancorado na posição do cursor
+  function handleWheelZoom(wheelEvent) {
+    // Se leitura direta ou modal estiver aberta, não captura wheel
+    if (isDirectReadingActive || document.querySelector('.atlas-overlay-modal[open]')) {
+      return;
+    }
+
+    wheelEvent.preventDefault();
+    const zoomMultiplier = Math.exp(-wheelEvent.deltaY * 0.0015);
+    const newTargetZoom = clampValue(
+      cameraState.targetZoom * zoomMultiplier,
+      cameraState.minZoom,
+      cameraState.maxZoom
+    );
+
+    const windowHalfWidth = (window.innerWidth || 1200) / 2;
+    const windowHalfHeight = (window.innerHeight || 800) / 2;
+    const cursorOffsetX = wheelEvent.clientX - windowHalfWidth - cameraState.targetPanX;
+    const cursorOffsetY = wheelEvent.clientY - windowHalfHeight - cameraState.targetPanY;
+
+    const zoomScaleRatio = newTargetZoom / cameraState.targetZoom;
+    const adjustedPanX = cameraState.targetPanX - cursorOffsetX * (zoomScaleRatio - 1);
+    const adjustedPanY = cameraState.targetPanY - cursorOffsetY * (zoomScaleRatio - 1);
+
+    cameraState.targetZoom = newTargetZoom;
+    cameraState.targetPanX = clampValue(adjustedPanX, cameraState.minPanX, cameraState.maxPanX);
+    cameraState.targetPanY = clampValue(adjustedPanY, cameraState.minPanY, cameraState.maxPanY);
+
+    if (isMotionReduced) {
+      cameraState.currentZoom = cameraState.targetZoom;
+      cameraState.currentPanX = cameraState.targetPanX;
+      cameraState.currentPanY = cameraState.targetPanY;
+    }
+    requestCameraWakeup();
+  }
+
+  // Minimap: Frustum divide pan pelo zoom; Teleporte multiplica coordenadas pelo zoom
+  function updateMinimapFrustum() {
+    const frustumRectangle = document.getElementById('minimap-frustum');
+    const coordReadout = document.getElementById('minimap-coord-readout');
+    if (!frustumRectangle) return;
+
+    const viewportWidth = window.innerWidth || 1200;
+    const viewportHeight = window.innerHeight || 800;
+    const scaleFactor = cameraState.currentZoom || 1;
+
+    // Dimensões do frustum no espaço do mundo (unidades mundiais)
+    const visibleWidthWorld = viewportWidth / scaleFactor;
+    const visibleHeightWorld = viewportHeight / scaleFactor;
+
+    // Coordenada do centro da tela em unidades do mundo: pan dividido pelo zoom!
+    const worldCenterX = -cameraState.currentPanX / scaleFactor;
+    const worldCenterY = -cameraState.currentPanY / scaleFactor;
+
+    const visibleLeftWorld = worldCenterX - visibleWidthWorld / 2;
+    const visibleTopWorld = worldCenterY - visibleHeightWorld / 2;
+
+    frustumRectangle.setAttribute('x', Math.round(visibleLeftWorld));
+    frustumRectangle.setAttribute('y', Math.round(visibleTopWorld));
+    frustumRectangle.setAttribute('width', Math.round(visibleWidthWorld));
+    frustumRectangle.setAttribute('height', Math.round(visibleHeightWorld));
+
+    if (coordReadout) {
+      coordReadout.textContent = Math.round(worldCenterX) + ', ' + Math.round(worldCenterY);
+    }
+  }
+
+  function handleMinimapClick(mouseEvent) {
+    const minimapRadar = document.getElementById('minimap-radar');
+    if (!minimapRadar) return;
+    const boundingBox = minimapRadar.getBoundingClientRect();
+    const clickRatioX = (mouseEvent.clientX - boundingBox.left) / boundingBox.width;
+    const clickRatioY = (mouseEvent.clientY - boundingBox.top) / boundingBox.height;
+
+    // Radar viewBox: -1000 a +1000 X (largura 2000), -800 a +800 Y (altura 1600)
+    const targetWorldX = -1000 + clickRatioX * 2000;
+    const targetWorldY = -800 + clickRatioY * 1600;
+
+    // Teleporte: multiplica unidades mundiais pelo zoom para converter em pan screen-px!
+    const currentScale = cameraState.targetZoom;
+    cameraState.targetPanX = clampValue(-targetWorldX * currentScale, cameraState.minPanX, cameraState.maxPanX);
+    cameraState.targetPanY = clampValue(-targetWorldY * currentScale, cameraState.minPanY, cameraState.maxPanY);
+
+    if (isMotionReduced) {
+      cameraState.currentPanX = cameraState.targetPanX;
+      cameraState.currentPanY = cameraState.targetPanY;
+    }
+    requestCameraWakeup();
+  }
+
+  // Centralização de rotas sem criação espúria de entradas no histórico
+  function navigateToRoute(routeHash, pushHistory) {
+    const cleanHash = (routeHash || '').replace('#', '').trim();
+    if (pushHistory !== false) {
+      const fullHash = cleanHash ? '#' + cleanHash : '#atlas';
+      if (window.location.hash !== fullHash) {
+        window.history.pushState(null, '', fullHash);
+      }
+    }
+    applyRouteState(cleanHash);
+  }
+
+  function applyRouteState(cleanHash) {
+    const route = cleanHash || 'atlas';
+
+    if (route === 'atlas') {
+      closeAllRoomsInternal();
+      exitDirectReadingInternal();
+      closeAllOverlaysInternal();
+      currentActiveRoom = null;
+      isDirectReadingActive = false;
+      updateDockActive(null);
+      setSpatialViewportInert(false);
+      resetCameraToOverview(true);
+
+      if (lastFocusedRoomId) {
+        const trigger = document.querySelector('[data-enter-room="' + lastFocusedRoomId + '"]');
+        if (trigger && typeof trigger.focus === 'function') {
+          trigger.focus();
+        }
+      }
+      announceLiveStatus('Retornou ao Atlas Espacial.');
+      return;
+    }
+
+    if (route === 'leitura') {
+      closeAllRoomsInternal();
+      closeAllOverlaysInternal();
+      enterDirectReadingInternal();
+      // currentActiveRoom DEVE ser estritamente null ao entrar em leitura!
+      currentActiveRoom = null;
+      isDirectReadingActive = true;
+      updateDockActive(null);
+      setSpatialViewportInert(true);
+      announceLiveStatus('Modo de leitura direta ativado.');
+      return;
+    }
+
+    if (route === 'sobre' || route === 'contato' || route === 'indice') {
+      closeAllRoomsInternal();
+      exitDirectReadingInternal();
+      currentActiveRoom = null;
+      isDirectReadingActive = false;
+      updateDockActive(null);
+      setSpatialViewportInert(true);
+      openOverlayModalInternal('overlay-' + route);
+      return;
+    }
+
+    const resolvedProject = (route === 'laboratorio') ? 'financeiro' : route;
+    if (PROJECT_COORDINATES[resolvedProject]) {
+      exitDirectReadingInternal();
+      closeAllOverlaysInternal();
+      openRoomInternal(resolvedProject);
+      document.documentElement.setAttribute('data-view', 'room');
+      currentActiveRoom = resolvedProject;
+      lastFocusedRoomId = resolvedProject;
+      isDirectReadingActive = false;
+      updateDockActive(resolvedProject);
+      setSpatialViewportInert(true);
+      announceLiveStatus('Entrou na sala do projeto: ' + resolvedProject);
+      return;
+    }
+
+    // Rota desconhecida: volta para o atlas
+    applyRouteState('atlas');
+  }
+
+  function setSpatialViewportInert(isInert) {
+    if (!spatialViewport) return;
+    if (isInert) {
+      spatialViewport.setAttribute('inert', '');
+      spatialViewport.setAttribute('aria-hidden', 'true');
+    } else {
+      spatialViewport.removeAttribute('inert');
+      spatialViewport.removeAttribute('aria-hidden');
+    }
+  }
+
+  function updateDockActive(activeProjectId) {
+    document.querySelectorAll('.dock-item-btn').forEach(function (dockButton) {
+      if (dockButton.getAttribute('data-dock-target') === activeProjectId) {
+        dockButton.classList.add('active');
+      } else {
+        dockButton.classList.remove('active');
+      }
+    });
+  }
+
+  function openRoomInternal(projectId) {
+    const targetRoomElement = document.getElementById('room-' + projectId);
+    if (!targetRoomElement) return;
+
+    // Alinha a câmera ao objeto no atlas de fundo
+    const coords = PROJECT_COORDINATES[projectId];
+    if (coords) {
+      cameraState.targetPanX = clampValue(-coords.coordX * coords.zoom, cameraState.minPanX, cameraState.maxPanX);
+      cameraState.targetPanY = clampValue(-coords.coordY * coords.zoom, cameraState.minPanY, cameraState.maxPanY);
+      cameraState.targetZoom = coords.zoom;
+      if (isMotionReduced) {
+        cameraState.currentPanX = cameraState.targetPanX;
+        cameraState.currentPanY = cameraState.targetPanY;
+        cameraState.currentZoom = cameraState.targetZoom;
+      }
+      requestCameraWakeup();
+    }
+
+    document.querySelectorAll('.project-room').forEach(function (room) {
+      room.classList.remove('is-active');
+      room.hidden = true;
+    });
+
+    targetRoomElement.hidden = false;
+    targetRoomElement.classList.add('is-active');
+
+    const backButton = targetRoomElement.querySelector('.room-back-btn');
+    if (backButton && typeof backButton.focus === 'function') {
+      backButton.focus();
+    }
+  }
+
+  function closeAllRoomsInternal() {
+    document.querySelectorAll('.project-room').forEach(function (room) {
+      room.classList.remove('is-active');
+      room.hidden = true;
+    });
+  }
+
+  function enterDirectReadingInternal() {
+    document.body.classList.remove('mode-atlas');
+    document.body.classList.add('mode-direct');
+    document.documentElement.setAttribute('data-view', 'direct');
+
+    const directView = document.getElementById('direct-reading-view');
+    if (directView) {
+      directView.hidden = false;
+    }
+
+    const readingBtn = document.getElementById('btn-direct-reading');
+    if (readingBtn) {
+      readingBtn.setAttribute('aria-pressed', 'true');
+      readingBtn.classList.add('active');
+    }
+
+    const returnBtn = document.getElementById('btn-return-to-atlas');
+    if (returnBtn && typeof returnBtn.focus === 'function') {
+      returnBtn.focus();
+    }
+  }
+
+  function exitDirectReadingInternal() {
+    document.body.classList.remove('mode-direct');
+    document.body.classList.add('mode-atlas');
+    document.documentElement.setAttribute('data-view', 'atlas');
+
+    const directView = document.getElementById('direct-reading-view');
+    if (directView) {
+      directView.hidden = true;
+    }
+
+    const readingBtn = document.getElementById('btn-direct-reading');
+    if (readingBtn) {
+      readingBtn.setAttribute('aria-pressed', 'false');
+      readingBtn.classList.remove('active');
+    }
+  }
+
+  function openOverlayModalInternal(modalId) {
+    closeAllOverlaysInternal();
+    const modalElement = document.getElementById(modalId);
+    if (!modalElement) return;
+
+    if (typeof modalElement.showModal === 'function') {
+      modalElement.showModal();
+    } else {
+      modalElement.setAttribute('open', '');
+    }
+
+    const container = document.getElementById('overlays-container');
+    if (container) container.setAttribute('aria-hidden', 'false');
+
+    const closeBtn = modalElement.querySelector('[data-action="close-overlay"]');
+    if (closeBtn && typeof closeBtn.focus === 'function') {
+      closeBtn.focus();
+    }
+  }
+
+  function closeAllOverlaysInternal() {
+    document.querySelectorAll('.atlas-overlay-modal').forEach(function (modal) {
+      if (typeof modal.close === 'function' && modal.open) {
+        modal.close();
+      } else {
+        modal.removeAttribute('open');
+      }
+    });
+
+    const container = document.getElementById('overlays-container');
+    if (container) container.setAttribute('aria-hidden', 'true');
+  }
+
+  function stepActiveRoom(stepDirection) {
+    if (!currentActiveRoom) return;
+    const currentIndex = PROJECT_SEQUENCE.indexOf(currentActiveRoom);
+    if (currentIndex === -1) return;
+
+    let targetIndex = stepDirection === 'next' ? currentIndex + 1 : currentIndex - 1;
+    if (targetIndex >= PROJECT_SEQUENCE.length) targetIndex = 0;
+    else if (targetIndex < 0) targetIndex = PROJECT_SEQUENCE.length - 1;
+
+    navigateToRoute(PROJECT_SEQUENCE[targetIndex], true);
+  }
+
+  // Navegação por teclado & gestão de foco
+  function initializeKeyboardNavigation() {
+    window.addEventListener('keydown', function (keyboardEvent) {
+      // 1. Esc SEMPRE fecha salas ou modais, MESMO com foco dentro de inputs/selects!
+      if (keyboardEvent.key === 'Escape') {
+        const openModal = document.querySelector('.atlas-overlay-modal[open]');
+        if (openModal) {
+          navigateToRoute('atlas', true);
+          keyboardEvent.preventDefault();
+          return;
+        }
+        if (currentActiveRoom) {
+          navigateToRoute('atlas', true);
+          keyboardEvent.preventDefault();
+          return;
+        }
+        if (isDirectReadingActive) {
+          navigateToRoute('atlas', true);
+          keyboardEvent.preventDefault();
+          return;
+        }
+      }
+
+      // Se um campo de formulário estiver focado, não sequestra setas/teclas de digitação
+      const activeTag = (document.activeElement && document.activeElement.tagName) || '';
+      if (['INPUT', 'SELECT', 'TEXTAREA'].includes(activeTag)) {
+        return;
+      }
+
+      // 2. Quando em sala ativa: setas navegam entre salas
+      if (currentActiveRoom) {
+        if (keyboardEvent.key === 'ArrowRight') {
+          stepActiveRoom('next');
+          keyboardEvent.preventDefault();
+        } else if (keyboardEvent.key === 'ArrowLeft') {
+          stepActiveRoom('prev');
+          keyboardEvent.preventDefault();
+        }
+        return;
+      }
+
+      // 3. Em modo leitura ou modal aberta: NÃO capturar setas para permitir rolagem nativa!
+      if (isDirectReadingActive || document.querySelector('.atlas-overlay-modal[open]')) {
+        return;
+      }
+
+      // 4. No Atlas: setas deslocam câmera, +/- alteram zoom, 0 restaura enquadramento geral
+      const panStep = keyboardEvent.shiftKey ? 140 : 50;
+      if (keyboardEvent.key === 'ArrowRight') {
+        cameraState.targetPanX = clampValue(cameraState.targetPanX - panStep, cameraState.minPanX, cameraState.maxPanX);
+        requestCameraWakeup();
+        keyboardEvent.preventDefault();
+      } else if (keyboardEvent.key === 'ArrowLeft') {
+        cameraState.targetPanX = clampValue(cameraState.targetPanX + panStep, cameraState.minPanX, cameraState.maxPanX);
+        requestCameraWakeup();
+        keyboardEvent.preventDefault();
+      } else if (keyboardEvent.key === 'ArrowDown') {
+        cameraState.targetPanY = clampValue(cameraState.targetPanY - panStep, cameraState.minPanY, cameraState.maxPanY);
+        requestCameraWakeup();
+        keyboardEvent.preventDefault();
+      } else if (keyboardEvent.key === 'ArrowUp') {
+        cameraState.targetPanY = clampValue(cameraState.targetPanY + panStep, cameraState.minPanY, cameraState.maxPanY);
+        requestCameraWakeup();
+        keyboardEvent.preventDefault();
+      } else if (keyboardEvent.key === '+' || keyboardEvent.key === '=') {
+        cameraState.targetZoom = clampValue(cameraState.targetZoom * 1.15, cameraState.minZoom, cameraState.maxZoom);
+        requestCameraWakeup();
+        keyboardEvent.preventDefault();
+      } else if (keyboardEvent.key === '-' || keyboardEvent.key === '_') {
+        cameraState.targetZoom = clampValue(cameraState.targetZoom / 1.15, cameraState.minZoom, cameraState.maxZoom);
+        requestCameraWakeup();
+        keyboardEvent.preventDefault();
+      } else if (keyboardEvent.key === '0') {
+        resetCameraToOverview();
+        keyboardEvent.preventDefault();
+      }
+    });
+  }
+
+  function initializeMotionControls() {
+    const motionButton = document.getElementById('motion-toggle-btn');
+    const savedPreference = safeStorageGet(STORAGE_MOTION_KEY);
+    const systemPrefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (savedPreference === 'paused' || (savedPreference === null && systemPrefersReduced)) {
+      setMotionState(true, false);
+    } else {
+      setMotionState(false, false);
+    }
+
+    if (motionButton) {
+      motionButton.addEventListener('click', function () {
+        setMotionState(!isMotionReduced, true);
+      });
+    }
+
+    if (window.matchMedia) {
+      try {
+        const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+        mediaQuery.addEventListener('change', function (mediaEvent) {
+          if (safeStorageGet(STORAGE_MOTION_KEY) === null) {
+            setMotionState(mediaEvent.matches, false);
+          }
+        });
+      } catch (_) {}
+    }
+  }
+
+  function setMotionState(reducedTarget, saveToStorage) {
+    isMotionReduced = reducedTarget;
+    const motionButton = document.getElementById('motion-toggle-btn');
+    const motionStatusLabel = document.getElementById('motion-status-label');
+
+    if (isMotionReduced) {
+      document.documentElement.setAttribute('data-motion', 'paused');
+      if (motionButton) {
+        motionButton.setAttribute('aria-pressed', 'true');
+        motionButton.classList.add('active');
+      }
+      if (motionStatusLabel) {
+        motionStatusLabel.textContent = 'Ativar animações';
+      }
+      if (saveToStorage) {
+        safeStorageSet(STORAGE_MOTION_KEY, 'paused');
+      }
+      cameraState.currentPanX = cameraState.targetPanX;
+      cameraState.currentPanY = cameraState.targetPanY;
+      cameraState.currentZoom = cameraState.targetZoom;
+      cameraState.isSettled = true;
+      applyWorldTransform();
+      drawAtlasCanvas();
+      announceLiveStatus('Animações pausadas.');
+    } else {
+      document.documentElement.setAttribute('data-motion', 'active');
+      if (motionButton) {
+        motionButton.setAttribute('aria-pressed', 'false');
+        motionButton.classList.remove('active');
+      }
+      if (motionStatusLabel) {
+        motionStatusLabel.textContent = 'Pausar animações';
+      }
+      if (saveToStorage) {
+        safeStorageSet(STORAGE_MOTION_KEY, 'active');
+      }
+      cameraState.isSettled = false;
+      requestCameraWakeup();
+      announceLiveStatus('Animações ativadas.');
+    }
   }
 
   function initializeEmailCopy() {
     const copyButtons = document.querySelectorAll('[data-copy-email]');
-    copyButtons.forEach(function (copyButton) {
-      const originalContent = copyButton.innerHTML;
-      let restoreTimer = null;
-      copyButton.addEventListener('click', async function (clickEvent) {
+    copyButtons.forEach(function (buttonElement) {
+      buttonElement.addEventListener('click', async function (clickEvent) {
         clickEvent.preventDefault();
-        let copySuccessful = false;
+        let wasSuccessful = false;
 
         if (navigator.clipboard && window.isSecureContext) {
           try {
             await navigator.clipboard.writeText(EMAIL_ADDRESS);
-            copySuccessful = true;
-          } catch (clipboardError) {
-            copySuccessful = false;
+            wasSuccessful = true;
+          } catch (_) {
+            wasSuccessful = false;
           }
         }
 
-        if (!copySuccessful) {
-          const previousFocus = document.activeElement;
+        if (!wasSuccessful) {
           try {
             const hiddenTextarea = document.createElement('textarea');
             hiddenTextarea.value = EMAIL_ADDRESS;
@@ -70,765 +884,673 @@
             hiddenTextarea.style.left = '-9999px';
             document.body.appendChild(hiddenTextarea);
             hiddenTextarea.select();
-            copySuccessful = document.execCommand('copy');
+            wasSuccessful = document.execCommand('copy');
             document.body.removeChild(hiddenTextarea);
-          } catch (execCommandError) {
-            copySuccessful = false;
+          } catch (_) {
+            wasSuccessful = false;
           }
-          if (previousFocus && typeof previousFocus.focus === 'function') previousFocus.focus({ preventScroll: true });
         }
 
-        if (copySuccessful) {
-          announceLiveStatus('email-live-status', 'E-mail ' + EMAIL_ADDRESS + ' copiado com sucesso!', false);
-          window.clearTimeout(restoreTimer);
-          copyButton.innerHTML = '<svg viewBox=\"0 0 16 16\" width=\"14\" height=\"14\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"2 8 6 12 14 3\"></polyline></svg><span>Copiado!</span>';
-          restoreTimer = setTimeout(function () {
-            copyButton.innerHTML = originalContent;
-          }, 2400);
+        const emailLiveElement = document.getElementById('email-live-status');
+        if (wasSuccessful) {
+          if (emailLiveElement) {
+            emailLiveElement.textContent = 'E-mail ' + EMAIL_ADDRESS + ' copiado com sucesso!';
+          }
+          announceLiveStatus('E-mail copiado com sucesso.');
         } else {
-          announceLiveStatus('email-live-status', 'Endereço: ' + EMAIL_ADDRESS, true);
+          if (emailLiveElement) {
+            emailLiveElement.textContent = 'Endereço: ' + EMAIL_ADDRESS;
+          }
         }
       });
     });
   }
 
-  function initializeMotionControls() {
-    const motionButton = document.getElementById('motion-toggle-btn');
-    const motionStatusText = document.getElementById('motion-status-label');
-
-    const savedPreference = safeStorageGet(STORAGE_MOTION_KEY);
-
-    const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    if (savedPreference === 'paused' || reducedMotionQuery.matches) {
-      document.documentElement.setAttribute('data-motion', 'paused');
-      if (motionButton) {
-        motionButton.setAttribute('aria-pressed', 'true');
-      }
-      if (motionStatusText) {
-        motionStatusText.textContent = 'Ativar animações';
-      }
-    } else {
-      document.documentElement.setAttribute('data-motion', 'active');
-      if (motionButton) {
-        motionButton.setAttribute('aria-pressed', 'false');
-      }
-      if (motionStatusText) {
-        motionStatusText.textContent = 'Pausar animações';
-      }
-    }
-
-    if (motionButton) motionButton.setAttribute('aria-label', document.documentElement.getAttribute('data-motion') === 'paused' ? 'Ativar animações' : 'Pausar animações');
-    reducedMotionQuery.addEventListener('change', function () {
-      const shouldPause = reducedMotionQuery.matches || safeStorageGet(STORAGE_MOTION_KEY) === 'paused';
-      document.documentElement.setAttribute('data-motion', shouldPause ? 'paused' : 'active');
-      if (motionButton) motionButton.setAttribute('aria-pressed', shouldPause ? 'true' : 'false');
-      if (motionButton) motionButton.setAttribute('aria-label', shouldPause ? 'Ativar animações' : 'Pausar animações');
-      if (motionStatusText) motionStatusText.textContent = shouldPause ? 'Ativar animações' : 'Pausar animações';
-      window.dispatchEvent(new CustomEvent('portfolio:motionchange'));
-    });
-    if (motionButton) {
-      motionButton.addEventListener('click', function () {
-        const isCurrentlyPaused = document.documentElement.getAttribute('data-motion') === 'paused';
-        const newMotionState = isCurrentlyPaused && !reducedMotionQuery.matches ? 'active' : 'paused';
-
-        document.documentElement.setAttribute('data-motion', newMotionState);
-        motionButton.setAttribute('aria-pressed', newMotionState === 'paused' ? 'true' : 'false');
-        motionButton.setAttribute('aria-label', newMotionState === 'paused' ? 'Ativar animações' : 'Pausar animações');
-        if (motionStatusText) {
-          motionStatusText.textContent = newMotionState === 'paused' ? 'Ativar animações' : 'Pausar animações';
-        }
-
-        safeStorageSet(STORAGE_MOTION_KEY, newMotionState);
-
-        announceLiveStatus('motion-live-status', newMotionState === 'paused' ? 'Animações decorativas pausadas.' : 'Animações decorativas ativadas.', false);
-        window.dispatchEvent(new CustomEvent('portfolio:motionchange', { detail: { motion: newMotionState } }));
-      });
-    }
-  }
-
-  function initializeBriefMode() {
-    const briefButton = document.getElementById('brief-mode-toggle');
-    const briefStatusLabel = document.getElementById('brief-status-label');
-
-    if (!briefButton) return;
-
-    briefButton.addEventListener('click', function () {
-      const isCurrentlyBrief = document.documentElement.getAttribute('data-view') === 'brief';
-      const newViewState = isCurrentlyBrief ? 'full' : 'brief';
-
-      document.documentElement.setAttribute('data-view', newViewState);
-      briefButton.setAttribute('aria-pressed', newViewState === 'brief' ? 'true' : 'false');
-
-      if (briefStatusLabel) {
-        briefStatusLabel.textContent = newViewState === 'brief' ? 'Modo completo' : 'Tenho 20 segundos';
-      }
-
-      briefButton.setAttribute('aria-label', newViewState === 'brief' ? 'Restaurar modo completo' : 'Ativar modo de 20 segundos');
-      briefButton.focus({ preventScroll: true });
-
-      const announcementMessage = newViewState === 'brief' ? 'Modo 20 segundos ativado: fatos essenciais e contatos.' : 'Modo completo restaurado.';
-      announceLiveStatus('brief-live-status', announcementMessage, false);
-
-      window.dispatchEvent(new CustomEvent('portfolio:viewchange', { detail: { view: newViewState } }));
-      window.dispatchEvent(new CustomEvent('portfolio:motionchange'));
-    });
-  }
-
-  let observatoryTabActivationFunction = null;
-
-  function initializeProjectObservatory() {
-    const observatoryTabs = document.querySelectorAll('.observatory-tab[role=\"tab\"]');
-    const observatoryPanels = document.querySelectorAll('.observatory-panel[role=\"tabpanel\"]');
-
-    if (observatoryTabs.length === 0) return;
-
-    function activateTab(targetTab, shouldFocusTab) {
-      observatoryTabs.forEach(function (tabElement) {
-        const isSelected = tabElement === targetTab;
-        tabElement.setAttribute('aria-selected', isSelected ? 'true' : 'false');
-        tabElement.setAttribute('tabindex', isSelected ? '0' : '-1');
-        if (isSelected) {
-          tabElement.classList.add('is-active');
-        } else {
-          tabElement.classList.remove('is-active');
-        }
-      });
-
-      const targetPanelId = targetTab.getAttribute('aria-controls');
-      observatoryPanels.forEach(function (panelElement) {
-        if (panelElement.id === targetPanelId) {
-          panelElement.hidden = false;
-          panelElement.classList.add('is-active');
-          panelElement.setAttribute('tabindex', '0');
-        } else {
-          panelElement.hidden = true;
-          panelElement.classList.remove('is-active');
-          panelElement.removeAttribute('tabindex');
-        }
-      });
-
-      if (shouldFocusTab) {
-        targetTab.focus();
-      }
-
-      const associatedStateName = targetTab.getAttribute('data-scene-state') || 'hero';
-      if (window.ImmersiveScene && typeof window.ImmersiveScene.setState === 'function') {
-        window.ImmersiveScene.setState(associatedStateName);
-      }
-      window.dispatchEvent(new CustomEvent('portfolio:statechange', { detail: { state: associatedStateName } }));
-    }
-
-    observatoryTabActivationFunction = activateTab;
-
-    const initialActiveTab = document.querySelector('.observatory-tab.is-active') || observatoryTabs[0];
-    activateTab(initialActiveTab, false);
-
-    observatoryTabs.forEach(function (tabElement, tabIndex) {
-      tabElement.addEventListener('click', function () {
-        activateTab(tabElement, false);
-      });
-
-      tabElement.addEventListener('keydown', function (keyboardEvent) {
-        let destinationIndex = null;
-        if (keyboardEvent.key === 'ArrowRight' || keyboardEvent.key === 'ArrowDown') {
-          destinationIndex = (tabIndex + 1) % observatoryTabs.length;
-        } else if (keyboardEvent.key === 'ArrowLeft' || keyboardEvent.key === 'ArrowUp') {
-          destinationIndex = (tabIndex - 1 + observatoryTabs.length) % observatoryTabs.length;
-        } else if (keyboardEvent.key === 'Home') {
-          destinationIndex = 0;
-        } else if (keyboardEvent.key === 'End') {
-          destinationIndex = observatoryTabs.length - 1;
-        }
-
-        if (destinationIndex !== null) {
-          keyboardEvent.preventDefault();
-          activateTab(observatoryTabs[destinationIndex], true);
-        }
-      });
-    });
-  }
-
+  // Demos Interativos das Salas
   function initializeYahcwDemo() {
-    const triggerOverviewButtons = document.querySelectorAll('[data-yahcw-trigger]');
-    const closeOverviewButton = document.getElementById('yahcw-overview-close-btn');
-    const overviewModal = document.getElementById('yahcw-demo-overview');
-    const brightnessSlider = document.getElementById('yahcw-brightness-slider');
-    const brightnessValueDisplay = document.getElementById('yahcw-brightness-display');
-    const demoDesktopStage = document.getElementById('yahcw-demo-stage');
-    const audioSelectElement = document.getElementById('yahcw-audio-select');
-    const audioDisplayElement = document.getElementById('yahcw-audio-display');
-    const windowTiles = document.querySelectorAll('.yahcw-overview-tile');
-    const activeWindowTitleDisplay = document.getElementById('yahcw-active-window-title');
-    const hotCornerTriggerBox = document.getElementById('yahcw-corner-trigger-box');
+    const toggleOverviewButton = document.getElementById('btn-toggle-overview');
+    const cornerTrigger = document.getElementById('sim-corner-trigger');
+    const dwmOverviewOverlay = document.getElementById('sim-dwm-overview');
+    const closeOverviewButton = document.getElementById('btn-close-overview');
+    const brightnessSlider = document.getElementById('sim-brightness-slider');
+    const brightnessDisplay = document.getElementById('brightness-val-display');
+    const screenPreview = document.getElementById('sim-screen-preview');
+    const audioSelect = document.getElementById('sim-audio-select');
+    const yahcwLogBox = document.getElementById('yahcw-log-box');
+    const trayAudioLabel = document.getElementById('sim-tray-audio-label');
+    const trayBrightLabel = document.getElementById('sim-tray-bright-label');
 
-    if (!overviewModal) return;
-
-    let lastActiveTrigger = null;
-
-    function openOverview(triggerOrigin) {
-      lastActiveTrigger = triggerOrigin || triggerOverviewButtons[0] || null;
-      overviewModal.hidden = false;
-      overviewModal.classList.add('is-open');
-
-      const firstTile = overviewModal.querySelector('.yahcw-overview-tile');
-      if (firstTile) {
-        firstTile.focus();
-      } else if (closeOverviewButton) {
-        closeOverviewButton.focus();
+    function toggleDwmOverview() {
+      if (!dwmOverviewOverlay) return;
+      const isHidden = dwmOverviewOverlay.hidden;
+      dwmOverviewOverlay.hidden = !isHidden;
+      if (yahcwLogBox) {
+        yahcwLogBox.innerHTML = isHidden
+          ? '<code>[DWM] Hot Corner ativado: Visão Geral de Miniaturas aberta.</code>'
+          : '<code>[DWM] Visão Geral fechada.</code>';
       }
     }
 
-    function closeOverview() {
-      overviewModal.hidden = true;
-      overviewModal.classList.remove('is-open');
-
-      if (lastActiveTrigger && typeof lastActiveTrigger.focus === 'function') {
-        lastActiveTrigger.focus();
-      }
-    }
-
-    triggerOverviewButtons.forEach(function (triggerButton) {
-      triggerButton.addEventListener('click', function () {
-        if (overviewModal.hidden) {
-          openOverview(triggerButton);
-        } else {
-          closeOverview();
+    if (toggleOverviewButton) toggleOverviewButton.addEventListener('click', toggleDwmOverview);
+    if (cornerTrigger) {
+      cornerTrigger.addEventListener('click', toggleDwmOverview);
+      cornerTrigger.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          toggleDwmOverview();
+          e.preventDefault();
         }
       });
-    });
-
-    if (hotCornerTriggerBox) {
-      hotCornerTriggerBox.addEventListener('mouseenter', function () {
-        if (overviewModal.hidden) openOverview(hotCornerTriggerBox);
-      });
-      hotCornerTriggerBox.addEventListener('click', function () {
-        if (overviewModal.hidden) openOverview(hotCornerTriggerBox);
-      });
     }
-
     if (closeOverviewButton) {
-      closeOverviewButton.addEventListener('click', closeOverview);
+      closeOverviewButton.addEventListener('click', function () {
+        if (dwmOverviewOverlay) dwmOverviewOverlay.hidden = true;
+      });
     }
 
-    overviewModal.addEventListener('keydown', function (keyboardEvent) {
-      if (keyboardEvent.key === 'Escape') {
-        keyboardEvent.preventDefault();
-        closeOverview();
-      }
-      if (keyboardEvent.key === 'Tab') {
-        const focusableItems = Array.from(overviewModal.querySelectorAll('button:not([disabled])'));
-        const firstItem = focusableItems[0];
-        const lastItem = focusableItems[focusableItems.length - 1];
-        if (keyboardEvent.shiftKey && document.activeElement === firstItem) {
-          keyboardEvent.preventDefault();
-          lastItem.focus();
-        } else if (!keyboardEvent.shiftKey && document.activeElement === lastItem) {
-          keyboardEvent.preventDefault();
-          firstItem.focus();
+    const windowThumbnails = document.querySelectorAll('.overview-thumb');
+    windowThumbnails.forEach(function (thumb) {
+      thumb.addEventListener('click', function () {
+        const winId = thumb.getAttribute('data-select-win');
+        document.querySelectorAll('.sim-window-tile').forEach(function (tile) {
+          tile.classList.remove('is-active');
+        });
+        const targetTile = document.getElementById('win-tile-' + winId);
+        if (targetTile) targetTile.classList.add('is-active');
+        if (dwmOverviewOverlay) dwmOverviewOverlay.hidden = true;
+        if (yahcwLogBox) {
+          yahcwLogBox.innerHTML = '<code>[DWM] Janela focada via miniatura: #' + winId + '</code>';
         }
-      }
-    });
-
-    windowTiles.forEach(function (windowTile) {
-      windowTile.addEventListener('click', function () {
-        const windowTitle = windowTile.getAttribute('data-window-title') || 'FormOverview.cs';
-        if (activeWindowTitleDisplay) {
-          activeWindowTitleDisplay.textContent = windowTitle;
-        }
-        announceLiveStatus('yahcw-live-status', 'Janela em foco alterada para: ' + windowTitle, false);
-        closeOverview();
       });
     });
 
-    if (brightnessSlider) {
+    if (brightnessSlider && screenPreview) {
       brightnessSlider.addEventListener('input', function () {
-        const brightnessPercentage = Number(brightnessSlider.value);
-        if (brightnessValueDisplay) {
-          brightnessValueDisplay.textContent = brightnessPercentage + '%';
-        }
-        if (demoDesktopStage) {
-          const brightnessFactor = 0.4 + (brightnessPercentage / 100) * 0.6;
-          demoDesktopStage.style.filter = 'brightness(' + brightnessFactor.toFixed(2) + ')';
+        const val = brightnessSlider.value;
+        if (brightnessDisplay) brightnessDisplay.textContent = val + '%';
+        if (trayBrightLabel) trayBrightLabel.textContent = val + '%';
+        const filterFactor = 0.3 + (val / 100) * 0.7;
+        screenPreview.style.filter = 'brightness(' + filterFactor.toFixed(2) + ')';
+        if (yahcwLogBox) {
+          yahcwLogBox.innerHTML = '<code>[Filtro Simulado] Demonstração: VCP 0x10 -> ' + val + '% no monitor DDC/CI</code>';
         }
       });
     }
 
-    if (audioSelectElement) {
-      audioSelectElement.addEventListener('change', function () {
-        const selectedDeviceName = audioSelectElement.options[audioSelectElement.selectedIndex].text;
-        if (audioDisplayElement) {
-          audioDisplayElement.textContent = selectedDeviceName;
+    if (audioSelect) {
+      audioSelect.addEventListener('change', function () {
+        const chosenAudio = audioSelect.value;
+        if (trayAudioLabel) trayAudioLabel.textContent = chosenAudio;
+        if (yahcwLogBox) {
+          yahcwLogBox.innerHTML = '<code>[IPolicyConfig] Dispositivo comutado para ' + chosenAudio + ' (COM status S_OK)</code>';
         }
       });
     }
   }
 
   function initializeTuyaDemo() {
-    const lampToggleButton = document.getElementById('tuya-lamp-toggle');
-    const lampStatusIndicator = document.getElementById('tuya-lamp-status-pill');
-    const lampBulbVisual = document.getElementById('tuya-lamp-visual');
-    const routeRadios = document.querySelectorAll('input[name=\"tuya-route-choice\"]');
-    const dropLocalCheckbox = document.getElementById('tuya-drop-local-toggle');
-    const latencyDisplay = document.getElementById('tuya-latency-display');
-    const activeRouteDisplay = document.getElementById('tuya-route-display');
-    const fallbackNotice = document.getElementById('tuya-fallback-notice');
+    const bulbElement = document.getElementById('tuya-bulb-element');
+    const powerButton = document.getElementById('btn-toggle-lamp-power');
+    const failureButton = document.getElementById('btn-simulate-tcp-failure');
+    const restoreButton = document.getElementById('btn-restore-tcp');
+    const badgeRouteMode = document.getElementById('badge-route-mode');
+    const pingReadout = document.getElementById('ping-readout');
+    const wireSegment = document.getElementById('wire-segment');
+    const nodeTargetLabel = document.getElementById('node-target-label');
+    const tuyaLogBox = document.getElementById('tuya-log-box');
 
-    let isLampTurnedOn = false;
+    let isLampPowerOn = false;
+    let isTcpActive = true;
 
-    function updateLampUi() {
-      if (!lampToggleButton || !lampStatusIndicator || !lampBulbVisual) return;
+    if (powerButton && bulbElement) {
+      powerButton.addEventListener('click', function () {
+        isLampPowerOn = !isLampPowerOn;
+        if (isLampPowerOn) bulbElement.classList.add('is-on');
+        else bulbElement.classList.remove('is-on');
 
-      if (isLampTurnedOn) {
-        lampToggleButton.setAttribute('aria-pressed', 'true');
-        lampToggleButton.textContent = 'Desligar Lâmpada';
-        lampStatusIndicator.textContent = 'Ligada';
-        lampStatusIndicator.classList.add('is-lamp-on');
-        lampBulbVisual.classList.add('is-lit');
-      } else {
-        lampToggleButton.setAttribute('aria-pressed', 'false');
-        lampToggleButton.textContent = 'Ligar Lâmpada';
-        lampStatusIndicator.textContent = 'Desligada';
-        lampStatusIndicator.classList.remove('is-lamp-on');
-        lampBulbVisual.classList.remove('is-lit');
-      }
-    }
-
-    function computeActiveRoute() {
-      let chosenRoute = 'local';
-      routeRadios.forEach(function (radioElement) {
-        if (radioElement.checked) {
-          chosenRoute = radioElement.value;
+        const activeRoute = isTcpActive ? 'TCP Socket (porta 6668)' : 'Tuya Cloud OpenAPI';
+        if (tuyaLogBox) {
+          tuyaLogBox.innerHTML += '<br><code>[COMANDO] Power state -> ' + (isLampPowerOn ? 'ON' : 'OFF') + ' via ' + activeRoute + '</code>';
+          tuyaLogBox.scrollTop = tuyaLogBox.scrollHeight;
         }
-      });
-
-      const isLocalDropped = dropLocalCheckbox && dropLocalCheckbox.checked;
-
-      if (chosenRoute === 'local' && isLocalDropped) {
-        if (activeRouteDisplay) {
-          activeRouteDisplay.textContent = 'Contingência: Nuvem (Tuya OpenAPI - simulação)';
-        }
-        if (latencyDisplay) {
-          latencyDisplay.textContent = '~320 ms (valor simulado para demonstração)';
-        }
-        if (fallbackNotice) {
-          fallbackNotice.hidden = false;
-        }
-      } else if (chosenRoute === 'cloud') {
-        if (activeRouteDisplay) {
-          activeRouteDisplay.textContent = 'Nuvem (Tuya OpenAPI - simulação)';
-        }
-        if (latencyDisplay) {
-          latencyDisplay.textContent = '~280 ms (valor simulado para demonstração)';
-        }
-        if (fallbackNotice) {
-          fallbackNotice.hidden = true;
-        }
-      } else {
-        if (activeRouteDisplay) {
-          activeRouteDisplay.textContent = 'Local (TCP Direto / Porta 6668) [Simulação]';
-        }
-        if (latencyDisplay) {
-          latencyDisplay.textContent = '~14 ms (valor simulado para demonstração)';
-        }
-        if (fallbackNotice) {
-          fallbackNotice.hidden = true;
-        }
-      }
-    }
-
-    if (lampToggleButton) {
-      lampToggleButton.addEventListener('click', function () {
-        isLampTurnedOn = !isLampTurnedOn;
-        updateLampUi();
       });
     }
 
-    routeRadios.forEach(function (radioElement) {
-      radioElement.addEventListener('change', computeActiveRoute);
-    });
+    if (failureButton) {
+      failureButton.addEventListener('click', function () {
+        isTcpActive = false;
+        if (badgeRouteMode) {
+          badgeRouteMode.textContent = 'ROTA CONTINGÊNCIA: CLOUD OPENAPI';
+          badgeRouteMode.className = 'route-badge cloud';
+        }
+        if (pingReadout) pingReadout.textContent = '148ms (simulado)';
+        if (wireSegment) wireSegment.className = 'wire wire-active';
+        if (nodeTargetLabel) nodeTargetLabel.textContent = 'Nuvem Tuya (OpenAPI Gateway)';
 
-    if (dropLocalCheckbox) {
-      dropLocalCheckbox.addEventListener('change', computeActiveRoute);
+        if (tuyaLogBox) {
+          tuyaLogBox.innerHTML += '<br><code>[SOCKET-ERROR] Timeout de ping local na porta 6668</code>' +
+            '<br><code>[CONTINGENCY] Comutando para Tuya Cloud OpenAPI</code>' +
+            '<br><code>[OPENAPI] Sessão estabelecida via OpenAPI (Latência simulada: 148ms)</code>';
+          tuyaLogBox.scrollTop = tuyaLogBox.scrollHeight;
+        }
+      });
+    }
+
+    if (restoreButton) {
+      restoreButton.addEventListener('click', function () {
+        isTcpActive = true;
+        if (badgeRouteMode) {
+          badgeRouteMode.textContent = 'ROTA ATIVA: TCP LOCAL';
+          badgeRouteMode.className = 'route-badge active';
+        }
+        if (pingReadout) pingReadout.textContent = '4ms (simulado)';
+        if (wireSegment) wireSegment.className = 'wire wire-active';
+        if (nodeTargetLabel) nodeTargetLabel.textContent = 'Lâmpada (192.168.1.104)';
+
+        if (tuyaLogBox) {
+          tuyaLogBox.innerHTML += '<br><code>[TCP-RECOVER] Barramento local restabelecido em 192.168.1.104:6668 (Latência simulada: 4ms)</code>';
+          tuyaLogBox.scrollTop = tuyaLogBox.scrollHeight;
+        }
+      });
     }
   }
 
-  function initializeGamingHudDemo() {
-    const profileSelectElement = document.getElementById('gaming-hud-preset-select');
-    const frametimeDisplay = document.getElementById('gaming-frametime-value');
-    const fpsDisplay = document.getElementById('gaming-fps-value');
-    const lowOneDisplay = document.getElementById('gaming-low-value');
-    const presentCountDisplay = document.getElementById('gaming-presents-value');
-    const jsonOutputDisplay = document.getElementById('gaming-json-snapshot');
+  function initializeGamingDemo() {
+    const presetButtons = document.querySelectorAll('.preset-btn');
+    const metricAvgFps = document.getElementById('metric-avg-fps');
+    const metricLowFps = document.getElementById('metric-low-fps');
+    const metricFrametime = document.getElementById('metric-frametime');
+    const metricMaxHitch = document.getElementById('metric-max-hitch');
+    const gamingChartLine = document.getElementById('gaming-chart-line');
+    const gamingJsonDisplay = document.getElementById('gaming-json-display');
+    const copyJsonButton = document.getElementById('btn-copy-gaming-json');
 
-    const telemetryProfiles = {
+    const syntheticPresets = {
       stable: {
-        frametimeMs: 6.94,
-        fpsEquivalent: 144,
-        lowOnePercentMs: 7.82,
-        presentsRecorded: 14420
+        avgFps: '144.1 FPS',
+        lowFps: '139.8 FPS',
+        frameTime: '6.94 ms',
+        maxHitch: '7.42 ms',
+        pathData: 'M 0 50 Q 100 48 200 52 T 400 50',
+        jsonPayload: '{\n  "timestamp_ns": 1730219842104500,\n  "present_count": 86420,\n  "avg_frame_time_ms": 6.94,\n  "one_percent_low_fps": 139.8,\n  "active_swapchain": "0x7ffd98b04a20",\n  "hitch_count_last_sec": 0\n}'
       },
-      shaderStutter: {
-        frametimeMs: 16.42,
-        fpsEquivalent: 61,
-        lowOnePercentMs: 33.10,
-        presentsRecorded: 6140
+      stutter: {
+        avgFps: '112.4 FPS',
+        lowFps: '28.5 FPS',
+        frameTime: '8.89 ms',
+        maxHitch: '35.40 ms',
+        pathData: 'M 0 50 L 120 50 L 130 115 L 140 50 L 260 50 L 270 110 L 280 50 L 400 50',
+        jsonPayload: '{\n  "timestamp_ns": 1730219842998100,\n  "present_count": 86840,\n  "avg_frame_time_ms": 8.89,\n  "one_percent_low_fps": 28.5,\n  "active_swapchain": "0x7ffd98b04a20",\n  "hitch_count_last_sec": 4,\n  "last_stutter_cause": "vkCreateGraphicsPipelines shader compile"\n}'
       },
-      heavyLoad: {
-        frametimeMs: 22.22,
-        fpsEquivalent: 45,
-        lowOnePercentMs: 41.50,
-        presentsRecorded: 4500
+      heavy: {
+        avgFps: '59.8 FPS',
+        lowFps: '54.2 FPS',
+        frameTime: '16.72 ms',
+        maxHitch: '19.80 ms',
+        pathData: 'M 0 80 Q 80 75 160 85 T 320 80 T 400 85',
+        jsonPayload: '{\n  "timestamp_ns": 1730219843650000,\n  "present_count": 87210,\n  "avg_frame_time_ms": 16.72,\n  "one_percent_low_fps": 54.2,\n  "active_swapchain": "0x7ffd98b04a20",\n  "hitch_count_last_sec": 0\n}'
       }
     };
 
-    function updateTelemetryUi(profileKey) {
-      const selectedData = telemetryProfiles[profileKey] || telemetryProfiles.stable;
-      if (frametimeDisplay) frametimeDisplay.textContent = selectedData.frametimeMs.toFixed(2) + ' ms';
-      if (fpsDisplay) fpsDisplay.textContent = selectedData.fpsEquivalent + ' FPS';
-      if (lowOneDisplay) lowOneDisplay.textContent = selectedData.lowOnePercentMs.toFixed(2) + ' ms';
-      if (presentCountDisplay) presentCountDisplay.textContent = selectedData.presentsRecorded.toLocaleString('pt-BR');
+    presetButtons.forEach(function (button) {
+      button.addEventListener('click', function () {
+        presetButtons.forEach(function (b) { b.classList.remove('active'); });
+        button.classList.add('active');
+        const presetKey = button.getAttribute('data-preset');
+        const data = syntheticPresets[presetKey];
+        if (!data) return;
 
-      if (jsonOutputDisplay) {
-        const snapshotObject = {
-          source: 'vulkan_presentation_observer',
-          targetLayer: 'VK_LAYER_OBSERVE_PRESENT',
-          scenarioType: 'synthetic_benchmark_demo',
-          timestamp: new Date().toISOString(),
-          metrics: {
-            frametimeMs: selectedData.frametimeMs,
-            fps: selectedData.fpsEquivalent,
-            onePercentLowMs: selectedData.lowOnePercentMs,
-            presentsObserved: selectedData.presentsRecorded
-          }
-        };
-        jsonOutputDisplay.textContent = JSON.stringify(snapshotObject, null, 2);
-      }
-    }
-
-    if (profileSelectElement) {
-      profileSelectElement.addEventListener('change', function () {
-        updateTelemetryUi(profileSelectElement.value);
+        if (metricAvgFps) metricAvgFps.textContent = data.avgFps;
+        if (metricLowFps) metricLowFps.textContent = data.lowFps;
+        if (metricFrametime) metricFrametime.textContent = data.frameTime;
+        if (metricMaxHitch) metricMaxHitch.textContent = data.maxHitch;
+        if (gamingChartLine) gamingChartLine.setAttribute('d', data.pathData);
+        if (gamingJsonDisplay) gamingJsonDisplay.textContent = data.jsonPayload;
       });
-      updateTelemetryUi(profileSelectElement.value);
+    });
+
+    if (copyJsonButton && gamingJsonDisplay) {
+      copyJsonButton.addEventListener('click', async function () {
+        if (navigator.clipboard && window.isSecureContext) {
+          try {
+            await navigator.clipboard.writeText(gamingJsonDisplay.textContent);
+            copyJsonButton.textContent = 'Copiado!';
+            setTimeout(function () { copyJsonButton.textContent = 'Copiar JSON'; }, 2000);
+          } catch (_) {
+            copyJsonButton.textContent = 'Falha ao copiar';
+          }
+        }
+      });
     }
   }
 
-  function initializeFinanceLabIntegration() {
-    if (!window.PortfolioFinance || typeof window.PortfolioFinance.calculate !== 'function') {
-      return;
-    }
+  function initializePythonDemo() {
+    const codeTabButtons = document.querySelectorAll('.code-tab-btn');
+    codeTabButtons.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        codeTabButtons.forEach(function (b) { b.classList.remove('active'); });
+        tab.classList.add('active');
+        const targetIndex = tab.getAttribute('data-code-tab');
 
-    const initialInput = document.getElementById('finance-initial');
-    const monthlyInput = document.getElementById('finance-monthly');
-    const rateSlider = document.getElementById('finance-rate-slider');
-    const rateInput = document.getElementById('finance-rate-input');
-    const monthsSlider = document.getElementById('finance-months-slider');
-    const monthsInput = document.getElementById('finance-months-input');
-    const resetButton = document.getElementById('finance-reset-btn');
+        document.querySelectorAll('.code-tab-content').forEach(function (panel) {
+          panel.classList.remove('active');
+          panel.hidden = true;
+        });
 
-    const resultContributed = document.getElementById('finance-res-contributed');
-    const resultInterest = document.getElementById('finance-res-interest');
-    const resultBalance = document.getElementById('finance-res-balance');
-    const chartSvg = document.getElementById('finance-chart-svg');
-    const tableBody = document.getElementById('finance-milestones-body');
-
-    const errorInitial = document.getElementById('error-finance-initial');
-    const errorMonthly = document.getElementById('error-finance-monthly');
-    const errorRate = document.getElementById('error-finance-rate');
-    const errorMonths = document.getElementById('error-finance-months');
-
-    const currencyFormatter = new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    });
-
-    function setFieldError(errorElement, inputElement, errorMessage) {
-      if (!errorElement) return;
-      if (errorMessage) {
-        errorElement.textContent = errorMessage;
-        errorElement.hidden = false;
-        if (inputElement) inputElement.setAttribute('aria-invalid', 'true');
-      } else {
-        errorElement.textContent = '';
-        errorElement.hidden = true;
-        if (inputElement) inputElement.removeAttribute('aria-invalid');
-      }
-    }
-
-    function renderDynamicSvgChart(calculationPoints) {
-      if (!chartSvg || !calculationPoints || calculationPoints.length === 0) return;
-
-      const chartWidth = 540;
-      const chartHeight = 240;
-      const paddingLeft = 44;
-      const paddingRight = 20;
-      const paddingTop = 24;
-      const paddingBottom = 34;
-
-      const plotWidth = chartWidth - paddingLeft - paddingRight;
-      const plotHeight = chartHeight - paddingTop - paddingBottom;
-
-      const lastPoint = calculationPoints[calculationPoints.length - 1];
-      const maximumValue = Math.max(10, lastPoint.balance);
-      const totalMonths = Math.max(1, lastPoint.month);
-
-      let balancePathString = '';
-      let contributedPathString = '';
-      let balanceAreaString = '';
-
-      calculationPoints.forEach(function (dataPoint, pointIndex) {
-        const coordinateX = paddingLeft + (dataPoint.month / totalMonths) * plotWidth;
-        const balanceY = paddingTop + plotHeight - (dataPoint.balance / maximumValue) * plotHeight;
-        const contributedY = paddingTop + plotHeight - (dataPoint.contributed / maximumValue) * plotHeight;
-
-        if (pointIndex === 0) {
-          balancePathString += 'M ' + coordinateX.toFixed(1) + ' ' + balanceY.toFixed(1);
-          contributedPathString += 'M ' + coordinateX.toFixed(1) + ' ' + contributedY.toFixed(1);
-          balanceAreaString += 'M ' + coordinateX.toFixed(1) + ' ' + (paddingTop + plotHeight) + ' L ' + coordinateX.toFixed(1) + ' ' + balanceY.toFixed(1);
-        } else {
-          balancePathString += ' L ' + coordinateX.toFixed(1) + ' ' + balanceY.toFixed(1);
-          contributedPathString += ' L ' + coordinateX.toFixed(1) + ' ' + balanceY.toFixed(1);
-          balanceAreaString += ' L ' + coordinateX.toFixed(1) + ' ' + balanceY.toFixed(1);
+        const activePanel = document.getElementById('code-panel-' + targetIndex);
+        if (activePanel) {
+          activePanel.classList.add('active');
+          activePanel.hidden = false;
         }
       });
+    });
+  }
 
-      balanceAreaString += ' L ' + (paddingLeft + plotWidth).toFixed(1) + ' ' + (paddingTop + plotHeight) + ' Z';
+  function initializeSpotifastDemo() {
+    const tokenTiles = document.querySelectorAll('[data-copy-hex]');
+    const statusBox = document.getElementById('spotifast-copy-status');
 
-      chartSvg.innerHTML = `
-        <defs>
-          <linearGradient id=\"chartSeaglassAreaGradient\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\">
-            <stop offset=\"0%\" stop-color=\"#a6d6c0\" stop-opacity=\"0.24\" />
-            <stop offset=\"100%\" stop-color=\"#a6d6c0\" stop-opacity=\"0.0\" />
-          </linearGradient>
-        </defs>
-        <line x1=\"${paddingLeft}\" y1=\"${paddingTop + plotHeight}\" x2=\"${paddingLeft + plotWidth}\" y2=\"${paddingTop + plotHeight}\" stroke=\"#1c2430\" stroke-width=\"1\" />
-        <line x1=\"${paddingLeft}\" y1=\"${paddingTop}\" x2=\"${paddingLeft}\" y2=\"${paddingTop + plotHeight}\" stroke=\"#1c2430\" stroke-width=\"1\" />
-        <path d=\"${balanceAreaString}\" fill=\"url(#chartSeaglassAreaGradient)\" />
-        <path d=\"${contributedPathString}\" fill=\"none\" stroke=\"#64748b\" stroke-width=\"2\" stroke-dasharray=\"4 4\" />
-        <path d=\"${balancePathString}\" fill=\"none\" stroke=\"#a6d6c0\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" />
-      `;
-    }
-
-    function renderMilestonesTable(calculationPoints) {
-      if (!tableBody || !calculationPoints) return;
-      tableBody.innerHTML = '';
-
-      const milestonesPoints = calculationPoints.filter(function (pointItem) {
-        return pointItem.month > 0 && (pointItem.month % 12 === 0 || pointItem.month === calculationPoints.length - 1);
+    tokenTiles.forEach(function (tile) {
+      tile.addEventListener('click', async function () {
+        const hex = tile.getAttribute('data-copy-hex');
+        if (navigator.clipboard && window.isSecureContext) {
+          try {
+            await navigator.clipboard.writeText(hex);
+            if (statusBox) statusBox.innerHTML = '<code>Token copiado: ' + hex + '</code>';
+          } catch (_) {
+            if (statusBox) statusBox.innerHTML = '<code>Valor do token: ' + hex + '</code>';
+          }
+        } else {
+          if (statusBox) statusBox.innerHTML = '<code>Valor do token: ' + hex + '</code>';
+        }
       });
+    });
+  }
 
-      milestonesPoints.forEach(function (milestone) {
-        const yearNumber = Math.floor(milestone.month / 12);
-        const periodLabel = yearNumber > 0 ? 'Mês ' + milestone.month + ' (Ano ' + yearNumber + ')' : 'Mês ' + milestone.month;
-        const interestAmount = milestone.balance - milestone.contributed;
+  function initializeFinanceDemo() {
+    const financeForm = document.getElementById('finance-calc-form');
+    const errorBox = document.getElementById('finance-error-box');
+    const finalBalanceElement = document.getElementById('res-final-balance');
+    const totalContributedElement = document.getElementById('res-total-contributed');
+    const totalInterestElement = document.getElementById('res-total-interest');
+    const monthlyRateElement = document.getElementById('res-monthly-rate');
+    const chartSvg = document.getElementById('finance-chart-svg');
 
-        const tableRow = document.createElement('tr');
-        tableRow.innerHTML = `
-          <td>${periodLabel}</td>
-          <td>${currencyFormatter.format(milestone.contributed)}</td>
-          <td>${currencyFormatter.format(interestAmount)}</td>
-          <td><strong>${currencyFormatter.format(milestone.balance)}</strong></td>
-        `;
-        tableBody.appendChild(tableRow);
+    function formatCurrencyReal(amount) {
+      return 'R$ ' + Number(amount).toLocaleString('pt-BR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
       });
     }
 
-    function recalculateFinance() {
-      if (!initialInput || !monthlyInput || !rateInput || !monthsInput) return;
+    function renderFinanceChart(pointsList, totalContributed, finalBalance) {
+      if (!chartSvg) return;
+      const chartWidth = 500;
+      const chartHeight = 200;
+      const padX = 40;
+      const padY = 25;
 
-      const rawInitial = initialInput.value.trim();
-      const rawMonthly = monthlyInput.value.trim();
-      const rawRate = rateInput.value.trim();
-      const rawMonths = monthsInput.value.trim();
+      const plotWidth = chartWidth - padX * 2;
+      const plotHeight = chartHeight - padY * 2;
 
-      const initialValue = parseFloat(rawInitial);
-      const monthlyValue = parseFloat(rawMonthly);
-      const rateValue = parseFloat(rawRate);
+      const maxY = Math.max(finalBalance * 1.08, 100);
+      const maxMonth = pointsList[pointsList.length - 1].month || 1;
 
-      const isStrictIntegerMonths = /^\d+$/.test(rawMonths);
-      const monthsValue = isStrictIntegerMonths ? parseInt(rawMonths, 10) : NaN;
+      let balancePath = '';
+      let contributedPath = '';
+      let areaFillPath = '';
 
-      let hasValidationError = false;
+      for (let i = 0; i < pointsList.length; i += 1) {
+        const pt = pointsList[i];
+        const px = padX + (pt.month / maxMonth) * plotWidth;
+        const pyBalance = chartHeight - padY - (pt.balance / maxY) * plotHeight;
+        const pyContrib = chartHeight - padY - (pt.contributed / maxY) * plotHeight;
 
-      if (isNaN(initialValue) || initialValue < 0 || initialValue > 1000000) {
-        setFieldError(errorInitial, initialInput, 'Valor entre 0 e 1.000.000');
-        hasValidationError = true;
-      } else {
-        setFieldError(errorInitial, initialInput, '');
+        if (i === 0) {
+          balancePath += 'M ' + px.toFixed(1) + ' ' + pyBalance.toFixed(1);
+          contributedPath += 'M ' + px.toFixed(1) + ' ' + pyContrib.toFixed(1);
+          areaFillPath += 'M ' + px.toFixed(1) + ' ' + (chartHeight - padY) + ' L ' + px.toFixed(1) + ' ' + pyBalance.toFixed(1);
+        } else {
+          balancePath += ' L ' + px.toFixed(1) + ' ' + pyBalance.toFixed(1);
+          contributedPath += ' L ' + px.toFixed(1) + ' ' + pyContrib.toFixed(1);
+          areaFillPath += ' L ' + px.toFixed(1) + ' ' + pyBalance.toFixed(1);
+        }
       }
 
-      if (isNaN(monthlyValue) || monthlyValue < 0 || monthlyValue > 10000) {
-        setFieldError(errorMonthly, monthlyInput, 'Aporte entre 0 e 10.000');
-        hasValidationError = true;
-      } else {
-        setFieldError(errorMonthly, monthlyInput, '');
+      areaFillPath += ' L ' + (chartWidth - padX).toFixed(1) + ' ' + (chartHeight - padY) + ' Z';
+      const baselineY = chartHeight - padY;
+      const midLineY = padY + plotHeight / 2;
+
+      chartSvg.innerHTML =
+        '<defs>' +
+        '  <linearGradient id="chartGradientAreaV2" x1="0" y1="0" x2="0" y2="1">' +
+        '    <stop offset="0%" stop-color="#d9432e" stop-opacity="0.25" />' +
+        '    <stop offset="100%" stop-color="#d9432e" stop-opacity="0.02" />' +
+        '  </linearGradient>' +
+        '</defs>' +
+        '<line x1="' + padX + '" y1="' + baselineY + '" x2="' + (chartWidth - padX) + '" y2="' + baselineY + '" stroke="#0e1218" stroke-width="1.2" />' +
+        '<line x1="' + padX + '" y1="' + padY + '" x2="' + padX + '" y2="' + baselineY + '" stroke="#0e1218" stroke-width="1.2" />' +
+        '<line x1="' + padX + '" y1="' + midLineY.toFixed(1) + '" x2="' + (chartWidth - padX) + '" y2="' + midLineY.toFixed(1) + '" stroke="#0e1218" stroke-width="0.5" stroke-dasharray="3 3" stroke-opacity="0.2" />' +
+        '<path d="' + areaFillPath + '" fill="url(#chartGradientAreaV2)" />' +
+        '<path d="' + contributedPath + '" fill="none" stroke="#5c6779" stroke-width="1.8" stroke-dasharray="4 4" />' +
+        '<path d="' + balancePath + '" fill="none" stroke="#d9432e" stroke-width="2.5" />' +
+        '<circle cx="' + (chartWidth - padX) + '" cy="' + (chartHeight - padY - (finalBalance / maxY) * plotHeight).toFixed(1) + '" r="4.5" fill="#d9432e" />';
+    }
+
+    function runCalculationWithParameters(params) {
+      if (!window.PortfolioFinance || typeof window.PortfolioFinance.calculate !== 'function') {
+        if (errorBox) {
+          errorBox.textContent = 'Mecanismo de cálculo não disponível.';
+          errorBox.hidden = false;
+        }
+        return false;
       }
 
-      if (isNaN(rateValue) || rateValue < 0 || rateValue > 30) {
-        setFieldError(errorRate, rateInput, 'Taxa entre 0% e 30%');
-        hasValidationError = true;
-      } else {
-        setFieldError(errorRate, rateInput, '');
-      }
-
-      if (!isStrictIntegerMonths || isNaN(monthsValue) || monthsValue < 1 || monthsValue > 360) {
-        setFieldError(errorMonths, monthsInput, 'Prazo deve ser um número inteiro de meses (1 a 360)');
-        hasValidationError = true;
-      } else {
-        setFieldError(errorMonths, monthsInput, '');
-      }
-
-      if (hasValidationError) {
-        return;
+      // Validação estrita: prazos fracionários devem ser rejeitados preservando o gráfico anterior!
+      if (!Number.isInteger(params.months) || params.months < 1) {
+        if (errorBox) {
+          errorBox.textContent = 'Prazo em meses deve ser um número inteiro positivo (ex: 12). Valores fracionários são rejeitados.';
+          errorBox.hidden = false;
+        }
+        return false;
       }
 
       try {
-        const calculationResults = window.PortfolioFinance.calculate({
-          initialAmount: initialValue,
-          monthlyContribution: monthlyValue,
-          annualRatePercent: rateValue,
-          months: monthsValue
-        });
-
-        if (resultBalance) resultBalance.textContent = currencyFormatter.format(calculationResults.finalBalance);
-        if (resultContributed) resultContributed.textContent = currencyFormatter.format(calculationResults.totalContributed);
-        if (resultInterest) resultInterest.textContent = currencyFormatter.format(calculationResults.interest);
-
-        renderDynamicSvgChart(calculationResults.points);
-        renderMilestonesTable(calculationResults.points);
-      } catch (calculationError) {
-        // preserve previous valid results
+        const result = window.PortfolioFinance.calculate(params);
+        if (errorBox) {
+          errorBox.textContent = '';
+          errorBox.hidden = true;
+        }
+        if (finalBalanceElement) finalBalanceElement.textContent = formatCurrencyReal(result.finalBalance);
+        if (totalContributedElement) totalContributedElement.textContent = formatCurrencyReal(result.totalContributed);
+        if (totalInterestElement) totalInterestElement.textContent = formatCurrencyReal(result.interest);
+        if (monthlyRateElement) {
+          monthlyRateElement.textContent = (result.monthlyRate * 100).toFixed(2) + '% a.m.';
+        }
+        renderFinanceChart(result.points, result.totalContributed, result.finalBalance);
+        return true;
+      } catch (err) {
+        if (errorBox) {
+          errorBox.textContent = err.message || 'Parâmetros inválidos para o cálculo.';
+          errorBox.hidden = false;
+        }
+        // Preserva o gráfico e os resultados anteriores intactos!
+        return false;
       }
     }
 
-    if (rateSlider && rateInput) {
-      rateSlider.addEventListener('input', function () {
-        rateInput.value = rateSlider.value;
-        recalculateFinance();
-      });
-      rateInput.addEventListener('input', function () {
-        rateSlider.value = rateInput.value;
-        recalculateFinance();
-      });
-    }
+    if (financeForm) {
+      financeForm.addEventListener('submit', function (e) {
+        e.preventDefault();
 
-    if (monthsSlider && monthsInput) {
-      monthsSlider.addEventListener('input', function () {
-        monthsInput.value = monthsSlider.value;
-        recalculateFinance();
-      });
-      monthsInput.addEventListener('input', function () {
-        monthsSlider.value = monthsInput.value;
-        recalculateFinance();
-      });
-    }
+        const initialRaw = document.getElementById('fin-initial-amount')?.value.trim();
+        const contribRaw = document.getElementById('fin-monthly-contrib')?.value.trim();
+        const rateRaw = document.getElementById('fin-annual-rate')?.value.trim();
+        const monthsRaw = document.getElementById('fin-months')?.value.trim();
 
-    if (initialInput) initialInput.addEventListener('input', recalculateFinance);
-    if (monthlyInput) monthlyInput.addEventListener('input', recalculateFinance);
-
-    if (resetButton) {
-      resetButton.addEventListener('click', function () {
-        if (initialInput) initialInput.value = '1000';
-        if (monthlyInput) monthlyInput.value = '100';
-        if (rateInput) rateInput.value = '12';
-        if (rateSlider) rateSlider.value = '12';
-        if (monthsInput) monthsInput.value = '12';
-        if (monthsSlider) monthsSlider.value = '12';
-
-        setFieldError(errorInitial, initialInput, '');
-        setFieldError(errorMonthly, monthlyInput, '');
-        setFieldError(errorRate, rateInput, '');
-        setFieldError(errorMonths, monthsInput, '');
-
-        recalculateFinance();
-      });
-    }
-
-    recalculateFinance();
-  }
-
-  function handleHashNavigation() {
-    const currentHash = window.location.hash;
-    if (currentHash === '#laboratorio' || currentHash === '#panel-finance') {
-      if (document.documentElement.getAttribute('data-view') === 'brief') document.getElementById('brief-mode-toggle').click();
-      const financeTab = document.getElementById('tab-finance');
-      if (financeTab && typeof observatoryTabActivationFunction === 'function') {
-        observatoryTabActivationFunction(financeTab, false);
-      }
-      const financePanel = document.getElementById('panel-finance');
-      if (financePanel) {
-        financePanel.scrollIntoView({ behavior: document.documentElement.getAttribute('data-motion') === 'paused' ? 'instant' : 'smooth' });
-      }
-    }
-  }
-
-  function initializeNavigationFocus() {
-    const internalAnchors = document.querySelectorAll('a[href^=\"#\"]');
-    internalAnchors.forEach(function (anchorElement) {
-      anchorElement.addEventListener('click', function (event) {
-        const destinationHash = this.getAttribute('href');
-        if (destinationHash === '#laboratorio' || destinationHash === '#panel-finance') {
-          event.preventDefault();
-          if (document.documentElement.getAttribute('data-view') === 'brief') document.getElementById('brief-mode-toggle').click();
-          const financeTab = document.getElementById('tab-finance');
-          if (financeTab && typeof observatoryTabActivationFunction === 'function') {
-            observatoryTabActivationFunction(financeTab, false);
+        if (!initialRaw || !contribRaw || !rateRaw || !monthsRaw) {
+          if (errorBox) {
+            errorBox.textContent = 'Preencha todos os campos antes de calcular.';
+            errorBox.hidden = false;
           }
-          const financePanel = document.getElementById('panel-finance');
-          if (financePanel) {
-            financePanel.scrollIntoView({ behavior: document.documentElement.getAttribute('data-motion') === 'paused' ? 'instant' : 'smooth' });
-            financePanel.focus({ preventScroll: true });
-          }
-          history.pushState(null, '', '#laboratorio');
           return;
         }
 
-        if (destinationHash && destinationHash !== '#') {
-          const destinationElement = document.querySelector(destinationHash);
-          if (destinationElement) {
-            destinationElement.setAttribute('tabindex', '-1');
-            destinationElement.focus({ preventScroll: true });
-          }
+        const monthsNum = Number(monthsRaw);
+        runCalculationWithParameters({
+          initialAmount: Number(initialRaw),
+          monthlyContribution: Number(contribRaw),
+          annualRatePercent: Number(rateRaw),
+          months: monthsNum
+        });
+      });
+
+      // Execução canônica inicial com caso de referência: 1000, 100, 12, 12 -> R$ 2.384,65
+      runCalculationWithParameters({
+        initialAmount: 1000,
+        monthlyContribution: 100,
+        annualRatePercent: 12,
+        months: 12
+      });
+    }
+  }
+
+  function initializeEventListeners() {
+    if (spatialViewport) {
+      spatialViewport.addEventListener('pointerdown', handlePointerDown);
+      window.addEventListener('pointermove', handlePointerMove);
+      window.addEventListener('pointerup', handlePointerUp);
+      window.addEventListener('pointercancel', handlePointerUp);
+      spatialViewport.addEventListener('wheel', handleWheelZoom, { passive: false });
+      spatialViewport.addEventListener('dblclick', function () {
+        resetCameraToOverview();
+      });
+    }
+
+    // Minimapa
+    const minimapRadar = document.getElementById('minimap-radar');
+    if (minimapRadar) {
+      minimapRadar.addEventListener('click', handleMinimapClick);
+    }
+
+    // Controles de Zoom do Dock
+    const dockOverview = document.getElementById('btn-dock-overview');
+    if (dockOverview) {
+      dockOverview.addEventListener('click', function () {
+        navigateToRoute('atlas', true);
+        resetCameraToOverview(true);
+      });
+    }
+
+    const dockZoomIn = document.getElementById('btn-dock-zoom-in');
+    if (dockZoomIn) {
+      dockZoomIn.addEventListener('click', function () {
+        cameraState.targetZoom = clampValue(cameraState.targetZoom * 1.25, cameraState.minZoom, cameraState.maxZoom);
+        requestCameraWakeup();
+      });
+    }
+
+    const dockZoomOut = document.getElementById('btn-dock-zoom-out');
+    if (dockZoomOut) {
+      dockZoomOut.addEventListener('click', function () {
+        cameraState.targetZoom = clampValue(cameraState.targetZoom / 1.25, cameraState.minZoom, cameraState.maxZoom);
+        requestCameraWakeup();
+      });
+    }
+
+    // Modo Leitura Direta
+    const directBtn = document.getElementById('btn-direct-reading');
+    if (directBtn) {
+      directBtn.addEventListener('click', function () {
+        if (isDirectReadingActive) {
+          navigateToRoute('atlas', true);
+        } else {
+          navigateToRoute('leitura', true);
+        }
+      });
+    }
+
+    const returnAtlasBtn = document.getElementById('btn-return-to-atlas');
+    if (returnAtlasBtn) {
+      returnAtlasBtn.addEventListener('click', function () {
+        navigateToRoute('atlas', true);
+      });
+    }
+
+    const returnAtlasFooterBtn = document.getElementById('btn-return-to-atlas-footer');
+    if (returnAtlasFooterBtn) {
+      returnAtlasFooterBtn.addEventListener('click', function () {
+        navigateToRoute('atlas', true);
+      });
+    }
+
+    const brandHomeLink = document.getElementById('brand-home-link');
+    if (brandHomeLink) {
+      brandHomeLink.addEventListener('click', function (e) {
+        e.preventDefault();
+        navigateToRoute('atlas', true);
+        resetCameraToOverview();
+      });
+    }
+
+    // Botões do Header
+    const btnIndice = document.getElementById('btn-header-indice');
+    if (btnIndice) {
+      btnIndice.addEventListener('click', function () {
+        navigateToRoute('indice', true);
+      });
+    }
+
+    const btnSobre = document.getElementById('btn-header-sobre');
+    if (btnSobre) {
+      btnSobre.addEventListener('click', function () {
+        navigateToRoute('sobre', true);
+      });
+    }
+
+    const btnContato = document.getElementById('btn-header-contato');
+    if (btnContato) {
+      btnContato.addEventListener('click', function () {
+        navigateToRoute('contato', true);
+      });
+    }
+
+    // Fechar Overlays
+    const closeOverlayBtns = document.querySelectorAll('[data-action="close-overlay"]');
+    closeOverlayBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        navigateToRoute('atlas', true);
+      });
+    });
+
+    // Pular de Índice para Sala
+    const indiceJumps = document.querySelectorAll('[data-jump-room]');
+    indiceJumps.forEach(function (jump) {
+      jump.addEventListener('click', function () {
+        const target = jump.getAttribute('data-jump-room');
+        navigateToRoute(target, true);
+      });
+    });
+
+    // CLIQUE REAL nos artefatos espaciais: somente abre se NÃO foi arrasto (>6px)
+    const enterButtons = document.querySelectorAll('[data-enter-room]');
+    enterButtons.forEach(function (btn) {
+      btn.addEventListener('click', function (clickEvent) {
+        if (pointerState.totalDragDistance > 6 || pointerState.wasDragged) {
+          clickEvent.preventDefault();
+          clickEvent.stopPropagation();
+          return;
+        }
+        const target = btn.getAttribute('data-enter-room');
+        navigateToRoute(target, true);
+      });
+    });
+
+    // Clique no artigo como hit-target complementar
+    const spatialArtifacts = document.querySelectorAll('.spatial-artifact');
+    spatialArtifacts.forEach(function (artifact) {
+      artifact.addEventListener('click', function (clickEvent) {
+        if (pointerState.totalDragDistance > 6 || pointerState.wasDragged) {
+          clickEvent.preventDefault();
+          clickEvent.stopPropagation();
+          return;
+        }
+        if (clickEvent.target.closest('button')) {
+          return;
+        }
+        const target = artifact.getAttribute('data-project');
+        if (target) {
+          navigateToRoute(target, true);
         }
       });
     });
 
-    window.addEventListener('hashchange', handleHashNavigation);
-    if (window.location.hash) {
-      setTimeout(handleHashNavigation, 80);
-    }
-  }
-
-  function initializeAboutCloudIllustration() {
-    const artContainers = document.querySelectorAll('.about-art-cloud');
-    if (window.createCloudMorph && typeof window.createCloudMorph === 'function') {
-      artContainers.forEach(function (artContainer) {
-        try {
-          window.createCloudMorph(artContainer);
-        } catch (cloudError) {
-          void cloudError;
-        }
+    // Dock: Botões de Projeto
+    const dockButtons = document.querySelectorAll('[data-dock-target]');
+    dockButtons.forEach(function (dockBtn) {
+      dockBtn.addEventListener('click', function () {
+        const target = dockBtn.getAttribute('data-dock-target');
+        navigateToRoute(target, true);
       });
-    }
+    });
+
+    // Voltar da Sala
+    const backButtons = document.querySelectorAll('[data-action="exit-room"]');
+    backButtons.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        navigateToRoute('atlas', true);
+      });
+    });
+
+    // Passo entre Salas (Anterior / Próximo)
+    const stepButtons = document.querySelectorAll('[data-step-dir]');
+    stepButtons.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const dir = btn.getAttribute('data-step-dir');
+        stepActiveRoom(dir);
+      });
+    });
+
+    // Histórico Back/Forward do navegador
+    window.addEventListener('popstate', function () {
+      applyRouteState(window.location.hash.replace('#', ''));
+    });
+
+    // Redimensionamento de Janela
+    window.addEventListener('resize', function () {
+      if (!currentActiveRoom && !isDirectReadingActive) {
+        const fitZoom = calculateOverviewFit();
+        cameraState.targetZoom = fitZoom;
+        if (isMotionReduced) {
+          cameraState.currentZoom = fitZoom;
+        }
+      }
+      requestCameraWakeup();
+    });
+
+    // Visibilidade da Página (Zero RAF ao ocultar aba)
+    document.addEventListener('visibilitychange', function () {
+      isPageVisible = !document.hidden;
+      if (isPageVisible) {
+        requestCameraWakeup();
+      }
+    });
   }
 
-  function initializeApplication() {
-    document.documentElement.classList.add('js-ready');
-    initializeEmailCopy();
+  function initializeAtlasApp() {
     initializeMotionControls();
-    initializeBriefMode();
-    initializeProjectObservatory();
+    initializeEmailCopy();
+    initializeKeyboardNavigation();
     initializeYahcwDemo();
     initializeTuyaDemo();
-    initializeGamingHudDemo();
-    initializeFinanceLabIntegration();
-    initializeNavigationFocus();
-    initializeAboutCloudIllustration();
+    initializeGamingDemo();
+    initializePythonDemo();
+    initializeSpotifastDemo();
+    initializeFinanceDemo();
+    initializeEventListeners();
+
+    // Inicialização da Câmera com FIT real
+    const initialFitZoom = calculateOverviewFit();
+    cameraState.currentZoom = initialFitZoom;
+    cameraState.targetZoom = initialFitZoom;
+    cameraState.currentPanX = 0;
+    cameraState.currentPanY = 0;
+    cameraState.targetPanX = 0;
+    cameraState.targetPanY = 0;
+
+    applyWorldTransform();
+    drawAtlasCanvas();
+
+    // Rota inicial (se houver hash)
+    if (window.location.hash && window.location.hash !== '#atlas') {
+      applyRouteState(window.location.hash.replace('#', ''));
+    } else {
+      requestCameraWakeup();
+    }
   }
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeApplication);
+    document.addEventListener('DOMContentLoaded', initializeAtlasApp);
   } else {
-    initializeApplication();
+    initializeAtlasApp();
   }
 })();

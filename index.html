@@ -1,806 +1,1587 @@
 <!DOCTYPE html>
-<html lang="pt-BR" data-motion="active" data-view="full">
+<html lang="pt-BR" data-motion="active" data-view="atlas">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Arthur Kadri de Oliveira | Portfólio &amp; Observatório de Sistemas</title>
-  <meta name="description" content="Portfólio de Arthur Kadri de Oliveira. Graduação na UFABC (2º período). Programação prática em C#, Python e C++, com projetos de sistemas e busca por estágio em mercado financeiro ou análise de dados.">
-  <link rel="icon" type="image/svg+xml" href="favicon.svg?v=20261029-immersive">
+  <title>Arthur Kadri de Oliveira | Atlas Espacial de Sistemas</title>
+  <meta name="description" content="Atlas espacial interativo de Arthur Kadri de Oliveira. Graduação na UFABC (2º período). Programação em C#, Python e C++, utilitários Win32, automação de rede e modelagem quantitativa. Busca de estágio em mercado financeiro ou dados.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg?v=20261029-atlas">
   <link rel="canonical" href="https://arthurmpbby.github.io/">
-  <meta property="og:title" content="Arthur Kadri de Oliveira | Portfólio &amp; Observatório de Sistemas">
-  <meta property="og:description" content="Estudante na UFABC (2º período). C#, Python e C++, projetos abertos no GitHub (YAHCW, tuya-smart-lamps, gaming-fps-hud) e busca por estágio em mercado financeiro ou dados.">
+  <meta property="og:title" content="Arthur Kadri de Oliveira | Atlas Espacial de Sistemas">
+  <meta property="og:description" content="Arquivo explorável em 6 planos arquiteturais interativos: YAHCW (Win32/DWM), Tuya (TCP/OpenAPI), Gaming (Vulkan/Wayland) e Laboratório Financeiro.">
   <meta property="og:image" content="https://arthurmpbby.github.io/og-image.png">
   <meta property="og:url" content="https://arthurmpbby.github.io/">
   <meta property="og:type" content="website">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20261029-immersive">
+  <link rel="stylesheet" href="styles.css?v=20261029-atlas-v3">
 </head>
-<body>
+<body class="mode-atlas">
   <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
 
-  <header class="site-header">
+  <!-- Header fixo editorial -->
+  <header class="atlas-header" role="banner">
     <div class="header-inner">
       <div class="header-brand-block">
-        <a href="#hero" class="brand-link" aria-label="Arthur Kadri - Início">
+        <a href="#atlas" class="brand-link" id="brand-home-link" aria-label="Arthur Kadri - Retornar ao Atlas">
           <span class="brand-glyph" aria-hidden="true">AK</span>
-          <span class="brand-text">Arthur Kadri</span>
+          <div class="brand-text-group">
+            <span class="brand-name">Arthur Kadri</span>
+            <span class="brand-sub">Atlas de Sistemas &middot; UFABC (2º período)</span>
+          </div>
         </a>
       </div>
 
-      <nav class="site-nav" aria-label="Navegação principal">
-        <ul class="nav-links">
-          <li><a href="#projetos" class="nav-link">Projetos</a></li>
-          <li><a href="#laboratorio" class="nav-link">Laboratório</a></li>
-          <li><a href="#sobre" class="nav-link">Sobre</a></li>
-          <li><a href="#contato" class="nav-link">Contato</a></li>
+      <nav class="atlas-nav" aria-label="Navegação do sistema">
+        <ul class="nav-pills">
+          <li>
+            <button type="button" class="nav-pill-btn" id="btn-header-indice" aria-haspopup="dialog" aria-controls="overlay-indice">
+              <span class="pill-dot" aria-hidden="true"></span>
+              <span>Índice</span>
+            </button>
+          </li>
+          <li>
+            <button type="button" class="nav-pill-btn" id="btn-header-sobre" aria-haspopup="dialog" aria-controls="overlay-sobre">
+              <span>Sobre</span>
+            </button>
+          </li>
+          <li>
+            <button type="button" class="nav-pill-btn" id="btn-header-contato" aria-haspopup="dialog" aria-controls="overlay-contato">
+              <span>Contato</span>
+            </button>
+          </li>
         </ul>
       </nav>
 
-      <div class="header-controls">
-        <button id="brief-mode-toggle" class="control-btn brief-btn" type="button" aria-pressed="false" aria-label="Alternar para modo resumido de 20 segundos">
-          <span class="control-indicator" aria-hidden="true"></span>
-          <span class="mobile-short-text" aria-hidden="true">20s</span>
-          <span id="brief-status-label" class="brief-btn-text">Tenho 20 segundos</span>
+      <div class="header-tools">
+        <!-- Modo Leitura Direta (para recrutadores / HR) -->
+        <button type="button" class="tool-btn direct-reading-toggle" id="btn-direct-reading" aria-pressed="false" aria-label="Alternar para modo de leitura direta linear">
+          <span class="tool-indicator" aria-hidden="true"></span>
+          <span class="tool-label-short" aria-hidden="true">Texto</span>
+          <span class="tool-label-full" id="reading-mode-label">Leitura direta</span>
         </button>
-        <span id="brief-live-status" class="sr-only" aria-live="polite"></span>
 
-        <button id="motion-toggle-btn" class="control-btn motion-btn" type="button" aria-pressed="false" aria-label="Pausar animações decorativas">
+        <!-- Controle de animação / persistência -->
+        <button type="button" class="tool-btn motion-toggle" id="motion-toggle-btn" aria-pressed="false" aria-label="Pausar animações de câmera e partículas">
           <span class="motion-icon" aria-hidden="true"></span>
-          <span class="mobile-short-text" aria-hidden="true">Motion</span>
-          <span id="motion-status-label" class="motion-btn-text">Pausar animações</span>
+          <span class="tool-label-short" aria-hidden="true">Efeitos</span>
+          <span class="tool-label-full" id="motion-status-label">Pausar animações</span>
         </button>
-        <span id="motion-live-status" class="sr-only" aria-live="polite"></span>
       </div>
     </div>
   </header>
 
+  <!-- Região de anúncios de acessibilidade -->
+  <div id="live-announcer" class="sr-only" aria-live="polite"></div>
+
+  <!-- CONTEÚDO PRINCIPAL -->
   <main id="main-content">
-    <section class="hero-section" id="hero" aria-labelledby="hero-title">
-      <canvas id="immersive-scene-canvas" class="immersive-scene-canvas" aria-hidden="true"></canvas>
 
-      <div class="hero-viewport-container">
-        <div class="hero-monumental-container">
-          <h1 class="hero-monumental-title" id="hero-title">
-            <span class="hero-name-row">ARTHUR KADRI</span>
-          </h1>
-        </div>
+    <!-- 1. VIEWPORT ESPACIAL (ATLAS 2D + PROFUNDIDADE ARQUITETURAL) -->
+    <div id="spatial-viewport" class="spatial-viewport" tabindex="0" role="region" aria-label="Mundo espacial navegável. Use arrastar ou teclado para navegar, roda do mouse para zoom.">
 
-        <div class="hero-floated-intro">
-          <p class="hero-intro-text">
-            Estudante na <strong>Universidade Federal do ABC (UFABC &mdash; 2º período)</strong>.<br>
-            Projetos em C#, Python e C++. Busco estágio em dados ou mercado financeiro.
-          </p>
-          <div class="hero-quiet-actions" data-full-only>
-            <a href="#projetos" class="quiet-cta-link cta-primary">
-              <span>Explorar observatório</span>
-              <span class="cta-glyph" aria-hidden="true">&darr;</span>
-            </a>
-            <a href="#contato" class="quiet-cta-link cta-secondary">
-              <span>Contato</span>
-              <span class="cta-glyph" aria-hidden="true">&nearr;</span>
-            </a>
-          </div>
-        </div>
-      </div>
-    </section>
+      <!-- Fundo gerativo em Canvas 2D -->
+      <canvas id="atlas-canvas" class="atlas-canvas" aria-hidden="true"></canvas>
 
-    <section class="section-block observatory-section" id="projetos" aria-labelledby="projetos-title">
-      <div class="section-container">
-        <header class="section-header">
-          <div class="section-index-badge">
-            <span class="section-index-num">01</span>
-            <span class="section-index-label">/ Observatório de Sistemas</span>
-          </div>
-          <h2 class="section-title" id="projetos-title">Projetos, por dentro.</h2>
-          <p class="section-subtitle">
-            Implementações com código aberto no GitHub. Selecione um projeto para visualizar arquitetura e interagir com simulações no navegador.
-          </p>
-        </header>
+      <!-- Plano espacial transformado via CSS (Pan & Zoom em sistema de coordenadas reais) -->
+      <div id="spatial-world" class="spatial-world">
 
-        <div class="brief-project-list" aria-label="Projetos em resumo">
-          <a href="https://github.com/arthurMPBBY/YAHCW" target="_blank" rel="noopener noreferrer"><strong>YAHCW</strong><small>C# · Janelas, brilho e áudio ↗</small></a>
-          <a href="https://github.com/arthurMPBBY/tuya-smart-lamps" target="_blank" rel="noopener noreferrer"><strong>Tuya Smart Lamps</strong><small>Python · Automação local ↗</small></a>
-          <a href="https://github.com/arthurMPBBY/gaming-fps-hud" target="_blank" rel="noopener noreferrer"><strong>Gaming FPS HUD</strong><small>C++ · Telemetria Vulkan ↗</small></a>
-          <a href="https://github.com/arthurMPBBY/python-curso" target="_blank" rel="noopener noreferrer"><strong>Fundamentos em Python</strong><small>Exercícios ↗</small></a>
-          <a href="https://github.com/arthurMPBBY/spotifast-neon-theme" target="_blank" rel="noopener noreferrer"><strong>Spotifast</strong><small>Paleta em JSON ↗</small></a>
-        </div>
-        <div class="observatory-explorer">
-          <div class="observatory-navigation-bar" role="tablist" aria-label="Seleção de projetos do observatório">
-            <button id="tab-yahcw" class="observatory-tab is-active" type="button" role="tab" aria-selected="true" aria-controls="panel-yahcw" tabindex="0" data-scene-state="yahcw">
-              <span class="tab-indicator" aria-hidden="true"></span>
-              <span class="tab-title">YAHCW (Hot Corners)</span>
-              <span class="tab-badge">C# / Win32</span>
-            </button>
-            <button id="tab-tuya" class="observatory-tab" type="button" role="tab" aria-selected="false" aria-controls="panel-tuya" tabindex="-1" data-scene-state="tuya">
-              <span class="tab-indicator" aria-hidden="true"></span>
-              <span class="tab-title">tuya-smart-lamps</span>
-              <span class="tab-badge">Python / TCP</span>
-            </button>
-            <button id="tab-gaming" class="observatory-tab" type="button" role="tab" aria-selected="false" aria-controls="panel-gaming" tabindex="-1" data-scene-state="gaming-fps-hud">
-              <span class="tab-indicator" aria-hidden="true"></span>
-              <span class="tab-title">gaming-fps-hud</span>
-              <span class="tab-badge">C++17 / Vulkan</span>
-            </button>
-            <button id="tab-finance" class="observatory-tab" type="button" role="tab" aria-selected="false" aria-controls="panel-finance" tabindex="-1" data-scene-state="laboratorio">
-              <span class="tab-indicator" aria-hidden="true"></span>
-              <span class="tab-title">Simulador Financeiro</span>
-              <span class="tab-badge">Laboratório</span>
-            </button>
-          </div>
-
-          <div class="observatory-stage-panels">
-            <article id="panel-yahcw" class="observatory-panel is-active" role="tabpanel" aria-labelledby="tab-yahcw" tabindex="0">
-              <div class="panel-two-column-layout">
-                <div class="panel-details-column">
-                  <div class="panel-meta-strip">
-                    <span class="panel-category-pill">Windows Desktop &middot; DWM &amp; Win32</span>
-                    <span class="panel-version-pill">C# / .NET 4.5+</span>
-                  </div>
-
-                  <h3 class="panel-project-title">
-                    <a href="https://github.com/arthurMPBBY/YAHCW" target="_blank" rel="noopener noreferrer" class="panel-title-link">
-                      YAHCW
-                      <svg viewBox="0 0 16 16" width="16" height="16" class="external-icon" aria-hidden="true">
-                        <path d="M4 12l8-8m0 0H6m6 0v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                      </svg>
-                    </a>
-                  </h3>
-                  <p class="panel-tagline">Janelas, brilho e áudio. No mesmo lugar.</p>
-
-                  <p class="panel-summary-text">
-                    Utilitário nativo para Windows que integra navegação rápida por cantos de tela com visão geral de janelas em execução, controle de brilho dos monitores e seleção ágil de saídas de áudio.
-                  </p>
-
-                  <div class="panel-tech-chips">
-                    <span class="tech-chip">C# / WinForms</span>
-                    <span class="tech-chip">DWM API</span>
-                    <span class="tech-chip">Win32</span>
-                  </div>
-
-                  <p class="panel-scope-warning">
-                    <strong>Demonstração ilustrativa.</strong> Não controla este computador.
-                  </p>
-
-                  <details class="panel-technical-details">
-                    <summary class="details-summary">Detalhes técnicos e limites de escopo</summary>
-                    <p class="details-body">
-                      No software nativo, a visão geral consulta o Desktop Window Manager (DWM). O controle de brilho comunica com o serviço auxiliar BrightTray via Named Pipe local protegido e depende de suporte do hardware a DDC/CI ou WMI. A seleção de áudio utiliza a interface COM IPolicyConfig. Não há sobreposição garantida em jogos com tela cheia exclusiva ou sob anti-cheats de kernel.
-                    </p>
-                  </details>
-
-                  <div class="panel-actions-row">
-                    <a href="https://github.com/arthurMPBBY/YAHCW" class="action-btn btn-primary" target="_blank" rel="noopener noreferrer">
-                      <span>Ver repositório no GitHub</span>
-                      <span class="btn-arrow" aria-hidden="true">&nearr;</span>
-                    </a>
-                    <button type="button" class="action-btn btn-secondary" data-yahcw-trigger aria-haspopup="dialog">
-                      <span>Simular Canto / Visão Geral</span>
-                    </button>
-                  </div>
-                  <span id="yahcw-live-status" class="sr-only" aria-live="polite"></span>
-                </div>
-
-                <div class="panel-interactive-demo-column">
-                  <div class="demo-card-frame">
-                    <div class="demo-card-header">
-                      <div class="demo-card-dots" aria-hidden="true">
-                        <span class="dot-red"></span>
-                        <span class="dot-yellow"></span>
-                        <span class="dot-green"></span>
-                      </div>
-                      <span class="demo-card-caption">Demonstração ilustrativa &mdash; não controla este computador</span>
-                    </div>
-
-                    <div id="yahcw-demo-stage" class="yahcw-simulated-desktop">
-                      <div id="yahcw-corner-trigger-box" class="yahcw-corner-box top-left" title="Passe o cursor ou clique aqui para disparar a visão geral do canto">
-                        <span class="corner-radar-pulse" aria-hidden="true"></span>
-                        <span class="corner-label">Canto Superior Esquerdo</span>
-                      </div>
-
-                      <div class="simulated-desktop-workarea">
-                        <div class="simulated-sample-window active-window">
-                          <div class="sample-window-header">
-                            <span class="sample-window-icon">📄</span>
-                            <span id="yahcw-active-window-title" class="sample-window-title">FormOverview.cs &mdash; C# WinForms / DWM</span>
-                          </div>
-                          <div class="sample-window-body">
-                            <div class="sample-code-skeleton" aria-hidden="true">
-                              <span class="code-line wide mint"></span>
-                              <span class="code-line medium"></span>
-                              <span class="code-line narrow"></span>
-                              <span class="code-line wide"></span>
-                            </div>
-                            <p class="sample-window-hint">
-                              Janela simulada em primeiro plano. Dispare o canto superior esquerdo ou utilize o botão para abrir a visão geral de miniaturas.
-                            </p>
-                          </div>
-                        </div>
-
-                        <div id="yahcw-demo-overview" class="yahcw-overview-overlay" hidden role="dialog" aria-modal="true" aria-label="Visão Geral de Janelas">
-                          <div class="overview-modal-content">
-                            <div class="overview-modal-header">
-                              <h4 class="overview-modal-title">Visão Geral DWM &mdash; Janelas em Execução</h4>
-                              <button id="yahcw-overview-close-btn" class="overview-close-btn" type="button" aria-label="Fechar visão geral">Fechar [Esc]</button>
-                            </div>
-                            <div class="overview-grid" role="list">
-                              <button type="button" class="yahcw-overview-tile" data-window-title="Editor C# — FormOverview.cs">
-                                <span class="tile-icon">⌨️</span>
-                                <span class="tile-label">Editor C# (FormOverview.cs)</span>
-                                <span class="tile-dwm-tag">DWM Ativo</span>
-                              </button>
-                              <button type="button" class="yahcw-overview-tile" data-window-title="Terminal PowerShell — YAHCW.exe --diagnose">
-                                <span class="tile-icon">⬛</span>
-                                <span class="tile-label">PowerShell (YAHCW.exe)</span>
-                                <span class="tile-dwm-tag">DWM Ativo</span>
-                              </button>
-                              <button type="button" class="yahcw-overview-tile" data-window-title="Navegador Web — Documentação DWM API">
-                                <span class="tile-icon">🌐</span>
-                                <span class="tile-label">Navegador (Documentação DWM)</span>
-                                <span class="tile-dwm-tag">DWM Ativo</span>
-                              </button>
-                              <button type="button" class="yahcw-overview-tile" data-window-title="BrightTray — Assistente de Brilho Named Pipe">
-                                <span class="tile-icon">☀️</span>
-                                <span class="tile-label">BrightTray (Named Pipe)</span>
-                                <span class="tile-dwm-tag">DWM Ativo</span>
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div class="simulated-desktop-bar">
-                        <div class="demo-bar-control-group brightness-group">
-                          <label for="yahcw-brightness-slider" class="demo-bar-label">
-                            <span class="control-name">Brilho:</span>
-                            <span id="yahcw-brightness-display" class="control-value-pill">85%</span>
-                          </label>
-                          <input type="range" id="yahcw-brightness-slider" class="demo-slider" min="15" max="100" value="85" aria-label="Ajuste ilustrativo de brilho">
-                        </div>
-
-                        <div class="demo-bar-control-group audio-group">
-                          <label for="yahcw-audio-select" class="demo-bar-label">
-                            <span class="control-name">Saída de Áudio:</span>
-                            <span id="yahcw-audio-display" class="sr-only">Fones de Ouvido (Realtek High Definition)</span>
-                          </label>
-                          <select id="yahcw-audio-select" class="demo-select" aria-label="Seleção ilustrativa de dispositivo de áudio">
-                            <option value="headphones" selected>Fones de Ouvido (Realtek High Definition)</option>
-                            <option value="speakers">Alto-falantes (USB Audio Codec)</option>
-                            <option value="displayport">Monitor DisplayPort (NVIDIA High Definition)</option>
-                          </select>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </article>
-
-            <article id="panel-tuya" class="observatory-panel" role="tabpanel" aria-labelledby="tab-tuya">
-              <div class="panel-two-column-layout">
-                <div class="panel-details-column">
-                  <div class="panel-meta-strip">
-                    <span class="panel-category-pill">Automação Residencial &amp; Redes</span>
-                    <span class="panel-version-pill">Python 3 / TCP &amp; SSE</span>
-                  </div>
-
-                  <h3 class="panel-project-title">
-                    <a href="https://github.com/arthurMPBBY/tuya-smart-lamps" target="_blank" rel="noopener noreferrer" class="panel-title-link">
-                      tuya-smart-lamps
-                      <svg viewBox="0 0 16 16" width="16" height="16" class="external-icon" aria-hidden="true">
-                        <path d="M4 12l8-8m0 0H6m6 0v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                      </svg>
-                    </a>
-                  </h3>
-                  <p class="panel-tagline">Controle local resiliente de lâmpadas inteligentes.</p>
-
-                  <p class="panel-summary-text">
-                    Sistema de controle com backend Python e aplicativo Android, priorizando conexões TCP diretas na rede Wi-Fi local e alternando automaticamente para a Tuya OpenAPI em nuvem caso a rede local não responda.
-                  </p>
-
-                  <div class="panel-tech-chips">
-                    <span class="tech-chip">Python 3</span>
-                    <span class="tech-chip">TCP Sockets</span>
-                    <span class="tech-chip">Server-Sent Events</span>
-                  </div>
-
-                  <p class="panel-scope-warning">
-                    <strong>Simulação de protocolo:</strong> O playground abaixo demonstra a lógica de contingência sem comunicar com lâmpadas físicas reais.
-                  </p>
-
-                  <div class="panel-actions-row">
-                    <a href="https://github.com/arthurMPBBY/tuya-smart-lamps" class="action-btn btn-primary" target="_blank" rel="noopener noreferrer">
-                      <span>Ver repositório no GitHub</span>
-                      <span class="btn-arrow" aria-hidden="true">&nearr;</span>
-                    </a>
-                  </div>
-                </div>
-
-                <div class="panel-interactive-demo-column">
-                  <div class="demo-card-frame">
-                    <div class="demo-card-header">
-                      <div class="demo-card-dots" aria-hidden="true">
-                        <span class="dot-red"></span>
-                        <span class="dot-yellow"></span>
-                        <span class="dot-green"></span>
-                      </div>
-                      <span class="demo-card-caption">Playground ilustrativo de protocolo &mdash; rede local vs nuvem</span>
-                    </div>
-
-                    <div class="tuya-playground-box">
-                      <div class="tuya-lamp-display">
-                        <div id="tuya-lamp-visual" class="lamp-visual-fixture" aria-hidden="true">
-                          <div class="fixture-cord"></div>
-                          <div class="fixture-bulb"></div>
-                        </div>
-                        <div class="lamp-state-details">
-                          <span class="lamp-name-label">Lâmpada Escritório (Tuya GU10)</span>
-                          <span id="tuya-lamp-status-pill" class="status-indicator-tag">Desligada</span>
-                        </div>
-                        <button type="button" id="tuya-lamp-toggle" class="action-btn btn-secondary" aria-pressed="false">Ligar Lâmpada</button>
-                      </div>
-
-                      <div class="tuya-network-inspector">
-                        <h4 class="inspector-heading">Roteamento de Comandos</h4>
-                        <div class="radio-options-cluster">
-                          <label class="radio-option-item">
-                            <input type="radio" name="tuya-route-choice" value="local" checked>
-                            <span>Priorizar Caminho Local TCP</span>
-                          </label>
-                          <label class="radio-option-item">
-                            <input type="radio" name="tuya-route-choice" value="cloud">
-                            <span>Usar Caminho Nuvem (Tuya OpenAPI)</span>
-                          </label>
-                        </div>
-
-                        <div class="checkbox-option-item">
-                          <label>
-                            <input type="checkbox" id="tuya-drop-local-toggle">
-                            <span>Simular perda da rede local Wi-Fi</span>
-                          </label>
-                        </div>
-
-                        <div class="tuya-telemetry-panel">
-                          <div class="telemetry-item">
-                            <span class="telemetry-label">Rota ativa:</span>
-                            <strong id="tuya-route-display" class="telemetry-value">Local (TCP Direto / Porta 6668) [Simulação]</strong>
-                          </div>
-                          <div class="telemetry-item">
-                            <span class="telemetry-label">Status do enlace:</span>
-                            <strong id="tuya-latency-display" class="telemetry-value mint">~14 ms (valor simulado para demonstração)</strong>
-                          </div>
-                        </div>
-
-                        <div id="tuya-fallback-notice" class="fallback-warning-box" hidden>
-                          <span class="warning-icon" aria-hidden="true">⚠️</span>
-                          <span>Queda local simulada: comando roteado via contingência automática Tuya OpenAPI.</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </article>
-
-            <article id="panel-gaming" class="observatory-panel" role="tabpanel" aria-labelledby="tab-gaming">
-              <div class="panel-two-column-layout">
-                <div class="panel-details-column">
-                  <div class="panel-meta-strip">
-                    <span class="panel-category-pill">Telemetria Gráfica &amp; Baixo Nível</span>
-                    <span class="panel-version-pill">C++17 / Vulkan API</span>
-                  </div>
-
-                  <h3 class="panel-project-title">
-                    <a href="https://github.com/arthurMPBBY/gaming-fps-hud" target="_blank" rel="noopener noreferrer" class="panel-title-link">
-                      gaming-fps-hud
-                      <svg viewBox="0 0 16 16" width="16" height="16" class="external-icon" aria-hidden="true">
-                        <path d="M4 12l8-8m0 0H6m6 0v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                      </svg>
-                    </a>
-                  </h3>
-                  <p class="panel-tagline">Telemetria gráfica desacoplada em Wayland.</p>
-
-                  <p class="panel-summary-text">
-                    Camada em C++17 para Linux/Wayland que observa chamadas de apresentação da Vulkan API e gera snapshots JSON atômicos com métricas de tempo de quadro e 1% lows, consumidos por um HUD leve em Qt.
-                  </p>
-
-                  <div class="panel-tech-chips">
-                    <span class="tech-chip">C++17</span>
-                    <span class="tech-chip">Vulkan API</span>
-                    <span class="tech-chip">Qt 6 Quick</span>
-                  </div>
-
-                  <p class="panel-scope-warning">
-                    <strong>Processos desacoplados:</strong> Comunicação unilateral via arquivos temporários atômicos, sem injeção de código ou hooks de teclado.
-                  </p>
-
-                  <div class="panel-actions-row">
-                    <a href="https://github.com/arthurMPBBY/gaming-fps-hud" class="action-btn btn-primary" target="_blank" rel="noopener noreferrer">
-                      <span>Ver repositório no GitHub</span>
-                      <span class="btn-arrow" aria-hidden="true">&nearr;</span>
-                    </a>
-                  </div>
-                </div>
-
-                <div class="panel-interactive-demo-column">
-                  <div class="demo-card-frame">
-                    <div class="demo-card-header">
-                      <div class="demo-card-dots" aria-hidden="true">
-                        <span class="dot-red"></span>
-                        <span class="dot-yellow"></span>
-                        <span class="dot-green"></span>
-                      </div>
-                      <span class="demo-card-caption">Observador de telemetria &mdash; cenários de teste sintéticos</span>
-                    </div>
-
-                    <div class="gaming-telemetry-box">
-                      <div class="gaming-hud-controls-row">
-                        <label for="gaming-hud-preset-select" class="demo-bar-label">
-                          <span class="control-name">Cenário Sintético de Apresentação Gráfica:</span>
-                        </label>
-                        <select id="gaming-hud-preset-select" class="demo-select">
-                          <option value="stable" selected>Carga Estável &mdash; 144 FPS / 6.94 ms</option>
-                          <option value="shaderStutter">Compilação de Shaders &mdash; Queda 1% Lows</option>
-                          <option value="heavyLoad">Carga Elevada &mdash; 45 FPS / 22.2 ms</option>
-                        </select>
-                      </div>
-
-                      <div class="telemetry-hud-readout">
-                        <div class="hud-metric-tile">
-                          <span class="metric-title">Frametime Médio</span>
-                          <span id="gaming-frametime-value" class="metric-number mint">6.94 ms</span>
-                        </div>
-                        <div class="hud-metric-tile">
-                          <span class="metric-title">Taxa Equivalente</span>
-                          <span id="gaming-fps-value" class="metric-number">144 FPS</span>
-                        </div>
-                        <div class="hud-metric-tile">
-                          <span class="metric-title">1% Lows</span>
-                          <span id="gaming-low-value" class="metric-number">7.82 ms</span>
-                        </div>
-                        <div class="hud-metric-tile">
-                          <span class="metric-title">Quadros Observados</span>
-                          <span id="gaming-presents-value" class="metric-number">14.420</span>
-                        </div>
-                      </div>
-
-                      <div class="snapshot-json-preview">
-                        <div class="json-header-label">Snapshot JSON atômico sintético (demonstração):</div>
-                        <pre id="gaming-json-snapshot" class="json-code-block"></pre>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </article>
-
-            <article id="panel-finance" class="observatory-panel" role="tabpanel" aria-labelledby="tab-finance">
-              <div class="finance-lab-embedded-wrapper">
-                <header class="finance-inner-header">
-                  <h3 class="finance-inner-title">Simulador de Juros Compostos: Aportes &amp; Taxa Efetiva</h3>
-                  <p class="finance-inner-desc">
-                    Explore juros compostos com taxa anual efetiva convertida para a taxa mensal equivalente e aportes ao fim de cada mês. Exemplo didático, sem recomendação de investimento.
-                  </p>
-                </header>
-
-                <div class="flab-grid">
-                  <div class="flab-controls">
-                    <div class="flab-field">
-                      <label for="finance-initial" class="flab-label">
-                        <span class="flab-label-text">Valor Inicial (R$)</span>
-                        <span class="flab-label-hint">0 a 1.000.000</span>
-                      </label>
-                      <div class="flab-input-prefix">
-                        <span class="currency-symbol">R$</span>
-                        <input type="number" id="finance-initial" class="flab-input" value="1000" min="0" max="1000000" step="100" aria-describedby="error-finance-initial">
-                      </div>
-                      <span id="error-finance-initial" class="flab-error" role="alert" hidden></span>
-                    </div>
-
-                    <div class="flab-field">
-                      <label for="finance-monthly" class="flab-label">
-                        <span class="flab-label-text">Aporte Mensal (R$)</span>
-                        <span class="flab-label-hint">0 a 10.000</span>
-                      </label>
-                      <div class="flab-input-prefix">
-                        <span class="currency-symbol">R$</span>
-                        <input type="number" id="finance-monthly" class="flab-input" value="100" min="0" max="10000" step="50" aria-describedby="error-finance-monthly">
-                      </div>
-                      <span id="error-finance-monthly" class="flab-error" role="alert" hidden></span>
-                    </div>
-
-                    <div class="flab-field">
-                      <label for="finance-rate-input" class="flab-label">
-                        <span class="flab-label-text">Taxa Anual Efetiva (%)</span>
-                        <span class="flab-label-hint">0% a 30%</span>
-                      </label>
-                      <div class="flab-slider-row">
-                        <input type="range" id="finance-rate-slider" class="flab-slider" min="0" max="30" step="0.25" value="12" aria-label="Taxa anual em porcentagem (slider)">
-                        <input type="number" id="finance-rate-input" class="flab-input flab-input-compact" min="0" max="30" step="0.25" value="12" aria-describedby="error-finance-rate" aria-label="Taxa anual em porcentagem (numérico)">
-                      </div>
-                      <span id="error-finance-rate" class="flab-error" role="alert" hidden></span>
-                    </div>
-
-                    <div class="flab-field">
-                      <label for="finance-months-input" class="flab-label">
-                        <span class="flab-label-text">Prazo (meses)</span>
-                        <span class="flab-label-hint">1 a 360 meses (inteiro)</span>
-                      </label>
-                      <div class="flab-slider-row">
-                        <input type="range" id="finance-months-slider" class="flab-slider" min="1" max="360" step="1" value="12" aria-label="Prazo em meses (slider)">
-                        <input type="number" id="finance-months-input" class="flab-input flab-input-compact" min="1" max="360" step="1" value="12" aria-describedby="error-finance-months" aria-label="Prazo em meses (numérico)">
-                      </div>
-                      <span id="error-finance-months" class="flab-error" role="alert" hidden></span>
-                    </div>
-
-                    <div class="flab-actions">
-                      <button type="button" id="finance-reset-btn" class="flab-reset-btn">Restaurar Valores Padrão</button>
-                    </div>
-                  </div>
-
-                  <div class="flab-display">
-                    <div class="flab-results-grid">
-                      <div class="flab-card flab-card-main">
-                        <span class="flab-card-label">Saldo Final Projetado</span>
-                        <strong class="flab-card-value mint" id="finance-res-balance">R$ 2.384,65</strong>
-                      </div>
-                      <div class="flab-card">
-                        <span class="flab-card-label">Total Aportado</span>
-                        <span class="flab-card-subvalue" id="finance-res-contributed">R$ 2.200,00</span>
-                      </div>
-                      <div class="flab-card">
-                        <span class="flab-card-label">Juros Acumulados</span>
-                        <span class="flab-card-subvalue flab-interest" id="finance-res-interest">R$ 184,65</span>
-                      </div>
-                    </div>
-
-                    <div class="flab-chart-wrapper">
-                      <div class="chart-header-row">
-                        <span class="chart-title">Evolução de Saldo vs. Aportes</span>
-                        <div class="chart-legend">
-                          <span class="legend-item"><span class="legend-dot dot-mint"></span>Saldo Projetado</span>
-                          <span class="legend-item"><span class="legend-dot dot-contributed"></span>Aportes</span>
-                        </div>
-                      </div>
-                      <svg id="finance-chart-svg" class="finance-chart-svg" viewBox="0 0 540 240" preserveAspectRatio="none" role="img" aria-label="Gráfico de evolução do saldo ao longo dos meses">
-                        <rect width="540" height="240" fill="transparent"/>
-                      </svg>
-                    </div>
-
-                    <details class="flab-milestones-details">
-                      <summary class="milestones-summary">Tabela de Marcos Anuais</summary>
-                      <div class="milestones-table-scroll">
-                        <table class="milestones-table">
-                          <thead>
-                            <tr>
-                              <th scope="col">Período</th>
-                              <th scope="col">Total Aportado</th>
-                              <th scope="col">Juros Acumulados</th>
-                              <th scope="col">Saldo Total</th>
-                            </tr>
-                          </thead>
-                          <tbody id="finance-milestones-body">
-                            <tr>
-                              <td>Mês 12 (Ano 1)</td>
-                              <td>R$ 2.200,00</td>
-                              <td>R$ 184,65</td>
-                              <td>R$ 2.384,65</td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                    </details>
-                  </div>
-                </div>
-              </div>
-            </article>
-          </div>
-        </div>
-
-        <div class="secondary-projects-grid">
-          <article class="secondary-project-card">
-            <div class="secondary-card-header">
-              <span class="secondary-card-tag">Python &amp; Lógica</span>
-              <a href="https://github.com/arthurMPBBY/python-curso" class="secondary-link" target="_blank" rel="noopener noreferrer">
-                python-curso &nearr;
-              </a>
-            </div>
-            <p class="secondary-card-desc">
-              Exercícios práticos de fundamentos em Python: cálculos numéricos e manipulação de listas e conjuntos.
-            </p>
-          </article>
-
-          <article class="secondary-project-card">
-            <div class="secondary-card-header">
-              <span class="secondary-card-tag">Interface &amp; JSON</span>
-              <a href="https://github.com/arthurMPBBY/spotifast-neon-theme" class="secondary-link" target="_blank" rel="noopener noreferrer">
-                spotifast-neon-theme &nearr;
-              </a>
-            </div>
-            <p class="secondary-card-desc">
-              Paleta visual escura com destaques em contraste definida em arquivo <code>neon.json</code> para o aplicativo Spotifast.
-            </p>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <section class="section-block section-finance-anchor" id="laboratorio" aria-labelledby="finance-anchor-title" data-full-only>
-      <div class="section-container">
-        <header class="section-header">
-          <div class="section-index-badge">
-            <span class="section-index-num">02</span>
-            <span class="section-index-label">/ Laboratório Matemático</span>
-          </div>
-          <h2 class="section-title" id="finance-anchor-title">Experimente os números.</h2>
-          <p class="section-subtitle">
-            Um pequeno laboratório para explorar como prazo, taxa e aportes alteram o resultado ao longo do tempo.
-          </p>
-        </header>
-        <div class="finance-jump-card">
-          <p class="jump-card-text">
-            O laboratório usa taxa anual efetiva e aportes ao fim de cada mês. Teste os parâmetros na aba dedicada do observatório.
-          </p>
-          <a href="#panel-finance" class="action-btn btn-secondary">
-            <span>Acessar Simulador no Observatório</span>
-            <span class="btn-arrow" aria-hidden="true">&uarr;</span>
-          </a>
-        </div>
-      </div>
-    </section>
-
-    <section class="section-block sobre-section" id="sobre" aria-labelledby="sobre-title">
-      <div class="section-container">
-        <header class="section-header">
-          <div class="section-index-badge">
-            <span class="section-index-num">03</span>
-            <span class="section-index-label">/ Trajetória &amp; Foco</span>
-          </div>
-          <h2 class="section-title" id="sobre-title">Sobre mim</h2>
-          <p class="section-subtitle">
-            Universidade Federal do ABC &mdash; 2º período. Prática de programação e aspiração aplicada no mercado.
-          </p>
-        </header>
-
-        <div class="sobre-editorial-grid">
-          <div class="sobre-primary-column">
-            <p class="sobre-lead-paragraph">
-              Sou <strong>Arthur Kadri de Oliveira</strong>, estudante do <strong>2º período na Universidade Federal do ABC (UFABC)</strong>. Crio utilitários para Windows em C#, automações em Python e projetos de telemetria gráfica em C++.
-            </p>
-            <p class="sobre-body-paragraph">
-              Busco meu primeiro <strong>estágio em mercado financeiro ou análise de dados</strong>, com espaço para aprender e aplicar programação na resolução de problemas reais.
-            </p>
-            <div class="sobre-focus-points">
-              <div class="focus-item">
-                <span class="focus-bullet mint" aria-hidden="true">&#9632;</span>
-                <span><strong>Formação acadêmica:</strong> UFABC (2º período), base interdisciplinar.</span>
-              </div>
-              <div class="focus-item">
-                <span class="focus-bullet silver" aria-hidden="true">&#9632;</span>
-                <span><strong>Programação prática:</strong> C#, Python e C++ com código aberto.</span>
-              </div>
-              <div class="focus-item">
-                <span class="focus-bullet mint" aria-hidden="true">&#9632;</span>
-                <span><strong>Objetivo profissional:</strong> Estágio em mercado financeiro ou equipes de dados.</span>
-              </div>
+        <!-- Âncora Tipográfica Central / Meridiano de Origem (0, 0) -->
+        <div class="spatial-meridian" id="spatial-origin-meridian">
+          <div class="meridian-crosshair" aria-hidden="true"></div>
+          <div class="meridian-rings" aria-hidden="true"></div>
+          <div class="meridian-typography">
+            <span class="meridian-academic-tag">UFABC &middot; 2º PERÍODO &middot; PROJETOS &amp; EXPERIMENTOS</span>
+            <h1 class="meridian-title">Arthur Kadri</h1>
+            <p class="meridian-lead">Atlas de Sistemas &middot; Primeiro Estágio em Finanças &amp; Dados</p>
+            <div class="meridian-hint" aria-hidden="true">
+              <span class="hint-pulse"></span>
+              <span>Arraste para explorar &middot; Roda do mouse zoom &middot; Clique em um objeto</span>
             </div>
           </div>
+          <!-- Vetores de orientação conectando aos 6 objetos -->
+          <div class="meridian-vectors" aria-hidden="true">
+            <span class="vector-line line-yahcw" data-target="yahcw"></span>
+            <span class="vector-line line-tuya" data-target="tuya"></span>
+            <span class="vector-line line-gaming" data-target="gaming"></span>
+            <span class="vector-line line-python" data-target="python"></span>
+            <span class="vector-line line-spotifast" data-target="spotifast"></span>
+            <span class="vector-line line-financeiro" data-target="financeiro"></span>
+          </div>
+        </div>
 
-          <aside class="sobre-sidebar-column" data-full-only aria-hidden="true">
-            <div class="hero-art-container about-art-cloud" data-morph-progress="0" aria-label="Escultura vetorial representando nuvem de dados">
-              <svg class="art-svg-stage" aria-hidden="true" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- OBJETO 01: YAHCW (Janelas Isométricas Win32 / DWM) -->
+        <article class="spatial-artifact artifact-yahcw" id="artifact-yahcw" style="--coord-x: -440px; --coord-y: -220px;" data-project="yahcw" aria-labelledby="art-title-yahcw">
+          <button type="button" class="artifact-trigger" data-enter-room="yahcw" aria-label="Explorar sala 01: YAHCW - Hot Corners, DWM e utilitários Win32 em C#">
+            <div class="object-editorial-label">
+              <div class="label-pre">
+                <span class="label-index">01</span>
+                <span class="label-category">Win32 &middot; DWM &middot; C#</span>
+              </div>
+              <h2 class="label-title" id="art-title-yahcw">YAHCW &mdash; Hot Corners</h2>
+              <div class="label-cta">
+                <span class="cta-text">Explorar sala</span>
+                <span class="cta-arrow" aria-hidden="true">&rarr;</span>
+              </div>
+            </div>
+
+            <!-- Escultura livre em SVG com camadas e sombras reais -->
+            <div class="object-sculpture sculpture-yahcw" aria-hidden="true">
+              <svg class="sculpture-svg" viewBox="0 0 420 220" width="100%" height="100%">
                 <defs>
-                  <radialGradient id="sunCoronaGlow" cx="50%" cy="50%" r="50%">
-                    <stop offset="0%" stop-color="#ffffff" stop-opacity="0.8" />
-                    <stop offset="50%" stop-color="#a6d6c0" stop-opacity="0.25" />
-                    <stop offset="100%" stop-color="#080a0c" stop-opacity="0" />
-                  </radialGradient>
-                  <radialGradient id="pearlescentCore" cx="44%" cy="36%" r="62%">
-                    <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95" />
-                    <stop offset="60%" stop-color="#e2e8f0" stop-opacity="0.8" />
-                    <stop offset="100%" stop-color="#a6d6c0" stop-opacity="0.35" />
-                  </radialGradient>
-                  <radialGradient id="pearlUnderlay" cx="52%" cy="64%" r="58%">
-                    <stop offset="0%" stop-color="#ffffff" stop-opacity="0.5" />
-                    <stop offset="100%" stop-color="#141922" stop-opacity="0.2" />
-                  </radialGradient>
+                  <filter id="shadow-yahcw" x="-15%" y="-15%" width="130%" height="130%">
+                    <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#0b0f15" flood-opacity="0.14" />
+                  </filter>
+                  <pattern id="yahcwGrid" width="20" height="20" patternUnits="userSpaceOnUse">
+                    <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#0e1218" stroke-width="0.5" stroke-opacity="0.08" />
+                  </pattern>
                 </defs>
 
-                <g class="sculpture-layer layer-corona">
-                  <circle cx="250" cy="250" r="162" fill="url(#sunCoronaGlow)" />
+                <!-- Camada 3: Mixer de Áudio IPolicyConfig -->
+                <g class="stacked-window window-back" transform="translate(130, 24)" filter="url(#shadow-yahcw)">
+                  <rect width="220" height="120" rx="4" fill="#f8fafc" stroke="#0e1218" stroke-width="1.2" stroke-opacity="0.35" />
+                  <rect width="220" height="22" rx="4" fill="#e9edf2" />
+                  <text x="12" y="15" font-family="'JetBrains Mono', monospace" font-size="8.5" font-weight="700" fill="#4b5565">AUDIO-IPolicyConfig.sys</text>
+                  <circle cx="195" cy="11" r="3" fill="#cbd5e1" />
+                  <circle cx="205" cy="11" r="3" fill="#cbd5e1" />
+                  <line x1="20" y1="46" x2="200" y2="46" stroke="#cbd5e1" stroke-width="1.5" />
+                  <line x1="20" y1="68" x2="160" y2="68" stroke="#cbd5e1" stroke-width="1.5" />
+                  <line x1="20" y1="90" x2="130" y2="90" stroke="#cbd5e1" stroke-width="1.5" />
                 </g>
-                <g class="sculpture-layer layer-core-sculpture svg-cloud-sculpture">
-                  <path d="M 162 284 C 136 284 116 262 116 236 C 116 211 133 190 156 188 C 164 156 192 133 228 133 C 267 133 297 160 303 196 C 310 193 318 191 326 191 C 349 191 368 209 368 232 C 368 235 367 238 366 241 C 379 246 388 260 388 275 C 388 297 371 314 348 314 L 162 314 Z" fill="url(#pearlUnderlay)" stroke="#a6d6c0" stroke-width="1" stroke-opacity="0.35" class="sculpture-underbillow" />
-                  <path d="M 170 280 C 145 280 125 260 125 235 C 125 212 142 193 164 191 C 172 163 198 142 230 142 C 265 142 293 167 298 200 C 304 197 311 195 318 195 C 339 195 356 212 356 233 C 356 235 355 238 355 240 C 367 245 375 258 375 272 C 375 292 359 308 339 308 L 170 308 C 150 308 135 296 135 280 Z" fill="url(#pearlescentCore)" stroke="#e2e8f0" stroke-width="1.6" class="sculpture-mainbillow" />
+
+                <!-- Camada 2: BrightTray VCP Opcode 0x10 -->
+                <g class="stacked-window window-mid" transform="translate(70, 52)" filter="url(#shadow-yahcw)">
+                  <rect width="240" height="130" rx="4" fill="#ffffff" stroke="#0e1218" stroke-width="1.2" stroke-opacity="0.45" />
+                  <rect width="240" height="24" rx="4" fill="#e2e7ee" />
+                  <text x="12" y="16" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="700" fill="#2c3545">BrightTray [NamedPipe 0x10]</text>
+                  <rect x="24" y="52" width="190" height="6" rx="3" fill="#e2e8f0" />
+                  <rect x="24" y="52" width="140" height="6" rx="3" fill="#0e1218" />
+                  <circle cx="164" cy="55" r="6" fill="#d9432e" />
+                  <text x="24" y="82" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="600" fill="#0e1218">Lumin&acirc;ncia Hardware: 75%</text>
+                  <text x="24" y="102" font-family="'DM Sans', sans-serif" font-size="9" fill="#5c6779">VCP Opcode 0x10 &middot; Monitor DDC/CI</text>
+                </g>
+
+                <!-- Camada 1: Miniatura Viva DWM com Hot Corner ativo -->
+                <g class="stacked-window window-front" transform="translate(20, 80)" filter="url(#shadow-yahcw)">
+                  <rect width="260" height="130" rx="4" fill="#ffffff" stroke="#0e1218" stroke-width="1.6" />
+                  <rect width="260" height="26" rx="4" fill="#0e1218" />
+                  <text x="36" y="17" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700" fill="#ffffff">YAHCW.DwmThumbnail.cs</text>
+
+                  <!-- Hot Corner Active Beacon (Top-Left) -->
+                  <rect x="2" y="2" width="26" height="22" rx="2" fill="#d9432e" />
+                  <circle cx="15" cy="13" r="4.5" fill="#ffffff" />
+
+                  <!-- Thumbnail live window grid -->
+                  <rect x="18" y="44" width="105" height="66" rx="3" fill="#f8fafc" stroke="#0e1218" stroke-width="1" stroke-opacity="0.3" />
+                  <rect x="135" y="44" width="105" height="66" rx="3" fill="#f8fafc" stroke="#0e1218" stroke-width="1" stroke-opacity="0.3" />
+                  <text x="32" y="82" font-family="'JetBrains Mono', monospace" font-size="8.5" font-weight="600" fill="#5c6779">DWM LIVE #1</text>
+                  <text x="148" y="82" font-family="'JetBrains Mono', monospace" font-size="8.5" font-weight="600" fill="#5c6779">DWM LIVE #2</text>
+                </g>
+
+                <!-- Caliper / Named Pipe Interconnect -->
+                <path d="M 315 115 L 345 115 L 345 56 L 355 56" fill="none" stroke="#d9432e" stroke-width="1.6" stroke-dasharray="3 3" />
+                <circle cx="315" cy="115" r="3.5" fill="#d9432e" />
+                <circle cx="355" cy="56" r="3.5" fill="#d9432e" />
+              </svg>
+            </div>
+          </button>
+        </article>
+
+        <!-- OBJETO 02: TUYA SMART LAMPS (Órbita e Luminaire Concêntrico) -->
+        <article class="spatial-artifact artifact-tuya" id="artifact-tuya" style="--coord-x: 440px; --coord-y: -220px;" data-project="tuya" aria-labelledby="art-title-tuya">
+          <button type="button" class="artifact-trigger" data-enter-room="tuya" aria-label="Explorar sala 02: tuya-smart-lamps - Automação TCP local e contingência OpenAPI em nuvem">
+            <div class="object-editorial-label">
+              <div class="label-pre">
+                <span class="label-index">02</span>
+                <span class="label-category">Redes &middot; TCP / OpenAPI</span>
+              </div>
+              <h2 class="label-title" id="art-title-tuya">tuya-smart-lamps</h2>
+              <div class="label-cta">
+                <span class="cta-text">Explorar sala</span>
+                <span class="cta-arrow" aria-hidden="true">&rarr;</span>
+              </div>
+            </div>
+
+            <!-- Escultura livre em SVG com anéis de rede concêntricos -->
+            <div class="object-sculpture sculpture-tuya" aria-hidden="true">
+              <svg class="sculpture-svg" viewBox="0 0 420 220" width="100%" height="100%">
+                <defs>
+                  <radialGradient id="lampGlowV2" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stop-color="#d9432e" stop-opacity="0.32" />
+                    <stop offset="70%" stop-color="#d9432e" stop-opacity="0.08" />
+                    <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
+                  </radialGradient>
+                  <filter id="shadow-tuya" x="-15%" y="-15%" width="130%" height="130%">
+                    <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#0b0f15" flood-opacity="0.12" />
+                  </filter>
+                </defs>
+
+                <!-- Grade técnica circular e órbitas -->
+                <circle cx="210" cy="110" r="95" fill="none" stroke="#0e1218" stroke-width="0.8" stroke-opacity="0.16" stroke-dasharray="4 4" />
+                <circle cx="210" cy="110" r="70" fill="none" stroke="#0e1218" stroke-width="1.2" stroke-opacity="0.25" />
+                <circle cx="210" cy="110" r="45" fill="url(#lampGlowV2)" />
+
+                <!-- Eixos ortogonais -->
+                <line x1="70" y1="110" x2="350" y2="110" stroke="#0e1218" stroke-width="0.7" stroke-opacity="0.2" />
+                <line x1="210" y1="10" x2="210" y2="210" stroke="#0e1218" stroke-width="0.7" stroke-opacity="0.2" />
+
+                <!-- Núcleo do Luminaire com filamento coral -->
+                <circle cx="210" cy="110" r="24" fill="#ffffff" stroke="#0e1218" stroke-width="1.8" filter="url(#shadow-tuya)" />
+                <path d="M 203 115 Q 210 98 217 115" fill="none" stroke="#d9432e" stroke-width="2.6" />
+                <circle cx="210" cy="110" r="3.5" fill="#d9432e" />
+
+                <!-- Rota 1: Anel Local TCP (Porta 6668) -->
+                <g class="orbit-local" filter="url(#shadow-tuya)">
+                  <circle cx="135" cy="110" r="9" fill="#ffffff" stroke="#0e1218" stroke-width="1.6" />
+                  <circle cx="135" cy="110" r="3.5" fill="#0e1218" />
+                  <text x="85" y="94" font-family="'JetBrains Mono', monospace" font-size="8.5" font-weight="700" fill="#0e1218">TCP LOCAL: 4ms</text>
+                  <circle cx="170" cy="110" r="3.5" fill="#d9432e" />
+                </g>
+
+                <!-- Rota 2: Órbita Externa Cloud OpenAPI -->
+                <g class="orbit-cloud" filter="url(#shadow-tuya)">
+                  <circle cx="285" cy="110" r="9" fill="#ffffff" stroke="#0e1218" stroke-width="1.6" />
+                  <circle cx="285" cy="110" r="3.5" fill="#d9432e" />
+                  <text x="250" y="142" font-family="'JetBrains Mono', monospace" font-size="8.5" font-weight="700" fill="#5c6779">OPENAPI CLOUD</text>
+                  <text x="250" y="154" font-family="'JetBrains Mono', monospace" font-size="7.5" fill="#5c6779">148ms SIMULADO</text>
+                </g>
+
+                <!-- Vetor de contingência automática -->
+                <path d="M 210 65 Q 260 65 285 101" fill="none" stroke="#d9432e" stroke-width="1.5" stroke-dasharray="3 3" />
+                <text x="205" y="54" font-family="'JetBrains Mono', monospace" font-size="7.5" font-weight="700" fill="#d9432e">AUTO CONTINGENCY</text>
+              </svg>
+            </div>
+          </button>
+        </article>
+
+        <!-- OBJETO 03: GAMING FPS HUD (Fita de Telemetria Vulkan) -->
+        <article class="spatial-artifact artifact-gaming" id="artifact-gaming" style="--coord-x: -450px; --coord-y: 220px;" data-project="gaming" aria-labelledby="art-title-gaming">
+          <button type="button" class="artifact-trigger" data-enter-room="gaming" aria-label="Explorar sala 03: gaming-fps-hud - Observação Vulkan vkQueuePresentKHR e HUD Wayland Qt 6">
+            <div class="object-editorial-label">
+              <div class="label-pre">
+                <span class="label-index">03</span>
+                <span class="label-category">C++17 &middot; Vulkan &middot; Wayland</span>
+              </div>
+              <h2 class="label-title" id="art-title-gaming">gaming-fps-hud</h2>
+              <div class="label-cta">
+                <span class="cta-text">Explorar sala</span>
+                <span class="cta-arrow" aria-hidden="true">&rarr;</span>
+              </div>
+            </div>
+
+            <!-- Escultura livre em SVG com fita de telemetria contínua -->
+            <div class="object-sculpture sculpture-gaming" aria-hidden="true">
+              <svg class="sculpture-svg" viewBox="0 0 420 220" width="100%" height="100%">
+                <defs>
+                  <filter id="shadow-gaming" x="-15%" y="-15%" width="130%" height="130%">
+                    <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#0b0f15" flood-opacity="0.12" />
+                  </filter>
+                </defs>
+
+                <!-- Fita de telemetria desdobrada -->
+                <path d="M 20 155 Q 90 75 170 115 T 320 85 T 400 125" fill="none" stroke="#0e1218" stroke-width="2" />
+                <path d="M 20 170 Q 90 90 170 130 T 320 100 T 400 140" fill="none" stroke="#cbd5e1" stroke-width="1.2" />
+
+                <!-- Gradiente de área sob a fita -->
+                <path d="M 20 155 Q 90 75 170 115 T 320 85 T 400 125 L 400 195 L 20 195 Z" fill="#0e1218" fill-opacity="0.04" />
+
+                <!-- Linhas guia de frame pacing -->
+                <line x1="20" y1="95" x2="400" y2="95" stroke="#0e1218" stroke-width="0.8" stroke-dasharray="2 3" stroke-opacity="0.25" />
+                <text x="30" y="89" font-family="'JetBrains Mono', monospace" font-size="8.5" fill="#5c6779">6.94ms (144 FPS BASELINE)</text>
+
+                <line x1="20" y1="145" x2="400" y2="145" stroke="#0e1218" stroke-width="0.8" stroke-dasharray="2 3" stroke-opacity="0.25" />
+                <text x="30" y="139" font-family="'JetBrains Mono', monospace" font-size="8.5" fill="#5c6779">16.6ms (60 FPS BOUNDARY)</text>
+
+                <!-- Caliper / Braçadeira de Medição de Frame Pacing -->
+                <g class="telemetry-caliper" transform="translate(160, 40)" filter="url(#shadow-gaming)">
+                  <rect width="94" height="44" rx="3" fill="#ffffff" stroke="#0e1218" stroke-width="1.4" />
+                  <text x="8" y="16" font-family="'JetBrains Mono', monospace" font-size="8.5" font-weight="700" fill="#0e1218">1% LOW DELTA</text>
+                  <text x="8" y="34" font-family="'JetBrains Mono', monospace" font-size="13" font-weight="700" fill="#d9432e">4.12 ms</text>
+                  <line x1="47" y1="44" x2="47" y2="75" stroke="#d9432e" stroke-width="1.5" stroke-dasharray="2 2" />
+                  <circle cx="47" cy="75" r="3.5" fill="#d9432e" />
+                </g>
+
+                <!-- Bracket de Emissão JSON Atômico -->
+                <g class="json-bracket" transform="translate(285, 26)" filter="url(#shadow-gaming)">
+                  <rect width="115" height="50" rx="3" fill="#f8fafc" stroke="#0e1218" stroke-width="1" stroke-opacity="0.35" />
+                  <text x="8" y="15" font-family="'JetBrains Mono', monospace" font-size="7.5" font-weight="700" fill="#2c3545">{ ATOMIC JSON }</text>
+                  <text x="8" y="29" font-family="'JetBrains Mono', monospace" font-size="7.5" fill="#5c6779">&quot;present_cnt&quot;: 86420</text>
+                  <text x="8" y="42" font-family="'JetBrains Mono', monospace" font-size="7.5" fill="#5c6779">&quot;swapchain&quot;: 0x7ffd98</text>
                 </g>
               </svg>
             </div>
-          </aside>
+          </button>
+        </article>
+
+        <!-- OBJETO 04: PYTHON CURSO (Estruturas de Dados e Algoritmos) -->
+        <article class="spatial-artifact artifact-python" id="artifact-python" style="--coord-x: 450px; --coord-y: 220px;" data-project="python" aria-labelledby="art-title-python">
+          <button type="button" class="artifact-trigger" data-enter-room="python" aria-label="Explorar sala 04: python-curso - Exercícios de algoritmos e coleções na UFABC">
+            <div class="object-editorial-label">
+              <div class="label-pre">
+                <span class="label-index">04</span>
+                <span class="label-category">Python 3 &middot; Algoritmos UFABC</span>
+              </div>
+              <h2 class="label-title" id="art-title-python">python-curso</h2>
+              <div class="label-cta">
+                <span class="cta-text">Explorar sala</span>
+                <span class="cta-arrow" aria-hidden="true">&rarr;</span>
+              </div>
+            </div>
+
+            <!-- Escultura livre em SVG com monograma estrutural e nós -->
+            <div class="object-sculpture sculpture-python" aria-hidden="true">
+              <svg class="sculpture-svg" viewBox="0 0 420 220" width="100%" height="100%">
+                <defs>
+                  <filter id="shadow-python" x="-15%" y="-15%" width="130%" height="130%">
+                    <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#0b0f15" flood-opacity="0.12" />
+                  </filter>
+                </defs>
+
+                <!-- Coluna de sintaxe central -->
+                <g filter="url(#shadow-python)">
+                  <rect x="180" y="18" width="60" height="184" rx="3" fill="#ffffff" stroke="#0e1218" stroke-width="1.6" />
+                  <rect x="180" y="18" width="60" height="26" rx="3" fill="#0e1218" />
+                  <text x="195" y="35" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700" fill="#ffffff">MATH</text>
+
+                  <!-- Glifos matemáticos e de coleções -->
+                  <text x="198" y="72" font-family="'JetBrains Mono', monospace" font-size="14" font-weight="700" fill="#0e1218">&lambda;</text>
+                  <text x="198" y="110" font-family="'JetBrains Mono', monospace" font-size="14" font-weight="700" fill="#d9432e">&Sigma;</text>
+                  <text x="195" y="148" font-family="'JetBrains Mono', monospace" font-size="13" font-weight="700" fill="#0e1218">&isin; S</text>
+                  <text x="194" y="184" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#5c6779">SET</text>
+                </g>
+
+                <!-- Nós e treliças à esquerda (Listas / Filtragem) -->
+                <line x1="180" y1="72" x2="105" y2="52" stroke="#0e1218" stroke-width="1.2" stroke-opacity="0.3" />
+                <rect x="45" y="36" width="85" height="32" rx="3" fill="#f8fafc" stroke="#0e1218" stroke-width="1.2" filter="url(#shadow-python)" />
+                <text x="54" y="56" font-family="'JetBrains Mono', monospace" font-size="8.5" font-weight="600" fill="#0e1218">list.filter()</text>
+
+                <line x1="180" y1="148" x2="95" y2="155" stroke="#0e1218" stroke-width="1.2" stroke-opacity="0.3" />
+                <rect x="35" y="138" width="95" height="32" rx="3" fill="#f8fafc" stroke="#0e1218" stroke-width="1.2" filter="url(#shadow-python)" />
+                <text x="44" y="158" font-family="'JetBrains Mono', monospace" font-size="8.5" font-weight="600" fill="#0e1218">set.difference()</text>
+
+                <!-- Nós e treliças à direita (Numérico / Séries) -->
+                <line x1="240" y1="72" x2="310" y2="52" stroke="#0e1218" stroke-width="1.2" stroke-opacity="0.3" />
+                <rect x="290" y="36" width="95" height="32" rx="3" fill="#f8fafc" stroke="#0e1218" stroke-width="1.2" filter="url(#shadow-python)" />
+                <text x="298" y="56" font-family="'JetBrains Mono', monospace" font-size="8.5" font-weight="600" fill="#0e1218">series.sum()</text>
+
+                <line x1="240" y1="148" x2="320" y2="155" stroke="#0e1218" stroke-width="1.2" stroke-opacity="0.3" />
+                <rect x="300" y="138" width="95" height="32" rx="3" fill="#f8fafc" stroke="#0e1218" stroke-width="1.2" filter="url(#shadow-python)" />
+                <text x="308" y="158" font-family="'JetBrains Mono', monospace" font-size="8.5" font-weight="600" fill="#d9432e">monthly_rate()</text>
+              </svg>
+            </div>
+          </button>
+        </article>
+
+        <!-- OBJETO 05: SPOTIFAST NEON THEME (Disco & Tokens JSON) -->
+        <article class="spatial-artifact artifact-spotifast" id="artifact-spotifast" style="--coord-x: 0px; --coord-y: -350px;" data-project="spotifast" aria-labelledby="art-title-spotifast">
+          <button type="button" class="artifact-trigger" data-enter-room="spotifast" aria-label="Explorar sala 05: spotifast-neon-theme - Paleta de cores e design tokens JSON">
+            <div class="object-editorial-label">
+              <div class="label-pre">
+                <span class="label-index">05</span>
+                <span class="label-category">Design Tokens &middot; JSON</span>
+              </div>
+              <h2 class="label-title" id="art-title-spotifast">spotifast-neon-theme</h2>
+              <div class="label-cta">
+                <span class="cta-text">Explorar sala</span>
+                <span class="cta-arrow" aria-hidden="true">&rarr;</span>
+              </div>
+            </div>
+
+            <!-- Escultura livre em SVG com disco mecânico usinado -->
+            <div class="object-sculpture sculpture-spotifast" aria-hidden="true">
+              <svg class="sculpture-svg" viewBox="0 0 420 220" width="100%" height="100%">
+                <defs>
+                  <filter id="shadow-spotifast" x="-15%" y="-15%" width="130%" height="130%">
+                    <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#0b0f15" flood-opacity="0.14" />
+                  </filter>
+                </defs>
+
+                <!-- Disco de vinil milled -->
+                <circle cx="165" cy="110" r="85" fill="#0e1218" stroke="#cbd5e1" stroke-width="1" filter="url(#shadow-spotifast)" />
+                <circle cx="165" cy="110" r="75" fill="none" stroke="#252f3f" stroke-width="0.8" />
+                <circle cx="165" cy="110" r="60" fill="none" stroke="#252f3f" stroke-width="0.8" />
+                <circle cx="165" cy="110" r="45" fill="none" stroke="#252f3f" stroke-width="0.8" />
+
+                <!-- Rótulo central com setores radiais do tema -->
+                <circle cx="165" cy="110" r="30" fill="#ffffff" stroke="#0e1218" stroke-width="1.6" />
+                <!-- Setor Coral -->
+                <path d="M 165 110 L 165 80 A 30 30 0 0 1 195 110 Z" fill="#d9432e" />
+                <!-- Setor Muted Slate -->
+                <path d="M 165 110 L 195 110 A 30 30 0 0 1 165 140 Z" fill="#94a3b8" />
+                <circle cx="165" cy="110" r="5" fill="#ffffff" stroke="#0e1218" stroke-width="1" />
+
+                <!-- Braço de leitura usinado (Tonearm) -->
+                <path d="M 330 26 L 275 80 L 215 95" fill="none" stroke="#0e1218" stroke-width="2.6" />
+                <circle cx="330" cy="26" r="10" fill="#ffffff" stroke="#0e1218" stroke-width="1.6" />
+                <rect x="205" y="90" width="14" height="10" rx="2" fill="#0e1218" />
+
+                <!-- Swatches de tokens neon.json -->
+                <g class="palette-swatches" transform="translate(275, 82)" filter="url(#shadow-spotifast)">
+                  <rect x="0" y="0" width="125" height="24" rx="3" fill="#0f141c" stroke="#cbd5e1" stroke-width="0.8" />
+                  <text x="8" y="16" font-family="'JetBrains Mono', monospace" font-size="8.5" fill="#ffffff">--bg: #0f141c</text>
+
+                  <rect x="0" y="30" width="125" height="24" rx="3" fill="#ffffff" stroke="#0e1218" stroke-width="0.8" />
+                  <text x="8" y="46" font-family="'JetBrains Mono', monospace" font-size="8.5" fill="#0e1218">--text: #f8fafc</text>
+
+                  <rect x="0" y="60" width="125" height="24" rx="3" fill="#ffffff" stroke="#d9432e" stroke-width="1.2" />
+                  <text x="8" y="76" font-family="'JetBrains Mono', monospace" font-size="8.5" font-weight="700" fill="#d9432e">--accent: #d9432e</text>
+                </g>
+              </svg>
+            </div>
+          </button>
+        </article>
+
+        <!-- OBJETO 06: LABORATÓRIO FINANCEIRO (Curva Exponencial e Juros Compostos) -->
+        <article class="spatial-artifact artifact-financeiro" id="artifact-financeiro" style="--coord-x: 0px; --coord-y: 350px;" data-project="financeiro" aria-labelledby="art-title-financeiro">
+          <button type="button" class="artifact-trigger" data-enter-room="financeiro" aria-label="Explorar sala 06: Laboratório Financeiro - Simulador quantitativo de juros compostos">
+            <div class="object-editorial-label">
+              <div class="label-pre">
+                <span class="label-index">06</span>
+                <span class="label-category">Finanças &middot; Taxa Efetiva</span>
+              </div>
+              <h2 class="label-title" id="art-title-financeiro">Laboratório Financeiro</h2>
+              <div class="label-cta">
+                <span class="cta-text">Explorar sala</span>
+                <span class="cta-arrow" aria-hidden="true">&rarr;</span>
+              </div>
+            </div>
+
+            <!-- Escultura livre em SVG com fita tridimensional exponencial -->
+            <div class="object-sculpture sculpture-financeiro" aria-hidden="true">
+              <svg class="sculpture-svg" viewBox="0 0 420 220" width="100%" height="100%">
+                <defs>
+                  <linearGradient id="finCompoundGradV2" x1="0%" y1="100%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#0e1218" stop-opacity="0.04" />
+                    <stop offset="100%" stop-color="#d9432e" stop-opacity="0.22" />
+                  </linearGradient>
+                  <filter id="shadow-finance" x="-15%" y="-15%" width="130%" height="130%">
+                    <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#0b0f15" flood-opacity="0.12" />
+                  </filter>
+                </defs>
+
+                <!-- Eixos ortogonais de coordenadas financeiras -->
+                <line x1="40" y1="180" x2="380" y2="180" stroke="#0e1218" stroke-width="1.4" />
+                <line x1="40" y1="28" x2="40" y2="180" stroke="#0e1218" stroke-width="1.4" />
+
+                <!-- Linhas guia de referência -->
+                <line x1="40" y1="130" x2="380" y2="130" stroke="#0e1218" stroke-width="0.6" stroke-dasharray="3 3" stroke-opacity="0.2" />
+                <line x1="40" y1="80" x2="380" y2="80" stroke="#0e1218" stroke-width="0.6" stroke-dasharray="3 3" stroke-opacity="0.2" />
+
+                <!-- Linha linear de aportes (base cinza) -->
+                <line x1="40" y1="180" x2="380" y2="110" stroke="#5c6779" stroke-width="1.8" stroke-dasharray="4 3" />
+                <text x="250" y="125" font-family="'JetBrains Mono', monospace" font-size="8.5" fill="#5c6779">TOTAL APORTES</text>
+
+                <!-- Área sob a curva exponencial de juros compostos -->
+                <path d="M 40 180 Q 220 170 380 40 L 380 180 Z" fill="url(#finCompoundGradV2)" />
+
+                <!-- Curva exponencial em destaque (coral) -->
+                <path d="M 40 180 Q 220 170 380 40" fill="none" stroke="#d9432e" stroke-width="2.8" />
+
+                <!-- Placa de marco final (12 meses: R$ 2.384,65) -->
+                <g class="milestone-plaque" transform="translate(245, 18)" filter="url(#shadow-finance)">
+                  <rect width="145" height="44" rx="3" fill="#ffffff" stroke="#d9432e" stroke-width="1.4" />
+                  <text x="10" y="17" font-family="'JetBrains Mono', monospace" font-size="8.5" font-weight="700" fill="#0e1218">12 MESES &middot; EFETIVA</text>
+                  <text x="10" y="34" font-family="'JetBrains Mono', monospace" font-size="13" font-weight="700" fill="#d9432e">R$ 2.384,65</text>
+                  <circle cx="132" cy="22" r="3.5" fill="#d9432e" />
+                </g>
+
+                <!-- Fórmula gravada -->
+                <text x="50" y="50" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="700" fill="#2c3545">FV = PV·(1+i)ⁿ + PMT·[((1+i)ⁿ - 1)/i]</text>
+              </svg>
+            </div>
+          </button>
+        </article>
+
+      </div> <!-- /#spatial-world -->
+    </div> <!-- /#spatial-viewport -->
+
+
+    <!-- 2. CONTAINER DAS 6 SALAS DEDICADAS (FULL VIEWPORT) -->
+    <div id="rooms-container" class="rooms-container" aria-live="polite">
+
+      <!-- SALA 01: YAHCW -->
+      <section class="project-room" id="room-yahcw" data-room-id="yahcw" hidden aria-labelledby="room-title-yahcw">
+        <div class="room-inner">
+          <header class="room-header">
+            <div class="room-nav-controls">
+              <button type="button" class="room-back-btn" data-action="exit-room">
+                <span class="back-arrow" aria-hidden="true">&larr;</span>
+                <span>Voltar ao Atlas <kbd>Esc</kbd></span>
+              </button>
+              <div class="room-indexer">
+                <span class="room-index-num">01 / 06</span>
+                <span class="room-index-name">YAHCW (Hot Corners)</span>
+              </div>
+              <div class="room-stepper">
+                <button type="button" class="room-step-btn" data-step-dir="prev" aria-label="Projeto anterior: Laboratório Financeiro">&larr; Anterior</button>
+                <button type="button" class="room-step-btn" data-step-dir="next" aria-label="Próximo projeto: tuya-smart-lamps">Próximo &rarr;</button>
+              </div>
+            </div>
+          </header>
+
+          <div class="room-body-split">
+            <div class="room-content-pane">
+              <div class="room-meta-badge">
+                <span>C# &middot; .NET &middot; WinForms &middot; Win32 API &middot; DWM</span>
+              </div>
+              <h2 class="room-heading" id="room-title-yahcw">YAHCW (Yet Another Hot Corners for Windows)</h2>
+              <p class="room-lead">
+                Utilitário de produtividade nativo para Windows que integra ativação ágil por cantos de tela (hot corners), visualização de miniaturas em tempo real via Desktop Window Manager (DWM), ajuste de luminosidade via DDC/CI e chaveamento de áudio COM.
+              </p>
+
+              <div class="tech-deep-dive">
+                <h3 class="dive-title">Decisões Arquiteturais &amp; Integração Win32</h3>
+                <ul class="dive-list">
+                  <li>
+                    <strong>Comunicação Interprocessos por Named Pipe:</strong> O executável principal desacopla o controle para o processo auxiliar <code>BrightTray</code> através de uma Named Pipe local, garantindo isolamento de privilégios.
+                  </li>
+                  <li>
+                    <strong>Controle de Brilho Físico (DDC/CI &amp; WMI):</strong> Emite opcodes VCP padrão (<code>0x10</code> para luminância) diretamente ao barramento I2C/DDC dos monitores externos via <code>dxva2.dll</code>, com fallback dinâmico para WMI em notebooks.
+                  </li>
+                  <li>
+                    <strong>Chaveamento de Áudio COM:</strong> Interage com a interface nativa <code>IPolicyConfig</code> via invocação COM pontual, permitindo alternar dispositivos sem reiniciar fluxos ativos.
+                  </li>
+                  <li>
+                    <strong>Miniaturas Vivas DWM:</strong> Utiliza <code>DwmRegisterThumbnail</code> e <code>DwmUpdateThumbnailProperties</code> para compor miniaturas renderizadas pela GPU sem sobrecarregar a CPU.
+                  </li>
+                </ul>
+
+                <div class="technical-notice">
+                  <h4 class="notice-title">Ressalvas Técnicas &amp; Demonstração Ilustrativa</h4>
+                  <p class="notice-text">
+                    A demonstração abaixo é <strong>ilustrativa</strong> e roda no navegador: o ajuste de brilho aplica um filtro visual simulado (CSS brightness), demonstrando o fluxo operacional que o executável C# realiza no hardware via VCP 0x10.
+                  </p>
+                </div>
+
+                <div class="room-links-bar">
+                  <a href="https://github.com/arthurMPBBY/YAHCW" class="external-repo-link" target="_blank" rel="noopener noreferrer">
+                    <span>Repositório GitHub &middot; YAHCW</span>
+                    <span aria-hidden="true">&nearr;</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Mini-Desktop Interativo Demonstrativo -->
+            <div class="room-demo-pane">
+              <div class="demo-card-frame">
+                <div class="demo-card-header">
+                  <span class="demo-status-pill">SIMULAÇÃO ILUSTRATIVA</span>
+                  <span class="demo-caption">Desktop Ilustrativo Win32</span>
+                </div>
+
+                <div class="sim-desktop-container" id="sim-yahcw-desktop">
+                  <!-- Gatilho de Canto Superior Esquerdo -->
+                  <div class="sim-hot-corner-trigger" id="sim-corner-trigger" title="Gatilho de Hot Corner (Canto Superior Esquerdo)" tabindex="0" role="button" aria-label="Acionar Visão Geral de Janelas via Hot Corner">
+                    <span class="corner-glow" aria-hidden="true"></span>
+                  </div>
+
+                  <div class="sim-screen-view" id="sim-screen-preview">
+                    <!-- Barra de tarefas simulada -->
+                    <div class="sim-taskbar">
+                      <div class="sim-start-btn">AK</div>
+                      <div class="sim-task-items">
+                        <span class="task-badge active">Terminal</span>
+                        <span class="task-badge">Compiler</span>
+                        <span class="task-badge">AudioMixer</span>
+                      </div>
+                      <div class="sim-tray">
+                        <span id="sim-tray-audio-label">Speakers</span> &middot;
+                        <span id="sim-tray-bright-label">85%</span>
+                      </div>
+                    </div>
+
+                    <!-- Janelas do Desktop -->
+                    <div class="sim-windows-area">
+                      <div class="sim-window-tile is-active" id="win-tile-1" tabindex="0" role="button" aria-label="Janela 1: Terminal C#">
+                        <div class="win-bar"><span>PowerShell - YAHCW.Host.exe</span></div>
+                        <div class="win-content"><code>[NamedPipe] Conectado ao BrightTray<br>[DWM] RegisterThumbnail OK</code></div>
+                      </div>
+                      <div class="sim-window-tile" id="win-tile-2" tabindex="0" role="button" aria-label="Janela 2: Compilador C#">
+                        <div class="win-bar"><span>Build Output - Release x64</span></div>
+                        <div class="win-content"><code>Compilação concluída sem erros.</code></div>
+                      </div>
+                    </div>
+
+                    <!-- Overlay DWM Overview -->
+                    <div class="sim-overview-overlay" id="sim-dwm-overview" hidden>
+                      <div class="overview-header">
+                        <span>VISÃO GERAL DWM &middot; SELECIONE UMA JANELA</span>
+                        <button type="button" class="overview-close-btn" id="btn-close-overview">&times;</button>
+                      </div>
+                      <div class="overview-grid">
+                        <div class="overview-thumb" data-select-win="1" tabindex="0" role="button">
+                          <span>Terminal</span>
+                        </div>
+                        <div class="overview-thumb" data-select-win="2" tabindex="0" role="button">
+                          <span>Compiler</span>
+                        </div>
+                        <div class="overview-thumb" data-select-win="3" tabindex="0" role="button">
+                          <span>Browser</span>
+                        </div>
+                        <div class="overview-thumb" data-select-win="4" tabindex="0" role="button">
+                          <span>Spotify</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Painel de Controles -->
+                <div class="sim-controls-panel">
+                  <div class="control-row">
+                    <button type="button" class="sim-action-btn" id="btn-toggle-overview">
+                      <span>Alternar Visão Geral (Canto Superior Esquerdo)</span>
+                    </button>
+                  </div>
+
+                  <div class="control-row">
+                    <label for="sim-brightness-slider" class="control-label">
+                      <span>Filtro de Brilho Simulado (Ilustração VCP 0x10):</span>
+                      <strong id="brightness-val-display">85%</strong>
+                    </label>
+                    <input type="range" id="sim-brightness-slider" min="10" max="100" value="85" step="1" class="sim-range-input">
+                  </div>
+
+                  <div class="control-row">
+                    <label for="sim-audio-select" class="control-label">
+                      <span>Dispositivo de Áudio Padrão (COM IPolicyConfig):</span>
+                    </label>
+                    <select id="sim-audio-select" class="sim-select-input">
+                      <option value="Speakers">Speakers (Realtek High Definition Audio)</option>
+                      <option value="Headphones">Headphones (SteelSeries Arctis Nova)</option>
+                      <option value="DisplayPort">Digital Audio (DisplayPort Monitor 1)</option>
+                    </select>
+                  </div>
+
+                  <div class="sim-log-output" id="yahcw-log-box" aria-live="polite">
+                    <code>Pronto. Mova o controle de brilho ou acione o canto para testar.</code>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SALA 02: TUYA SMART LAMPS -->
+      <section class="project-room" id="room-tuya" data-room-id="tuya" hidden aria-labelledby="room-title-tuya">
+        <div class="room-inner">
+          <header class="room-header">
+            <div class="room-nav-controls">
+              <button type="button" class="room-back-btn" data-action="exit-room">
+                <span class="back-arrow" aria-hidden="true">&larr;</span>
+                <span>Voltar ao Atlas <kbd>Esc</kbd></span>
+              </button>
+              <div class="room-indexer">
+                <span class="room-index-num">02 / 06</span>
+                <span class="room-index-name">tuya-smart-lamps</span>
+              </div>
+              <div class="room-stepper">
+                <button type="button" class="room-step-btn" data-step-dir="prev" aria-label="Projeto anterior: YAHCW">&larr; Anterior</button>
+                <button type="button" class="room-step-btn" data-step-dir="next" aria-label="Próximo projeto: gaming-fps-hud">Próximo &rarr;</button>
+              </div>
+            </div>
+          </header>
+
+          <div class="room-body-split">
+            <div class="room-content-pane">
+              <div class="room-meta-badge">
+                <span>Python 3 &middot; Sockets TCP &middot; OpenAPI &middot; SSE na UI</span>
+              </div>
+              <h2 class="room-heading" id="room-title-tuya">tuya-smart-lamps</h2>
+              <p class="room-lead">
+                Sistema de automação para lâmpadas inteligentes priorizando sockets TCP diretos na rede local Wi-Fi na porta 6668, com algoritmo de contingência que comuta para a OpenAPI da Tuya em nuvem em caso de queda do enlace direto.
+              </p>
+
+              <div class="tech-deep-dive">
+                <h3 class="dive-title">Topologia de Rede &amp; Arquitetura Híbrida</h3>
+                <ul class="dive-list">
+                  <li>
+                    <strong>Sessão TCP Persistente Local:</strong> Conexão de socket criptografado com a porta 6668 do dispositivo na LAN, mantendo independência da internet pública.
+                  </li>
+                  <li>
+                    <strong>Fallback OpenAPI em Nuvem:</strong> Se o watchdog local detectar timeouts consecutivos, as requisições são roteadas para a OpenAPI da Tuya na nuvem, com telemetria via Server-Sent Events (SSE) na UI.
+                  </li>
+                  <li>
+                    <strong>Latências Simuladas para Demonstração:</strong> Os valores de latência exibidos no teste (4ms local vs 148ms nuvem) são <em>valores simulados</em> para ilustrar o contraste entre rota LAN direta e trânsito externo de nuvem.
+                  </li>
+                </ul>
+
+                <div class="room-links-bar">
+                  <a href="https://github.com/arthurMPBBY/tuya-smart-lamps" class="external-repo-link" target="_blank" rel="noopener noreferrer">
+                    <span>Repositório GitHub &middot; tuya-smart-lamps</span>
+                    <span aria-hidden="true">&nearr;</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Painel Demonstrativo de Roteamento -->
+            <div class="room-demo-pane">
+              <div class="demo-card-frame">
+                <div class="demo-card-header">
+                  <span class="demo-status-pill">SIMULAÇÃO DE ROTEAMENTO</span>
+                  <span class="demo-caption">Protocolo TCP vs OpenAPI (Valores Simulados)</span>
+                </div>
+
+                <div class="tuya-sim-body">
+                  <div class="tuya-lamp-display">
+                    <div class="lamp-fixture-visual" id="tuya-lamp-fixture">
+                      <div class="fixture-bulb" id="tuya-bulb-element"></div>
+                      <div class="fixture-socket"></div>
+                    </div>
+                    <div class="route-status-box">
+                      <div class="route-indicator-row">
+                        <span class="route-badge active" id="badge-route-mode">ROTA ATIVA: TCP LOCAL</span>
+                        <span class="ping-readout" id="ping-readout">4ms (simulado)</span>
+                      </div>
+                      <div class="network-diagram-track">
+                        <span class="node node-client">Cliente</span>
+                        <span class="wire wire-active" id="wire-segment"></span>
+                        <span class="node node-target" id="node-target-label">Lâmpada (192.168.1.104)</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="tuya-actions-box">
+                    <div class="btn-group-row">
+                      <button type="button" class="sim-action-btn" id="btn-toggle-lamp-power">
+                        <span>Ligar / Desligar Lâmpada</span>
+                      </button>
+                      <button type="button" class="sim-action-btn danger" id="btn-simulate-tcp-failure">
+                        <span>Simular Queda de Rede Local</span>
+                      </button>
+                    </div>
+
+                    <div class="btn-group-row">
+                      <button type="button" class="sim-action-btn secondary" id="btn-restore-tcp">
+                        <span>Restabelecer Rota Local (TCP)</span>
+                      </button>
+                    </div>
+
+                    <div class="sim-log-output tuya-terminal" id="tuya-log-box" aria-live="polite">
+                      <code>[TCP-SOCKET] Conexão local ativa em 192.168.1.104:6668 (Latência simulada: 4ms)</code>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SALA 03: GAMING FPS HUD -->
+      <section class="project-room" id="room-gaming" data-room-id="gaming" hidden aria-labelledby="room-title-gaming">
+        <div class="room-inner">
+          <header class="room-header">
+            <div class="room-nav-controls">
+              <button type="button" class="room-back-btn" data-action="exit-room">
+                <span class="back-arrow" aria-hidden="true">&larr;</span>
+                <span>Voltar ao Atlas <kbd>Esc</kbd></span>
+              </button>
+              <div class="room-indexer">
+                <span class="room-index-num">03 / 06</span>
+                <span class="room-index-name">gaming-fps-hud</span>
+              </div>
+              <div class="room-stepper">
+                <button type="button" class="room-step-btn" data-step-dir="prev" aria-label="Projeto anterior: tuya-smart-lamps">&larr; Anterior</button>
+                <button type="button" class="room-step-btn" data-step-dir="next" aria-label="Próximo projeto: python-curso">Próximo &rarr;</button>
+              </div>
+            </div>
+          </header>
+
+          <div class="room-body-split">
+            <div class="room-content-pane">
+              <div class="room-meta-badge">
+                <span>C++17 &middot; Vulkan API &middot; vkQueuePresentKHR &middot; Qt 6 Quick &middot; KDE Wayland</span>
+              </div>
+              <h2 class="room-heading" id="room-title-gaming">gaming-fps-hud</h2>
+              <p class="room-lead">
+                Camada de telemetria em C++17 para Linux/Wayland que observa chamadas <code>vkQueuePresentKHR</code> na fila gráfica da GPU, gerando métricas de frame-time e 1% low serializadas como snapshots JSON atômicos para um HUD em Qt 6 Quick.
+              </p>
+
+              <div class="tech-deep-dive">
+                <h3 class="dive-title">Observação Vulkan &amp; Snapshots Atômicos</h3>
+                <ul class="dive-list">
+                  <li>
+                    <strong>Observação Vulkan Sem Bloqueio:</strong> Mede deltas temporais entre apresentações gráficas com relógio monotônico de alta precisão (<code>std::chrono::steady_clock</code>).
+                  </li>
+                  <li>
+                    <strong>Snapshots JSON Atômicos:</strong> A amostragem de telemetria é formatada em estruturas JSON atômicas consumidas pela interface gráfica.
+                  </li>
+                  <li>
+                    <strong>Cenários Sintéticos Demonstrativos:</strong> As métricas exibidas nos seletores (144 FPS estável, stutter, 60 FPS) são dados sintetizados para demonstração didática da interface.
+                  </li>
+                </ul>
+
+                <div class="room-links-bar">
+                  <a href="https://github.com/arthurMPBBY/gaming-fps-hud" class="external-repo-link" target="_blank" rel="noopener noreferrer">
+                    <span>Repositório GitHub &middot; gaming-fps-hud</span>
+                    <span aria-hidden="true">&nearr;</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Painel Demonstrativo de Telemetria Sintética -->
+            <div class="room-demo-pane">
+              <div class="demo-card-frame">
+                <div class="demo-card-header">
+                  <span class="demo-status-pill">TELEMETRIA SINTÉTICA</span>
+                  <span class="demo-caption">Cenários Demonstrativos &amp; Snapshots JSON</span>
+                </div>
+
+                <div class="gaming-sim-body">
+                  <div class="preset-selector-row">
+                    <span class="selector-label">Cenário Demonstrativo:</span>
+                    <div class="preset-btns">
+                      <button type="button" class="preset-btn active" data-preset="stable">144 FPS Estável</button>
+                      <button type="button" class="preset-btn" data-preset="stutter">Stutter de Shaders</button>
+                      <button type="button" class="preset-btn" data-preset="heavy">Carga Elevada (60 FPS)</button>
+                    </div>
+                  </div>
+
+                  <div class="telemetry-cards-grid">
+                    <div class="metric-card">
+                      <span class="metric-name">Taxa Média</span>
+                      <strong class="metric-val" id="metric-avg-fps">144.1 FPS</strong>
+                    </div>
+                    <div class="metric-card">
+                      <span class="metric-name">1% Low</span>
+                      <strong class="metric-val accent" id="metric-low-fps">139.8 FPS</strong>
+                    </div>
+                    <div class="metric-card">
+                      <span class="metric-name">Tempo Médio</span>
+                      <strong class="metric-val" id="metric-frametime">6.94 ms</strong>
+                    </div>
+                    <div class="metric-card">
+                      <span class="metric-name">Pico Máximo</span>
+                      <strong class="metric-val" id="metric-max-hitch">7.42 ms</strong>
+                    </div>
+                  </div>
+
+                  <div class="frametime-chart-container">
+                    <svg class="frametime-svg" id="gaming-chart-svg" viewBox="0 0 400 120" width="100%" height="120">
+                      <line x1="0" y1="50" x2="400" y2="50" stroke="#0e1218" stroke-width="0.7" stroke-dasharray="3 3" stroke-opacity="0.25" />
+                      <line x1="0" y1="80" x2="400" y2="80" stroke="#0e1218" stroke-width="0.7" stroke-dasharray="3 3" stroke-opacity="0.25" />
+                      <path id="gaming-chart-line" d="M 0 50 L 400 50" fill="none" stroke="#0e1218" stroke-width="1.8" />
+                    </svg>
+                  </div>
+
+                  <div class="json-payload-viewer">
+                    <div class="json-header">
+                      <span>Snapshot JSON Atômico Sintético:</span>
+                      <button type="button" class="copy-json-btn" id="btn-copy-gaming-json">Copiar JSON</button>
+                    </div>
+                    <pre class="json-code-box"><code id="gaming-json-display">{
+  "timestamp_ns": 1730219842104500,
+  "present_count": 86420,
+  "avg_frame_time_ms": 6.94,
+  "one_percent_low_fps": 139.8,
+  "active_swapchain": "0x7ffd98b04a20",
+  "hitch_count_last_sec": 0
+}</code></pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SALA 04: PYTHON CURSO -->
+      <section class="project-room" id="room-python" data-room-id="python" hidden aria-labelledby="room-title-python">
+        <div class="room-inner">
+          <header class="room-header">
+            <div class="room-nav-controls">
+              <button type="button" class="room-back-btn" data-action="exit-room">
+                <span class="back-arrow" aria-hidden="true">&larr;</span>
+                <span>Voltar ao Atlas <kbd>Esc</kbd></span>
+              </button>
+              <div class="room-indexer">
+                <span class="room-index-num">04 / 06</span>
+                <span class="room-index-name">python-curso</span>
+              </div>
+              <div class="room-stepper">
+                <button type="button" class="room-step-btn" data-step-dir="prev" aria-label="Projeto anterior: gaming-fps-hud">&larr; Anterior</button>
+                <button type="button" class="room-step-btn" data-step-dir="next" aria-label="Próximo projeto: spotifast-neon-theme">Próximo &rarr;</button>
+              </div>
+            </div>
+          </header>
+
+          <div class="room-body-split">
+            <div class="room-content-pane">
+              <div class="room-meta-badge">
+                <span>Python 3 &middot; Fundamentos Acadêmicos &middot; UFABC</span>
+              </div>
+              <h2 class="room-heading" id="room-title-python">python-curso</h2>
+              <p class="room-lead">
+                Repositório de exercícios de graduação na UFABC, consolidando fundamentos de algoritmos, operações com listas e conjuntos (sets), cálculos numéricos e manipulação estruturada de arquivos.
+              </p>
+
+              <div class="tech-deep-dive">
+                <h3 class="dive-title">Fundamentos Práticos Cobertos</h3>
+                <ul class="dive-list">
+                  <li>
+                    <strong>Operações com Conjuntos &amp; Listas:</strong> Filtragem de dados, eliminação de duplicatas e operações de conjuntos (união, interseção e diferença).
+                  </li>
+                  <li>
+                    <strong>Cálculos Numéricos &amp; Séries:</strong> Implementação de sequências matemáticas e cálculos de conversão de taxas para modelagem quantitativa básica.
+                  </li>
+                  <li>
+                    <strong>Leitura Defensiva de Arquivos:</strong> Uso de context managers (<code>with open</code>) com encoding explícito e tratamento de exceções.
+                  </li>
+                </ul>
+
+                <div class="room-links-bar">
+                  <a href="https://github.com/arthurMPBBY/python-curso" class="external-repo-link" target="_blank" rel="noopener noreferrer">
+                    <span>Repositório GitHub &middot; python-curso</span>
+                    <span aria-hidden="true">&nearr;</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Visualizador Factual de Código -->
+            <div class="room-demo-pane">
+              <div class="demo-card-frame">
+                <div class="demo-card-header">
+                  <span class="demo-status-pill">EXERCÍCIOS DA GRADUAÇÃO</span>
+                  <span class="demo-caption">Trechos Práticos da UFABC</span>
+                </div>
+
+                <div class="code-browser-body">
+                  <div class="code-tabs-bar">
+                    <button type="button" class="code-tab-btn active" data-code-tab="1">Conjuntos &amp; Listas</button>
+                    <button type="button" class="code-tab-btn" data-code-tab="2">Cálculo Numérico</button>
+                    <button type="button" class="code-tab-btn" data-code-tab="3">Leitura de Arquivos</button>
+                  </div>
+
+                  <div class="code-tab-content active" id="code-panel-1">
+                    <pre class="source-code-block"><code>def extrair_elementos_unicos(colecao_primaria, colecao_secundaria):
+    """
+    Retorna elementos exclusivos da primeira colecao
+    utilizando a operacao set.difference().
+    """
+    conjunto_a = set(colecao_primaria)
+    conjunto_b = set(colecao_secundaria)
+    return sorted(list(conjunto_a.difference(conjunto_b)))</code></pre>
+                  </div>
+
+                  <div class="code-tab-content" id="code-panel-2" hidden>
+                    <pre class="source-code-block"><code>def converter_taxa_anual_mensal(taxa_anual_percentual):
+    """
+    Converte taxa anual efetiva em taxa mensal equivalente.
+    """
+    fator_anual = 1.0 + (taxa_anual_percentual / 100.0)
+    taxa_mensal = (fator_anual ** (1.0 / 12.0)) - 1.0
+    return taxa_mensal</code></pre>
+                  </div>
+
+                  <div class="code-tab-content" id="code-panel-3" hidden>
+                    <pre class="source-code-block"><code>def ler_linhas_validas(caminho_arquivo):
+    """
+    Abre arquivo com context manager e descarta linhas vazias.
+    """
+    linhas_limpas = []
+    with open(caminho_arquivo, mode='r', encoding='utf-8') as arquivo:
+        for linha in arquivo:
+            texto = linha.strip()
+            if texto:
+                linhas_limpas.append(texto)
+    return linhas_limpas</code></pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SALA 05: SPOTIFAST NEON THEME -->
+      <section class="project-room" id="room-spotifast" data-room-id="spotifast" hidden aria-labelledby="room-title-spotifast">
+        <div class="room-inner">
+          <header class="room-header">
+            <div class="room-nav-controls">
+              <button type="button" class="room-back-btn" data-action="exit-room">
+                <span class="back-arrow" aria-hidden="true">&larr;</span>
+                <span>Voltar ao Atlas <kbd>Esc</kbd></span>
+              </button>
+              <div class="room-indexer">
+                <span class="room-index-num">05 / 06</span>
+                <span class="room-index-name">spotifast-neon-theme</span>
+              </div>
+              <div class="room-stepper">
+                <button type="button" class="room-step-btn" data-step-dir="prev" aria-label="Projeto anterior: python-curso">&larr; Anterior</button>
+                <button type="button" class="room-step-btn" data-step-dir="next" aria-label="Próximo projeto: Laboratório Financeiro">Próximo &rarr;</button>
+              </div>
+            </div>
+          </header>
+
+          <div class="room-body-split">
+            <div class="room-content-pane">
+              <div class="room-meta-badge">
+                <span>JSON &middot; Design Tokens &middot; Paleta Estruturada</span>
+              </div>
+              <h2 class="room-heading" id="room-title-spotifast">spotifast-neon-theme</h2>
+              <p class="room-lead">
+                Especificação de design tokens e paleta de cores estruturada em formato JSON (<code>neon.json</code>) para tema de alto contraste, com documentação clara de valores de cores e superfícies.
+              </p>
+
+              <div class="tech-deep-dive">
+                <h3 class="dive-title">Especificação dos Tokens</h3>
+                <ul class="dive-list">
+                  <li>
+                    <strong>Mapeamento em JSON Puro:</strong> Utiliza chaveamento semântico de tokens em JSON legível, desacoplado de dependências externas.
+                  </li>
+                  <li>
+                    <strong>Contraste Tipográfico:</strong> Pares de texto principal e superfícies mantêm contraste confortável para visualização prolongada.
+                  </li>
+                </ul>
+
+                <div class="room-links-bar">
+                  <a href="https://github.com/arthurMPBBY/spotifast-neon-theme" class="external-repo-link" target="_blank" rel="noopener noreferrer">
+                    <span>Repositório GitHub &middot; spotifast-neon-theme</span>
+                    <span aria-hidden="true">&nearr;</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Inspetor Interativo de Tokens -->
+            <div class="room-demo-pane">
+              <div class="demo-card-frame">
+                <div class="demo-card-header">
+                  <span class="demo-status-pill">INSPETOR DE TOKENS JSON</span>
+                  <span class="demo-caption">Clique no token para copiar</span>
+                </div>
+
+                <div class="spotifast-tokens-grid">
+                  <div class="token-tile" data-copy-hex="#0f141c" tabindex="0" role="button" aria-label="Token bg-base #0f141c">
+                    <span class="token-color-chip" style="background-color: #0f141c;"></span>
+                    <span class="token-name">bg-base</span>
+                    <code class="token-hex">#0f141c</code>
+                  </div>
+                  <div class="token-tile" data-copy-hex="#18202c" tabindex="0" role="button" aria-label="Token surface-card #18202c">
+                    <span class="token-color-chip" style="background-color: #18202c;"></span>
+                    <span class="token-name">surface-card</span>
+                    <code class="token-hex">#18202c</code>
+                  </div>
+                  <div class="token-tile" data-copy-hex="#f4f6f8" tabindex="0" role="button" aria-label="Token text-primary #f4f6f8">
+                    <span class="token-color-chip" style="background-color: #f4f6f8;"></span>
+                    <span class="token-name">text-primary</span>
+                    <code class="token-hex">#f4f6f8</code>
+                  </div>
+                  <div class="token-tile" data-copy-hex="#d9432e" tabindex="0" role="button" aria-label="Token accent-coral #d9432e">
+                    <span class="token-color-chip" style="background-color: #d9432e;"></span>
+                    <span class="token-name">accent-coral</span>
+                    <code class="token-hex">#d9432e</code>
+                  </div>
+                </div>
+
+                <div class="sim-log-output" id="spotifast-copy-status" aria-live="polite">
+                  <code>Clique em um token para copiar o código hexadecimal.</code>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SALA 06: LABORATÓRIO FINANCEIRO (SIMULADOR DE JUROS COMPOSTOS) -->
+      <section class="project-room" id="room-financeiro" data-room-id="financeiro" hidden aria-labelledby="room-title-financeiro">
+        <div class="room-inner">
+          <header class="room-header">
+            <div class="room-nav-controls">
+              <button type="button" class="room-back-btn" data-action="exit-room">
+                <span class="back-arrow" aria-hidden="true">&larr;</span>
+                <span>Voltar ao Atlas <kbd>Esc</kbd></span>
+              </button>
+              <div class="room-indexer">
+                <span class="room-index-num">06 / 06</span>
+                <span class="room-index-name">Laboratório Financeiro</span>
+              </div>
+              <div class="room-stepper">
+                <button type="button" class="room-step-btn" data-step-dir="prev" aria-label="Projeto anterior: spotifast-neon-theme">&larr; Anterior</button>
+                <button type="button" class="room-step-btn" data-step-dir="next" aria-label="Próximo projeto: YAHCW">Próximo &rarr;</button>
+              </div>
+            </div>
+          </header>
+
+          <div class="room-body-split">
+            <!-- Rigor Quantitativo -->
+            <div class="room-content-pane">
+              <div class="room-meta-badge">
+                <span>Modelagem Quantitativa &middot; Taxa Efetiva &middot; Gráfico Reativo SVG</span>
+              </div>
+              <h2 class="room-heading" id="room-title-financeiro">Simulador Quantitativo de Juros Compostos</h2>
+              <p class="room-lead">
+                Motor matemático determinístico preservado em <code>finance-lab.js</code> que calcula a evolução temporal de patrimônio a partir da taxa anual efetiva convertida em taxa mensal equivalente, com aportes regulares no final de cada período.
+              </p>
+
+              <div class="tech-deep-dive">
+                <h3 class="dive-title">Fundamentos Matemáticos &amp; Validação</h3>
+                <ul class="dive-list">
+                  <li>
+                    <strong>Conversão de Taxa Efetiva:</strong> Aplica a relação estrita <code>taxaMensal = (1 + taxaAnual / 100) ** (1 / 12) - 1</code>, calculada com precisão via <code>Math.expm1(Math.log1p(annualRatePercent / 100) / 12)</code>.
+                  </li>
+                  <li>
+                    <strong>Validação Estrita &amp; Preservação de Estado:</strong> Entradas inválidas, nulas ou prazos fracionários (ex: 12.5 meses) são rejeitados pelo validador, preservando intacto o gráfico da simulação anterior e exibindo mensagem diagnóstica.
+                  </li>
+                  <li>
+                    <strong>Propósito Acadêmico:</strong> Instrumento desenvolvido para estudos quantitativos de trajetórias de capitalização, sem constituir recomendação financeira.
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Calculadora e Gráfico Reativo SVG -->
+            <div class="room-demo-pane">
+              <div class="demo-card-frame">
+                <div class="demo-card-header">
+                  <span class="demo-status-pill">CALCULADORA DE CAPITALIZAÇÃO</span>
+                  <span class="demo-caption">Motor finance-lab.js</span>
+                </div>
+
+                <div class="finance-calculator-body">
+                  <!-- Formulário de Parâmetros -->
+                  <form id="finance-calc-form" class="finance-form" novalidate>
+                    <div class="form-grid-2x2">
+                      <div class="form-field">
+                        <label for="fin-initial-amount">Valor inicial (R$):</label>
+                        <input type="number" id="fin-initial-amount" name="initialAmount" value="1000" min="0" max="1000000" step="100" required class="fin-input">
+                      </div>
+
+                      <div class="form-field">
+                        <label for="fin-monthly-contrib">Aporte mensal (R$):</label>
+                        <input type="number" id="fin-monthly-contrib" name="monthlyContribution" value="100" min="0" max="10000" step="50" required class="fin-input">
+                      </div>
+
+                      <div class="form-field">
+                        <label for="fin-annual-rate">Taxa anual efetiva (% a.a.):</label>
+                        <input type="number" id="fin-annual-rate" name="annualRatePercent" value="12" min="0" max="30" step="0.5" required class="fin-input">
+                      </div>
+
+                      <div class="form-field">
+                        <label for="fin-months">Prazo em meses (inteiro):</label>
+                        <input type="number" id="fin-months" name="months" value="12" min="1" max="360" step="1" required class="fin-input">
+                      </div>
+                    </div>
+
+                    <div class="form-submit-row">
+                      <button type="submit" class="sim-action-btn primary" id="btn-run-finance">
+                        <span>Recalcular Simulação</span>
+                      </button>
+                    </div>
+                  </form>
+
+                  <!-- Caixa de Erro Diagnóstica (Preserva Gráfico) -->
+                  <div id="finance-error-box" class="finance-error-message" hidden role="alert"></div>
+
+                  <!-- Resumo dos Resultados -->
+                  <div class="finance-results-strip">
+                    <div class="result-box">
+                      <span class="res-label">Saldo Final</span>
+                      <strong class="res-value" id="res-final-balance">R$ 2.384,65</strong>
+                    </div>
+                    <div class="result-box">
+                      <span class="res-label">Total Aportado</span>
+                      <strong class="res-value" id="res-total-contributed">R$ 2.200,00</strong>
+                    </div>
+                    <div class="result-box">
+                      <span class="res-label">Juros Acumulados</span>
+                      <strong class="res-value accent" id="res-total-interest">R$ 184,65</strong>
+                    </div>
+                    <div class="result-box">
+                      <span class="res-label">Taxa Mensal Equivalente</span>
+                      <strong class="res-value" id="res-monthly-rate">0,95% a.m.</strong>
+                    </div>
+                  </div>
+
+                  <!-- Gráfico SVG Reativo -->
+                  <div class="finance-chart-wrapper">
+                    <svg id="finance-chart-svg" class="finance-svg" viewBox="0 0 500 200" width="100%" height="200" aria-label="Gráfico de evolução patrimonial"></svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div> <!-- /#rooms-container -->
+
+
+    <!-- 3. MODO LEITURA DIRETA (LINEAR PARA RECRUTADORES & HR) -->
+    <div id="direct-reading-view" class="direct-reading-view" hidden>
+      <div class="direct-reading-container">
+        <div class="direct-return-bar">
+          <button type="button" class="direct-return-btn" id="btn-return-to-atlas">
+            <span aria-hidden="true">&larr;</span>
+            <span>Retornar ao Atlas Espacial</span>
+          </button>
+          <span class="direct-view-badge">Modo Editorial Texto &middot; Completo</span>
+        </div>
+
+        <article class="direct-dossier">
+          <header class="dossier-header">
+            <h2 class="dossier-name">Arthur Kadri de Oliveira</h2>
+            <p class="dossier-lead">
+              Estudante de graduação na <strong>Universidade Federal do ABC (UFABC &mdash; 2º período)</strong>.<br>
+              Desenvolvimento prático em C#, Python e C++. Em busca do <strong>primeiro estágio</strong> em análise de dados ou mercado financeiro (sem reivindicação de experiência profissional anterior nessas áreas).
+            </p>
+            <div class="dossier-contacts-row">
+              <span class="contact-entry">E-mail: <strong>arthurkadri968@gmail.com</strong></span>
+              <a href="https://github.com/arthurMPBBY" class="contact-entry" target="_blank" rel="noopener noreferrer">GitHub: <strong>arthurMPBBY &nearr;</strong></a>
+              <a href="https://www.linkedin.com/in/arthur-kadri-de-oliveira-2586a12b2/" class="contact-entry" target="_blank" rel="noopener noreferrer">LinkedIn: <strong>Arthur Kadri &nearr;</strong></a>
+            </div>
+          </header>
+
+          <hr class="dossier-rule">
+
+          <section class="dossier-section">
+            <h2 class="dossier-section-title">Índice Completo de Projetos no GitHub</h2>
+
+            <!-- Projeto 1 -->
+            <div class="dossier-project-item">
+              <div class="dossier-proj-head">
+                <h3 class="dossier-proj-name">1. YAHCW (Yet Another Hot Corners for Windows)</h3>
+                <span class="dossier-proj-tech">C# &middot; .NET &middot; WinForms &middot; Win32 &middot; DWM</span>
+              </div>
+              <p class="dossier-proj-desc">
+                Utilitário nativo de desktop que ativa cantos de tela com miniaturas em tempo real gerenciadas pelo Desktop Window Manager (DWM). Integra controle de brilho via Named Pipe com BrightTray através de opcodes DDC/CI (0x10) e WMI, e chaveamento de dispositivos de áudio COM via <code>IPolicyConfig</code>.
+              </p>
+              <div class="dossier-notice">
+                <em>Ressalva técnica:</em> O controle de luminância depende de hardware/monitor com suporte a DDC/CI ativado. A demonstração na web aplica filtro visual simulado (CSS brightness) para fins ilustrativos.
+              </div>
+              <a href="https://github.com/arthurMPBBY/YAHCW" class="dossier-link" target="_blank" rel="noopener noreferrer">github.com/arthurMPBBY/YAHCW &nearr;</a>
+            </div>
+
+            <!-- Projeto 2 -->
+            <div class="dossier-project-item">
+              <div class="dossier-proj-head">
+                <h3 class="dossier-proj-name">2. tuya-smart-lamps</h3>
+                <span class="dossier-proj-tech">Python 3 &middot; Sockets TCP &middot; OpenAPI Tuya</span>
+              </div>
+              <p class="dossier-proj-desc">
+                Solução de controle de dispositivos inteligentes priorizando conexões TCP diretas na LAN na porta 6668. Em caso de timeout de socket ou queda na rede Wi-Fi local, comuta automaticamente para a OpenAPI da Tuya em nuvem.
+              </p>
+              <a href="https://github.com/arthurMPBBY/tuya-smart-lamps" class="dossier-link" target="_blank" rel="noopener noreferrer">github.com/arthurMPBBY/tuya-smart-lamps &nearr;</a>
+            </div>
+
+            <!-- Projeto 3 -->
+            <div class="dossier-project-item">
+              <div class="dossier-proj-head">
+                <h3 class="dossier-proj-name">3. gaming-fps-hud</h3>
+                <span class="dossier-proj-tech">C++17 &middot; Vulkan API &middot; Qt 6 Quick &middot; KDE Wayland</span>
+              </div>
+              <p class="dossier-proj-desc">
+                Camada de observação em C++17 para <code>vkQueuePresentKHR</code> na API Vulkan. Realiza amostragem de frame-time e cálculo de 1% lows com relógio monotônico e serializa snapshots JSON atômicos consumidos por overlay gráfico em Qt 6 sob Wayland.
+              </p>
+              <a href="https://github.com/arthurMPBBY/gaming-fps-hud" class="dossier-link" target="_blank" rel="noopener noreferrer">github.com/arthurMPBBY/gaming-fps-hud &nearr;</a>
+            </div>
+
+            <!-- Projeto 4 -->
+            <div class="dossier-project-item">
+              <div class="dossier-proj-head">
+                <h3 class="dossier-proj-name">4. Laboratório Financeiro (Simulador de Juros Compostos)</h3>
+                <span class="dossier-proj-tech">Modelagem Quantitativa &middot; Taxa Efetiva &middot; finance-lab.js</span>
+              </div>
+              <p class="dossier-proj-desc">
+                Implementação matemática determinística de capitalização composta: conversão da taxa anual efetiva em taxa mensal equivalente com aportes regulares no final do período. Caso canônico de validação: R$ 1.000 iniciais + R$ 100/mês a 12% a.a. efetiva por 12 meses resulta em R$ 2.384,65 finais (R$ 2.200 aportes, R$ 184,65 juros).
+              </p>
+            </div>
+
+            <!-- Projeto 5 e 6 -->
+            <div class="dossier-project-item">
+              <div class="dossier-proj-head">
+                <h3 class="dossier-proj-name">5. python-curso &amp; 6. spotifast-neon-theme</h3>
+                <span class="dossier-proj-tech">Python 3 &middot; Fundamentos UFABC &middot; JSON Design Tokens</span>
+              </div>
+              <p class="dossier-proj-desc">
+                Repositórios complementares: exercícios de estruturas de dados, coleções e algoritmos numéricos na UFABC (<code>python-curso</code>) e especificação JSON de design tokens e paleta de cores para aplicativo de reprodução (<code>spotifast-neon-theme</code>).
+              </p>
+            </div>
+          </section>
+
+          <footer class="dossier-footer">
+            <button type="button" class="direct-return-btn" id="btn-return-to-atlas-footer">
+              <span aria-hidden="true">&larr;</span>
+              <span>Retornar ao Atlas Espacial</span>
+            </button>
+          </footer>
+        </article>
+      </div>
+    </div>
+
+
+    <!-- 4. DOCK PERSISTENTE DO ATLAS (RODAPÉ) -->
+    <div id="atlas-dock" class="atlas-dock" role="toolbar" aria-label="Barra de navegação rápida do Atlas">
+      <div class="dock-inner">
+        <!-- Seletor de Salas / Planos -->
+        <div class="dock-projects-group">
+          <button type="button" class="dock-item-btn" data-dock-target="yahcw" title="Ir para 01 YAHCW">
+            <span class="dock-num">01</span>
+            <span class="dock-name">YAHCW</span>
+          </button>
+          <button type="button" class="dock-item-btn" data-dock-target="tuya" title="Ir para 02 tuya-smart-lamps">
+            <span class="dock-num">02</span>
+            <span class="dock-name">Tuya</span>
+          </button>
+          <button type="button" class="dock-item-btn" data-dock-target="gaming" title="Ir para 03 gaming-fps-hud">
+            <span class="dock-num">03</span>
+            <span class="dock-name">Gaming</span>
+          </button>
+          <button type="button" class="dock-item-btn" data-dock-target="python" title="Ir para 04 python-curso">
+            <span class="dock-num">04</span>
+            <span class="dock-name">Python</span>
+          </button>
+          <button type="button" class="dock-item-btn" data-dock-target="spotifast" title="Ir para 05 spotifast-neon-theme">
+            <span class="dock-num">05</span>
+            <span class="dock-name">Spotifast</span>
+          </button>
+          <button type="button" class="dock-item-btn" data-dock-target="financeiro" title="Ir para 06 Laboratório Financeiro">
+            <span class="dock-num">06</span>
+            <span class="dock-name">Finanças</span>
+          </button>
+        </div>
+
+        <div class="dock-separator" aria-hidden="true"></div>
+
+        <!-- Controles de Zoom & Visão Geral (Acessíveis em Mobile & Desktop) -->
+        <div class="dock-zoom-controls">
+          <button type="button" class="dock-tool-btn zoom-btn" id="btn-dock-zoom-out" title="Reduzir zoom" aria-label="Reduzir zoom">
+            <span aria-hidden="true">&minus;</span>
+          </button>
+          <button type="button" class="dock-tool-btn" id="btn-dock-overview" title="Restaurar enquadramento geral do Atlas">
+            <span class="tool-glyph" aria-hidden="true">&odot;</span>
+            <span class="tool-text">Geral</span>
+          </button>
+          <button type="button" class="dock-tool-btn zoom-btn" id="btn-dock-zoom-in" title="Aumentar zoom" aria-label="Aumentar zoom">
+            <span aria-hidden="true">&plus;</span>
+          </button>
         </div>
       </div>
-    </section>
+    </div>
 
-    <section class="section-block contact-section" id="contato" aria-labelledby="contato-title">
-      <div class="section-container">
-        <header class="section-header">
-          <div class="section-index-badge">
-            <span class="section-index-num">04</span>
-            <span class="section-index-label">/ Conexão</span>
+
+    <p class="atlas-mobile-hint">Arraste para explorar. Toque num objeto ou escolha um projeto abaixo.</p>
+
+    <!-- 5. MINIMAPA INTERATIVO DO ATLAS -->
+    <div id="atlas-minimap-container" class="atlas-minimap-container" aria-label="Minimapa de navegação do Atlas" role="region">
+      <div class="minimap-header">
+        <span class="minimap-title">RADAR / MINIMAPA</span>
+        <span class="minimap-coords" id="minimap-coord-readout">0, 0</span>
+      </div>
+      <div class="minimap-radar-box" id="minimap-radar" tabindex="0" role="button" aria-label="Clique no minimapa para deslocar a câmera">
+        <svg id="minimap-svg" viewBox="-1000 -800 2000 1600" width="100%" height="100%">
+          <rect x="-990" y="-790" width="1980" height="1580" fill="#f8fafc" stroke="#0e1218" stroke-width="12" stroke-opacity="0.15" />
+          <line x1="-990" y1="0" x2="990" y2="0" stroke="#0e1218" stroke-width="6" stroke-dasharray="20 20" stroke-opacity="0.2" />
+          <line x1="0" y1="-790" x2="0" y2="790" stroke="#0e1218" stroke-width="6" stroke-dasharray="20 20" stroke-opacity="0.2" />
+
+          <!-- Pontos dos 6 objetos no minimapa nas coordenadas atualizadas -->
+          <circle cx="-440" cy="-220" r="45" fill="#0e1218" />
+          <text x="-420" y="-250" font-family="'JetBrains Mono', monospace" font-size="64" font-weight="700" fill="#0e1218">01</text>
+
+          <circle cx="440" cy="-220" r="45" fill="#0e1218" />
+          <text x="460" y="-250" font-family="'JetBrains Mono', monospace" font-size="64" font-weight="700" fill="#0e1218">02</text>
+
+          <circle cx="-450" cy="220" r="45" fill="#0e1218" />
+          <text x="-430" y="290" font-family="'JetBrains Mono', monospace" font-size="64" font-weight="700" fill="#0e1218">03</text>
+
+          <circle cx="450" cy="220" r="45" fill="#0e1218" />
+          <text x="470" y="290" font-family="'JetBrains Mono', monospace" font-size="64" font-weight="700" fill="#0e1218">04</text>
+
+          <circle cx="0" cy="-350" r="45" fill="#0e1218" />
+          <text x="20" y="-380" font-family="'JetBrains Mono', monospace" font-size="64" font-weight="700" fill="#0e1218">05</text>
+
+          <circle cx="0" cy="350" r="45" fill="#d9432e" />
+          <text x="20" y="420" font-family="'JetBrains Mono', monospace" font-size="64" font-weight="700" fill="#d9432e">06</text>
+
+          <!-- Retângulo de Visão / Frustum da Câmera -->
+          <rect id="minimap-frustum" x="-400" y="-300" width="800" height="600" fill="#d9432e" fill-opacity="0.12" stroke="#d9432e" stroke-width="12" />
+        </svg>
+      </div>
+    </div>
+
+
+    <!-- 6. OVERLAYS MODAIS (ÍNDICE, SOBRE, CONTATO) COM GESTÃO DE FOCO -->
+    <div id="overlays-container" class="overlays-container" aria-hidden="true">
+
+      <!-- MODAL ÍNDICE -->
+      <dialog class="atlas-overlay-modal" id="overlay-indice" aria-labelledby="modal-title-indice">
+        <div class="modal-dialog-card">
+          <div class="modal-card-header">
+            <h2 class="modal-title" id="modal-title-indice">Índice do Atlas Espacial</h2>
+            <button type="button" class="modal-close-btn" data-action="close-overlay" aria-label="Fechar índice">&times;</button>
           </div>
-          <h2 class="section-title" id="contato-title">Vamos conversar?</h2>
-          <p class="section-subtitle">
-            Disponível para contato e aberto a oportunidades de estágio em mercado financeiro, análise de dados e engenharia de software.
-          </p>
-        </header>
+          <div class="modal-card-body">
+            <p class="modal-subtitle">Selecione um plano arquitetural para navegar imediatamente à sala:</p>
+            <ul class="indice-links-list">
+              <li>
+                <button type="button" class="indice-jump-btn" data-jump-room="yahcw">
+                  <span class="idx-badge">01</span>
+                  <div class="idx-text">
+                    <strong>YAHCW &mdash; Hot Corners, Brilho &amp; Áudio</strong>
+                    <small>C# &middot; Win32 &middot; DWM &middot; NamedPipe</small>
+                  </div>
+                  <span class="idx-arrow">&rarr;</span>
+                </button>
+              </li>
+              <li>
+                <button type="button" class="indice-jump-btn" data-jump-room="tuya">
+                  <span class="idx-badge">02</span>
+                  <div class="idx-text">
+                    <strong>tuya-smart-lamps &mdash; Automação de Rede</strong>
+                    <small>Python 3 &middot; Sockets TCP &middot; OpenAPI Fallback</small>
+                  </div>
+                  <span class="idx-arrow">&rarr;</span>
+                </button>
+              </li>
+              <li>
+                <button type="button" class="indice-jump-btn" data-jump-room="gaming">
+                  <span class="idx-badge">03</span>
+                  <div class="idx-text">
+                    <strong>gaming-fps-hud &mdash; Telemetria Vulkan</strong>
+                    <small>C++17 &middot; vkQueuePresentKHR &middot; Qt 6 Wayland</small>
+                  </div>
+                  <span class="idx-arrow">&rarr;</span>
+                </button>
+              </li>
+              <li>
+                <button type="button" class="indice-jump-btn" data-jump-room="python">
+                  <span class="idx-badge">04</span>
+                  <div class="idx-text">
+                    <strong>python-curso &mdash; Algoritmos &amp; Coleções</strong>
+                    <small>Python 3 &middot; Fundamentos Acadêmicos UFABC</small>
+                  </div>
+                  <span class="idx-arrow">&rarr;</span>
+                </button>
+              </li>
+              <li>
+                <button type="button" class="indice-jump-btn" data-jump-room="spotifast">
+                  <span class="idx-badge">05</span>
+                  <div class="idx-text">
+                    <strong>spotifast-neon-theme &mdash; Design Tokens</strong>
+                    <small>JSON &middot; Paleta de Cores Estruturada</small>
+                  </div>
+                  <span class="idx-arrow">&rarr;</span>
+                </button>
+              </li>
+              <li>
+                <button type="button" class="indice-jump-btn" data-jump-room="financeiro">
+                  <span class="idx-badge">06</span>
+                  <div class="idx-text">
+                    <strong>Laboratório Financeiro &mdash; Juros Compostos</strong>
+                    <small>Modelagem Quantitativa &middot; Taxa Efetiva &middot; SVG</small>
+                  </div>
+                  <span class="idx-arrow">&rarr;</span>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </dialog>
 
-        <div class="contact-editorial-card">
-          <div class="contact-main-info">
-            <span class="contact-card-kicker">CANAL DE CONTATO DIRETO</span>
-            <div class="contact-email-box">
-              <span class="email-display" id="contact-email-text">arthurkadri968@gmail.com</span>
-              <div class="contact-btn-group">
-                <button class="action-btn btn-primary" type="button" data-copy-email aria-label="Copiar endereço de e-mail para a área de transferência">
-                  <svg viewBox="0 0 16 16" width="14" height="14" class="copy-icon" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <path d="M5 2h7a1 1 0 011 1v7m-3 4H4a1 1 0 01-1-1V6a1 1 0 011-1h6a1 1 0 011 1v7a1 1 0 01-1 1z"/>
-                  </svg>
+      <!-- MODAL SOBRE -->
+      <dialog class="atlas-overlay-modal" id="overlay-sobre" aria-labelledby="modal-title-sobre">
+        <div class="modal-dialog-card">
+          <div class="modal-card-header">
+            <h2 class="modal-title" id="modal-title-sobre">Sobre &middot; Arthur Kadri de Oliveira</h2>
+            <button type="button" class="modal-close-btn" data-action="close-overlay" aria-label="Fechar sobre">&times;</button>
+          </div>
+          <div class="modal-card-body">
+            <div class="profile-summary">
+              <p>
+                Graduando na <strong>Universidade Federal do ABC (UFABC &mdash; 2º período)</strong>.
+              </p>
+              <p>
+                Estudo programação de sistemas em <strong>C#, Python e C++</strong>, com foco em interfaces nativas de sistema operacional, comunicação em rede e modelagem quantitativa.
+              </p>
+              <p>
+                <strong>Objetivo Profissional:</strong> Busco meu <em>primeiro estágio</em> em <strong>análise de dados ou mercado financeiro</strong>. Sem alegação de experiência corporativa anterior: valorizo demonstração prática por meio de projetos abertos no GitHub e matemática aplicada verificável.
+              </p>
+            </div>
+          </div>
+        </div>
+      </dialog>
+
+      <!-- MODAL CONTATO -->
+      <dialog class="atlas-overlay-modal" id="overlay-contato" aria-labelledby="modal-title-contato">
+        <div class="modal-dialog-card">
+          <div class="modal-card-header">
+            <h2 class="modal-title" id="modal-title-contato">Contato Direto</h2>
+            <button type="button" class="modal-close-btn" data-action="close-overlay" aria-label="Fechar contato">&times;</button>
+          </div>
+          <div class="modal-card-body">
+            <p class="modal-subtitle">Canais diretos para estágio, projetos e contato técnico:</p>
+
+            <div class="contact-channels-box">
+              <div class="channel-row">
+                <span class="channel-label">E-mail:</span>
+                <strong class="channel-value">arthurkadri968@gmail.com</strong>
+                <button type="button" class="copy-email-btn" id="btn-copy-email-modal" data-copy-email>
                   <span>Copiar E-mail</span>
                 </button>
-                <a href="mailto:arthurkadri968@gmail.com" class="action-btn btn-secondary" aria-label="Enviar e-mail para arthurkadri968@gmail.com">
-                  <svg viewBox="0 0 16 16" width="14" height="14" class="copy-icon" aria-hidden="true" fill="currentColor">
-                    <path d="M2 3.5A1.5 1.5 0 0 1 3.5 2h9A1.5 1.5 0 0 1 14 3.5v9a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 12.5v-9zm1.75.5a.25.25 0 0 0-.25.25v.379l4.5 3.15 4.5-3.15V4.25a.25.25 0 0 0-.25-.25h-8.5zm8.5 7.75V6.321L8.28 9.098a.5.5 0 0 1-.56 0L3.5 6.321v5.429c0 .138.112.25.25.25h8.5a.25.25 0 0 0 .25-.25z"/>
-                  </svg>
-                  <span>Abrir</span>
+              </div>
+
+              <div class="channel-row">
+                <span class="channel-label">GitHub:</span>
+                <a href="https://github.com/arthurMPBBY" class="channel-link" target="_blank" rel="noopener noreferrer">
+                  <span>github.com/arthurMPBBY &nearr;</span>
+                </a>
+              </div>
+
+              <div class="channel-row">
+                <span class="channel-label">LinkedIn:</span>
+                <a href="https://www.linkedin.com/in/arthur-kadri-de-oliveira-2586a12b2/" class="channel-link" target="_blank" rel="noopener noreferrer">
+                  <span>arthur-kadri-de-oliveira &nearr;</span>
                 </a>
               </div>
             </div>
-            <span id="email-live-status" class="sr-only" aria-live="polite"></span>
-            <p class="contact-availability-note">
-              Entre em contato por e-mail ou pelo LinkedIn.
-            </p>
-          </div>
 
-          <div class="contact-profiles-block">
-            <h4 class="contact-profiles-heading">Perfis Profissionais</h4>
-            <div class="contact-links-grid">
-              <a href="https://github.com/arthurMPBBY" class="contact-profile-card" target="_blank" rel="noopener noreferrer">
-                <div class="profile-card-top">
-                  <span class="profile-network-name">GitHub</span>
-                  <span class="profile-arrow" aria-hidden="true">&nearr;</span>
-                </div>
-                <span class="profile-network-handle">github.com/arthurMPBBY</span>
-              </a>
-
-              <a href="https://www.linkedin.com/in/arthur-kadri-de-oliveira-2586a12b2/" class="contact-profile-card" target="_blank" rel="noopener noreferrer">
-                <div class="profile-card-top">
-                  <span class="profile-network-name">LinkedIn</span>
-                  <span class="profile-arrow" aria-hidden="true">&nearr;</span>
-                </div>
-                <span class="profile-network-handle">Arthur Kadri de Oliveira</span>
-              </a>
-            </div>
+            <div class="sim-log-output" id="email-live-status" aria-live="polite"></div>
           </div>
         </div>
-      </div>
-    </section>
+      </dialog>
+
+    </div> <!-- /#overlays-container -->
+
   </main>
 
-  <footer class="site-footer">
-    <div class="footer-inner">
-      <div class="footer-left">
-        <span class="footer-brand">Arthur Kadri de Oliveira</span>
-        <span class="footer-sep" aria-hidden="true">&middot;</span>
-        <span class="footer-academic">UFABC &middot; 2º Período</span>
-      </div>
-      <div class="footer-right">
-        <span class="footer-copy">Portfólio estático com projetos abertos no GitHub.</span>
+  <!-- DEGRADAÇÃO SEM JAVASCRIPT (FALLBACK SEMÂNTICO) -->
+  <noscript>
+    <style>
+      body.mode-atlas { height: auto; overflow: auto; }
+      .atlas-header, main, .skip-link { display: none; }
+      .no-js-banner { min-height: 100vh; }
+      .no-js-inner a { overflow-wrap: anywhere; }
+    </style>
+    <div class="no-js-banner">
+      <div class="no-js-inner">
+        <h2>Arthur Kadri de Oliveira &mdash; Portfólio de Sistemas &amp; Dados</h2>
+        <p>JavaScript está desativado no seu navegador. Todo o conteúdo factual, projetos e canais de contato estão disponíveis integralmente abaixo:</p>
+        <hr>
+        <h3>Projetos no GitHub</h3>
+        <ul>
+          <li><strong>YAHCW:</strong> Utilitário C# Win32/DWM para hot corners, NamedPipe com BrightTray e IPolicyConfig. <a href="https://github.com/arthurMPBBY/YAHCW">Repositório GitHub</a></li>
+          <li><strong>tuya-smart-lamps:</strong> Automação Python via socket TCP local e contingência OpenAPI em nuvem. <a href="https://github.com/arthurMPBBY/tuya-smart-lamps">Repositório GitHub</a></li>
+          <li><strong>gaming-fps-hud:</strong> Camada C++17 Vulkan vkQueuePresentKHR e HUD Wayland Qt 6. <a href="https://github.com/arthurMPBBY/gaming-fps-hud">Repositório GitHub</a></li>
+          <li><strong>python-curso:</strong> Exercícios e fundamentos de algoritmos na UFABC. <a href="https://github.com/arthurMPBBY/python-curso">Repositório GitHub</a></li>
+          <li><strong>spotifast-neon-theme:</strong> Tokens JSON de cores e design. <a href="https://github.com/arthurMPBBY/spotifast-neon-theme">Repositório GitHub</a></li>
+          <li><strong>Laboratório Financeiro:</strong> Exemplo estático de juros compostos: R$ 1.000 iniciais e R$ 100 ao final de cada mês, a 12% ao ano por 12 meses, resultam em R$ 2.384,65. São R$ 2.200,00 em aportes e R$ 184,65 em juros. Simulação educacional, sem recomendação de investimento.</li>
+        </ul>
+        <hr>
+        <p>Contato: <a href="mailto:arthurkadri968@gmail.com">arthurkadri968@gmail.com</a> | Estudante UFABC (2º período) em busca de primeiro estágio em mercado financeiro ou dados.</p>
       </div>
     </div>
-  </footer>
+  </noscript>
 
-  <script src="cloud-morph.js?v=20261029-immersive"></script>
-  <script src="finance-lab.js?v=20261029-immersive"></script>
-  <script src="immersive-scene.js?v=20261029-immersive"></script>
-  <script src="script.js?v=20261029-immersive"></script>
+  <!-- SCRIPTS DO SISTEMA -->
+  <script src="finance-lab.js"></script>
+  <script src="cloud-morph.js"></script>
+  <script src="script.js?v=20261029-atlas-v3"></script>
 </body>
 </html>
