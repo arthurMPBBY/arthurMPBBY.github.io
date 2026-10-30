@@ -1,6 +1,6 @@
 # Arthur Kadri de Oliveira &mdash; Portfólio de Projetos &amp; Atlas Espacial
 
-Portfólio interativo de projetos desenvolvido sob uma interface bidimensional (Atlas Espacial com estética de Observatório Óptico e Giroscópio procedural) e modo editorial de leitura direta. Reúne projetos práticos desenvolvidos em C#, Python e C++, abrangendo utilitários para Windows, automação de rede, observação gráfica e modelagem quantitativa.
+Portfólio interativo com navegação espacial, ambiente óptico procedural inspirado no interior de uma íris e alternativa de leitura direta. Reúne projetos práticos desenvolvidos em C#, Python e C++, abrangendo utilitários para Windows, automação de rede, observação gráfica e modelagem quantitativa.
 
 - **Autor:** Arthur Kadri de Oliveira
 - **Formação:** Graduando na Universidade Federal do ABC (UFABC &mdash; 2º período)
@@ -13,21 +13,26 @@ Portfólio interativo de projetos desenvolvido sob uma interface bidimensional (
 
 ---
 
-## Estética do Observatório Óptico & Giroscópio 3D
+## Íris: ambiente óptico e interação
 
-A interface visual adota a estética do vídeo de inicialização do **Steam Deck 'Giroscópio'**:
-- **Câmara Óptica Profunda:** Fundo em tons de grafite, petróleo e obsidiana (`#070b0e`), com curvatura esférica sutil e iluminação periférica em névoa esmeralda (`#10b981`).
-- **Gimbals Mecânicos Concêntricos:** 5 anéis concêntricos aninhados, projetados analiticamente em 3D com inclinações polares e equatoriais independentes, gerando escorço elíptico realista e profundidade cinemática.
-- **Calibrações em Âmbar Luminoso:** Marcações de precisão em escala Vernier (graduações de 30°, 10° e 2,5°), trilhas de setores e retículos luminescentes em ouro/âmbar (`#f59e0b` / `#fbbf24`).
-- **Vazio Óptico Central:** Abertura central com queda suave para o preto profundo (`#020406`), preservando legibilidade absoluta para a tipografia editorial e as esculturas dos projetos.
-- **Paralaxe e Resposta ao Ponteiro:** Movimentação do mouse orienta a câmera virtual e acelera suavemente a precessão dos anéis mecânicos, com amortecimento estrito (settling bounded em 700ms) e repouso total de RAF/GPU quando estático.
-- **Degradação e Fallback Gracioso:** Em navegadores sem WebGL ou com falhas de driver/alocação, o layout é preservado integralmente através de gradiente radial estático escuro com alto contraste.
+A referência de luz âmbar e atmosfera verde-petróleo evolui para uma interpretação original de íris, pupila e lente. O ambiente utiliza WebGL procedural; não depende de vídeo ou de imagens da Steam.
+
+A superfície curva possui relevo calculado por raymarching, borda elevada da pupila, oclusão entre fibras e refração em uma córnea esférica. São 113 feixes radiais com filamentos menores; a iluminação acompanha as normais da superfície. O renderizador limita o buffer a aproximadamente 1,05 milhão de pixels e DPR de no máximo 1,5, encerrando o ciclo após a acomodação da entrada.
+
+- **Atlas:** projetos e tipografia permanecem em HTML acessível sobre a cena; as esculturas acompanham discretamente o ponto de vista.
+- **Dentro da íris:** abre uma visão dedicada à arte, com arrasto, controle de profundidade e botão de retorno. O modo guarda a câmera do atlas e isola seus controles do teclado enquanto estiver aberto.
+- **Celular:** o arrasto envia coordenadas normalizadas à cena, sem sensores, permissões de orientação ou movimento automático permanente.
+- **Teclado:** setas alteram o ponto de vista; `+`/`-` ajustam profundidade; `0` centraliza; `Esc` retorna aos projetos com restauração de foco.
+- **Movimento:** pausa manual, preferência de movimento reduzido e aba oculta suspendem a interação visual. A renderização termina ao acomodar o movimento.
+- **Falhas gráficas:** o portfólio continua disponível sem WebGL. Se o contexto for perdido dentro da experiência, os controles do atlas são restaurados.
+- **Separação de módulos:** `kaleidoscope.js` renderiza a cena; `optics-interface.js` controla exploração e gestos; `optics-interface.css` define a interface. A comunicação usa `portfolio:opticsinput` com coordenadas, profundidade e reset.
+- **Medição local anterior à integração final:** no teste instrumentado do Astra em uma RX 7600, o desenho de desktop apresentou mediana de 14,4 ms e p95 de 16,9 ms, incluindo leitura síncrona de pixels. Isso não mede a experiência em um telefone físico; os testes móveis usam emulação de viewport.
 
 ---
 
 ## Estrutura do Atlas e Modos de Navegação
 
-O projeto oferece duas formas complementares de navegação:
+O projeto oferece duas formas complementares de navegação e uma experiência óptica opcional:
 
 1. **Atlas Espacial (Navegação Não Linear):**
    - Sistema de coordenadas mundiais contínuo com origem centralizada em `(0, 0)`.
@@ -113,13 +118,9 @@ O projeto oferece duas formas complementares de navegação:
 
 - **Suíte de Ciclo de Vida do WebGL (`outputs/kaleidoscope-sol-review.cjs`):**
   - 29/29 verificações automatizadas com sucesso.
-  - Testes de repouso total de RAF/GPU (0 frames e 0 draws após 700ms de ponteiro estacionário).
+  - A interpolação tem alvo de 500 ms; a suíte verifica ausência de frames e desenhos permanentes após sua acomodação.
   - Suspensão imediata em salas (`data-view="room"`), modo de leitura direta (`data-view="direct"`), deep links diretos (`#yahcw`, `#tuya`) e aba oculta (`document.hidden`).
   - Gating de DPR máximo de 1,5 em resoluções de 320px, 390px, 768px e 1440px.
   - Tolerância e resiliência: testes de perda de contexto WebGL com recuperação dinâmica de recursos (`WEBGL_lose_context`), falha de compilação, linkagem e injeção de erros nulos/exceções (fail-open sem afetar o atlas).
-- **Suíte do Observatório Óptico (`outputs/gyroscope-worker-review.cjs`):**
-  - 18/18 verificações automatizadas com sucesso.
-  - Validação colorimétrica dos gimbals 3D: câmara escura predominante (> 55% de amostras escuras na base), marcações em âmbar luminoso, reflexões esmeralda e centro óptico preto.
-  - Inspeção de escorço elíptico e rotação de perspectiva interativa com mouse.
-  - Responsividade móvel sem overflow horizontal em 320px e 390px.
-  - Acesso ao link discoverable da versão `/2/` clara.
+- **Interface da íris (`outputs/iris-interface-review.cjs`):** testa clique real, preservação da câmera, foco, teclado, profundidade, arrasto touch, pausa, movimento reduzido, rotas externas e recuperação após perda de contexto. Os relatórios JSON registram os resultados de cada execução, local ou online.
+- Os testes gráficos automatizados usam Edge com SwiftShader. Não equivalem a uma medição de desempenho em todos os celulares ou GPUs físicos.

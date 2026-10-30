@@ -2696,6 +2696,10 @@ html[data-view="direct"] .dock-zoom-controls {
   display: none;
 }
 
+html[data-view="atlas"][data-optics="immersive"] .atlas-mobile-hint {
+  display: none;
+}
+
 @media (max-width: 480px) {
   html[data-view="atlas"] .atlas-mobile-hint {
     display: block;

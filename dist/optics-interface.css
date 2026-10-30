@@ -1,0 +1,258 @@
+:root {
+  --iris-pitch: 0deg;
+  --iris-yaw: 0deg;
+  --color-vermilion: #deb87b;
+  --color-vermilion-hover: #f2d5a5;
+  --color-vermilion-glow: rgba(222, 184, 123, 0.18);
+  --border-vermilion: 1px solid #deb87b;
+}
+
+.meridian-crosshair,
+.meridian-rings,
+.meridian-vectors {
+  display: none;
+}
+
+.meridian-typography {
+  isolation: isolate;
+}
+
+.meridian-typography::before {
+  content: "";
+  position: absolute;
+  inset: -45% -14%;
+  z-index: -1;
+  background: radial-gradient(ellipse, rgba(3, 8, 10, 0.78), rgba(3, 8, 10, 0.42) 35%, transparent 70%);
+  pointer-events: none;
+}
+
+.meridian-title {
+  text-shadow: 0 3px 22px #020609;
+  letter-spacing: -2.5px;
+}
+
+.meridian-academic-tag {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 3px;
+  color: #c3cecd;
+  margin-bottom: 13px;
+}
+
+.meridian-lead {
+  color: #e6e9e5;
+  line-height: 1.7;
+}
+
+.meridian-career {
+  color: #aebdbd;
+  font-size: 12px;
+}
+
+.meridian-hint {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: #b2bfbf;
+  font-size: 10px;
+  font-weight: 400;
+}
+
+.hint-pulse { animation: none; }
+
+.spatial-artifact .object-sculpture {
+  transform: perspective(900px) rotateX(var(--iris-pitch)) rotateY(var(--iris-yaw));
+  transition: transform 650ms cubic-bezier(.16, 1, .3, 1), filter 400ms ease;
+  filter: drop-shadow(0 20px 18px rgba(0, 0, 0, .7));
+}
+
+.spatial-artifact:is(:hover, :focus-within, .is-highlighted) .object-sculpture {
+  transform: perspective(900px) rotateX(var(--iris-pitch)) rotateY(var(--iris-yaw)) translateZ(18px);
+  filter: drop-shadow(0 25px 22px rgba(0, 0, 0, .8)) drop-shadow(0 -1px 1px rgba(211, 226, 208, .2));
+}
+
+.artifact-label {
+  text-shadow: 0 2px 6px #020607, 0 0 18px #020607;
+}
+
+.label-title {
+  letter-spacing: -.35px;
+}
+
+.spatial-artifact.is-highlighted .artifact-trigger {
+  outline: none;
+}
+
+.spatial-artifact .artifact-trigger:focus-visible {
+  outline: 2px solid var(--color-vermilion);
+}
+
+.atlas-header {
+  background: linear-gradient(#080e12 20%, rgba(8, 14, 18, .72));
+  border-color: rgba(209, 226, 218, .1);
+}
+
+.atlas-dock {
+  background: rgba(8, 15, 18, .87);
+  border-color: rgba(209, 226, 218, .2);
+  box-shadow: 0 14px 60px #020607;
+}
+
+.optics-interface[hidden],
+.optics-interface [hidden] {
+  display: none !important;
+}
+
+.optics-interface {
+  position: fixed;
+  left: 24px;
+  bottom: 30px;
+  z-index: 80;
+  color: #e8edeb;
+  max-width: calc(100vw - 48px);
+}
+
+.optics-view-toggle {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 46px;
+  padding: 8px 14px;
+  border: 1px solid rgba(202, 225, 214, .24);
+  border-radius: 28px;
+  background: rgba(7, 15, 19, .82);
+  color: #dfd7c5;
+  backdrop-filter: blur(12px);
+  font: 500 12px var(--font-body);
+  cursor: pointer;
+}
+
+.optics-view-toggle:hover,
+.optics-actions button:hover {
+  border-color: #d7bf91;
+  color: #fff1d6;
+}
+
+.optics-toggle-arrow { margin-left: 8px; }
+
+.optics-interface :focus-visible {
+  outline: 2px solid #eac18b;
+  outline-offset: 5px;
+}
+
+html[data-optics="immersive"] .spatial-world,
+html[data-optics="immersive"] .atlas-header,
+html[data-optics="immersive"] .atlas-dock,
+html[data-optics="immersive"] .atlas-minimap-container,
+html[data-optics="immersive"] .atlas-canvas,
+html[data-optics="immersive"] .atlas-relation-banner {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+html[data-optics="immersive"] .optics-interface {
+  inset: auto 40px 32px;
+  max-width: none;
+}
+
+.optics-caption {
+  pointer-events: none;
+  margin-bottom: 24px;
+  text-shadow: 0 2px 24px #000;
+}
+
+.optics-edition,
+.optics-key-hint {
+  font: 10px var(--font-mono);
+  letter-spacing: 1.6px;
+  color: #abbeba;
+}
+
+.optics-caption h2 {
+  font: 500 clamp(30px, 4vw, 56px)/1.1 var(--font-heading);
+  letter-spacing: -2px;
+  margin: 12px 0;
+}
+
+.optics-caption p {
+  font: 13px/1.65 var(--font-body);
+  color: #bdcbc8;
+}
+
+.optics-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.optics-adjustments {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  padding: 10px 16px;
+  border: 1px solid rgba(202, 225, 214, .2);
+  border-radius: 28px;
+  background: rgba(5, 13, 17, .88);
+  backdrop-filter: blur(14px);
+}
+
+.optics-adjustments label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font: 12px var(--font-body);
+}
+
+.optics-adjustments input {
+  width: 110px;
+  accent-color: #dbbc83;
+  min-height: 28px;
+}
+
+.optics-adjustments button {
+  color: #cad6d0;
+  background: none;
+  border: 0;
+  padding: 6px 8px;
+  font: 12px var(--font-body);
+  cursor: pointer;
+  min-height: 36px;
+}
+
+.optics-adjustments button:disabled { opacity: .55; cursor: default; }
+.optics-key-hint { display: block; margin-top: 18px; font-size: 9px; }
+
+html[data-motion="paused"] .spatial-artifact .object-sculpture,
+html[data-page-hidden] .spatial-artifact .object-sculpture {
+  transform: none !important;
+  transition: none !important;
+}
+
+@media (max-width: 1100px) {
+  .optics-interface { bottom: auto; top: calc(var(--header-height) + 16px); left: 18px; }
+  html[data-optics="immersive"] .optics-interface { top: auto; left: 24px; right: 24px; }
+}
+
+@media (max-width: 600px) {
+  .optics-interface { top: calc(var(--header-height) + 10px); left: 12px; }
+  .optics-view-toggle { min-height: 40px; gap: 8px; padding: 5px 12px; font-size: 11px; }
+  .optics-view-toggle svg { width: 25px; }
+  html[data-optics="immersive"] .optics-interface { bottom: max(18px, env(safe-area-inset-bottom)); left: 18px; right: 18px; }
+  .optics-caption { margin-bottom: 18px; }
+  .optics-caption h2 { font-size: 34px; }
+  .optics-caption p { font-size: 12px; }
+  .optics-actions { gap: 10px; }
+  .optics-adjustments { width: 100%; border-radius: 18px; padding: 10px 12px; flex-wrap: wrap; gap: 4px 10px; }
+  .optics-adjustments label { flex-basis: 100%; justify-content: space-between; }
+  .optics-adjustments input { width: 55%; }
+  .optics-key-hint { display: none; }
+  .meridian-title { font-size: 48px; }
+  .meridian-career { font-size: 11px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spatial-artifact .object-sculpture { transform: none !important; transition: none !important; }
+}

@@ -6,17 +6,18 @@
   <meta name="theme-color" content="#070b0e">
   <title>Arthur Kadri de Oliveira | Atlas Espacial de Sistemas</title>
   <meta name="description" content="Atlas espacial interativo de Arthur Kadri de Oliveira. Graduação na UFABC (2º período). Programação em C#, Python e C++, utilitários Win32, automação de rede e modelagem quantitativa. Busca de estágio em mercado financeiro ou dados.">
-  <link rel="icon" type="image/svg+xml" href="favicon.svg?v=20261029-gyroscope">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg?v=20261030-iris-v1">
   <link rel="canonical" href="https://arthurmpbby.github.io/">
   <meta property="og:title" content="Arthur Kadri de Oliveira | Atlas Espacial de Sistemas">
-  <meta property="og:description" content="Arquivo explorável em 6 planos arquiteturais interativos: YAHCW (Win32/DWM), Tuya (TCP/OpenAPI), Gaming (Vulkan/Wayland) e Laboratório Financeiro.">
-  <meta property="og:image" content="https://arthurmpbby.github.io/og-image.png">
+  <meta property="og:description" content="Entre sistemas, dados e possibilidades. Explore os projetos de Arthur Kadri em um atlas espacial com uma íris tridimensional interativa. UFABC, em busca de estágio em dados ou finanças.">
+  <meta property="og:image" content="https://arthurmpbby.github.io/og-image.png?v=20261030-iris">
   <meta property="og:url" content="https://arthurmpbby.github.io/">
   <meta property="og:type" content="website">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20261029-gyroscope-v1">
+  <link rel="stylesheet" href="styles.css?v=20261030-iris-v1">
+  <link rel="stylesheet" href="optics-interface.css?v=20261030-iris-v1">
 </head>
 <body class="mode-atlas">
   <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
@@ -29,7 +30,7 @@
           <span class="brand-glyph" aria-hidden="true">AK</span>
           <div class="brand-text-group">
             <span class="brand-name">Arthur Kadri</span>
-            <span class="brand-sub">Atlas de Sistemas &middot; Observat&oacute;rio &Oacute;ptico</span>
+            <span class="brand-sub">Atlas de Sistemas &middot; Íris</span>
           </div>
         </a>
       </div>
@@ -100,9 +101,9 @@
           <div class="meridian-crosshair" aria-hidden="true"></div>
           <div class="meridian-rings" aria-hidden="true"></div>
           <div class="meridian-typography">
-            <span class="meridian-academic-tag">UFABC &middot; 2&ordm; PER&Iacute;ODO &middot; OBSERVAT&Oacute;RIO &Oacute;PTICO GIROSC&Oacute;PIO</span>
+            <span class="meridian-academic-tag">UFABC &middot; 2&ordm; período</span>
             <h1 class="meridian-title">Arthur Kadri</h1>
-            <p class="meridian-lead">Atlas de Sistemas &middot; Busco Estágio em Análise de Dados &amp; Finanças</p>
+            <p class="meridian-lead">Entre sistemas, dados e possibilidades.<br><span class="meridian-career">Busco estágio em Análise de Dados &amp; Finanças.</span></p>
             <div class="meridian-hint" aria-hidden="true">
               <span class="hint-pulse"></span>
               <span>Arraste para explorar &middot; Roda do mouse zoom &middot; Clique em um objeto</span>
@@ -514,6 +515,27 @@
         </div>
       </div>
     </div> <!-- /#spatial-viewport -->
+
+    <section class="optics-interface" id="optics-interface" aria-label="Exploração da íris" hidden>
+      <div class="optics-caption" id="optics-caption" hidden>
+        <span class="optics-edition">ESTUDO ÓPTICO / 01</span>
+        <h2>Dentro da íris.</h2>
+        <p>Arraste para mudar o ponto de vista.<br>Explore a profundidade. Encontre outra perspectiva.</p>
+      </div>
+      <div class="optics-actions">
+        <button type="button" class="optics-view-toggle" id="btn-optics-view" aria-pressed="false" aria-controls="optics-caption optics-adjustments">
+          <svg viewBox="0 0 36 22" width="30" height="20" aria-hidden="true"><path d="M2 11C10-1 26-1 34 11C26 23 10 23 2 11Z" fill="none" stroke="currentColor"/><circle cx="18" cy="11" r="6" fill="none" stroke="currentColor"/><circle cx="18" cy="11" r="2" fill="currentColor"/></svg>
+          <span id="optics-toggle-label">Dentro da íris</span>
+          <span class="optics-toggle-arrow" aria-hidden="true">↗</span>
+        </button>
+        <div class="optics-adjustments" id="optics-adjustments" hidden>
+          <label for="optics-depth">Profundidade <input id="optics-depth" type="range" min="80" max="125" value="100" step="1"></label>
+          <button type="button" id="optics-reset">Centralizar</button>
+          <button type="button" id="optics-motion" aria-pressed="false">Pausar movimento</button>
+        </div>
+      </div>
+      <span class="optics-key-hint" id="optics-key-hint" hidden>Setas para olhar &middot; Esc para voltar</span>
+    </section>
 
 
     <!-- 2. CONTAINER DAS 6 SALAS DEDICADAS (FULL VIEWPORT) -->
@@ -1600,9 +1622,10 @@
   </noscript>
 
   <!-- SCRIPTS DO SISTEMA -->
-  <script src="kaleidoscope.js?v=20261029-gyroscope-v1"></script>
+  <script src="kaleidoscope.js?v=20261030-iris-v1"></script>
   <script src="finance-lab.js"></script>
   <script src="cloud-morph.js"></script>
   <script src="script.js?v=20261029-atlas-relations-v4"></script>
+  <script src="optics-interface.js?v=20261030-iris-v1"></script>
 </body>
 </html>
