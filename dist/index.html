@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20261029-atlas-relations-v4">
+  <link rel="stylesheet" href="styles.css?v=20261029-kaleidoscope-v1">
 </head>
 <body class="mode-atlas">
   <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
@@ -82,6 +82,7 @@
     <div id="spatial-viewport" class="spatial-viewport" tabindex="0" role="region" aria-label="Mundo espacial navegável. Use arrastar ou teclado para navegar, roda do mouse para zoom.">
 
       <!-- Fundo gerativo em Canvas 2D -->
+      <canvas id="kaleidoscope-canvas" class="kaleidoscope-canvas" aria-hidden="true"></canvas>
       <canvas id="atlas-canvas" class="atlas-canvas" aria-hidden="true"></canvas>
 
       <!-- Plano espacial transformado via CSS (Pan & Zoom em sistema de coordenadas reais) -->
@@ -1591,6 +1592,7 @@
   </noscript>
 
   <!-- SCRIPTS DO SISTEMA -->
+  <script src="kaleidoscope.js?v=20261029-kaleidoscope-v1"></script>
   <script src="finance-lab.js"></script>
   <script src="cloud-morph.js"></script>
   <script src="script.js?v=20261029-atlas-relations-v4"></script>

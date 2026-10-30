@@ -104,3 +104,12 @@ O projeto oferece duas formas complementares de navegação:
 - Falhas de Canvas e Storage injetadas antes da inicialização, movimento reduzido dinâmico, repouso de RAF e fallback sem JavaScript com rolagem nativa.
 - Demonstrações são ilustrativas: métricas e mudanças visuais no navegador não medem nem controlam o hardware real.
 - Testes feitos em Edge headless com renderização por software. Não equivalem a validação em aparelhos físicos, Safari ou Firefox.
+
+## Fundo caleidoscópico reativo
+
+- Módulo independente em kaleidoscope.js, WebGL sem dependências, abaixo do atlas 2D e dos objetos HTML; o canvas decorativo não recebe eventos de ponteiro.
+- Simetria angular espelhada de 12 dobras e decomposição em facetas triangulares. A projeção sobre um plano e a iluminação por normais produzem uma aparência de relevo e profundidade; não são um modelo volumétrico nem ray tracing.
+- Mouse controla deslocamento de perspectiva e rotação. A interpolação termina até 700ms após a última atualização do alvo; não existe rotação automática contínua. Pausa, movimento reduzido e ponteiro de toque mantêm composição estática.
+- Renderização suspensa em salas, leitura direta e aba oculta. DPR limitado a 1,5. O centro elíptico é atenuado para preservar a leitura.
+- Falhas de contexto, compilação, link e alocação de recursos mantêm o atlas original funcional. Perda de contexto oculta a camada; restauração recompila os shaders e recria os buffers antes de desenhar novamente.
+- Verificação independente em outputs/kaleidoscope-sol-review.cjs: pixels efetivamente desenhados, resposta ao mouse, repouso de RAF/GPU, pausa, falhas injetadas e reconstrução de recursos. Testada em Edge headless com SwiftShader; desempenho em GPUs físicas e outros navegadores não foi medido.
