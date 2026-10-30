@@ -63,11 +63,16 @@ uniform float uniformRotation;
 uniform float uniformIntensity;
 uniform float uniformZoom;
 uniform float uniformProject;
+uniform float uniformActiveTime;
 
 float fiberPhase(vec2 position) {
   float radius = length(position);
   float angle = atan(position.y, position.x);
-  return angle * 113.0 + sin(angle * 13.0 + radius * 5.2) * 2.1 + sin(angle * 7.0 - radius * 8.0) * 1.25 + radius * 7.0;
+  float travelingTension = sin(angle * 9.0 + radius * 6.5 - uniformActiveTime * 0.462) * 0.85;
+  float travelingRelief = sin(angle * 5.0 - radius * 7.2 + uniformActiveTime * 0.306) * 0.65;
+  float perturbationOne = sin(angle * 13.0 + radius * 5.2 + travelingTension) * 2.1;
+  float perturbationTwo = sin(angle * 7.0 - radius * 8.0 + travelingRelief) * 1.25;
+  return angle * 113.0 + perturbationOne + perturbationTwo + radius * 7.0;
 }
 float irisHeight(vec2 position) {
   float radius = length(position);
@@ -75,17 +80,25 @@ float irisHeight(vec2 position) {
   float phase = fiberPhase(position);
   float bundles = pow(0.5 + 0.5 * sin(phase), 3.0);
   float filaments = pow(0.5 + 0.5 * sin(phase * 4.0 + sin(radius * 24.0 + angle * 19.0)), 6.0);
+  float respirationWave = sin(uniformActiveTime * 0.641) * 0.72 + sin(uniformActiveTime * 0.306 + 1.15) * 0.28;
+  float tidalWave = sin(uniformActiveTime * 0.306) * 0.68 + sin(uniformActiveTime * 0.462 + 2.05) * 0.32;
+  float pupilDilation = 0.038 * respirationWave + 0.012 * tidalWave;
   float radialGrowth = smoothstep(0.51, 0.68, radius) * (1.0 - smoothstep(1.65, 2.1, radius));
-  float collaretteRadius = 0.79 + 0.045 * sin(angle * 11.0) + 0.022 * sin(angle * 23.0);
+  float collaretteRadius = (0.79 + 0.045 * sin(angle * 11.0) + 0.022 * sin(angle * 23.0)) * (1.0 + pupilDilation * 0.45);
   float collarette = exp(-pow(abs(radius - collaretteRadius) / 0.064, 2.0));
-  float pupilLip = exp(-pow(abs(radius - 0.57 - 0.012 * sin(angle * 17.0)) / 0.041, 2.0));
-  float funnel = 0.23 - 0.85 * exp(-max(radius - 0.52, 0.0) * 2.35);
-  return funnel + radialGrowth * (bundles * 0.065 + filaments * 0.010 + 0.024 * sin(angle * 31.0 + radius * 12.0)) + collarette * (0.055 + bundles * 0.035) + pupilLip * 0.095;
+  float pupilLipRadius = (0.57 + 0.012 * sin(angle * 17.0)) * (1.0 + pupilDilation);
+  float pupilLip = exp(-pow(abs(radius - pupilLipRadius) / 0.041, 2.0));
+  float funnel = 0.23 - 0.85 * exp(-max(radius - 0.52 * (1.0 + pupilDilation), 0.0) * 2.35);
+  float tissueLift = (respirationWave * 0.018 + tidalWave * 0.008) * smoothstep(0.52, 0.95, radius) * (1.0 - smoothstep(1.45, 2.05, radius));
+  return funnel + tissueLift + radialGrowth * (bundles * 0.065 + filaments * 0.010 + 0.024 * sin(angle * 31.0 + radius * 12.0)) + collarette * (0.055 + bundles * 0.035) + pupilLip * 0.095;
 }
 float irisDistance(vec3 position) {
   float radius = length(position.xy);
   float angle = atan(position.y, position.x);
-  float pupilRadius = 0.514 + 0.009 * sin(angle * 17.0) + 0.006 * sin(angle * 31.0);
+  float respirationWave = sin(uniformActiveTime * 0.641) * 0.72 + sin(uniformActiveTime * 0.306 + 1.15) * 0.28;
+  float tidalWave = sin(uniformActiveTime * 0.306) * 0.68 + sin(uniformActiveTime * 0.462 + 2.05) * 0.32;
+  float pupilDilation = 0.038 * respirationWave + 0.012 * tidalWave;
+  float pupilRadius = (0.514 + 0.009 * sin(angle * 17.0) + 0.006 * sin(angle * 31.0)) * (1.0 + pupilDilation);
   pupilRadius += min(position.z + 0.57, 0.0) * 0.20;
   float surfaceDistance = (position.z - irisHeight(position.xy)) * 0.43;
   return max(max(surfaceDistance, (pupilRadius - radius) * 0.74), (radius - 2.12) * 0.5);
@@ -163,8 +176,8 @@ void main(void) {
     vec3 bronzeColor = mix(vec3(0.17, 0.076, 0.022), vec3(0.46, 0.30, 0.11), ridge);
     vec3 materialColor = mix(petrolColor, bronzeColor, clamp(mineral * 0.78 + innerGold, 0.0, 0.94));
     materialColor *= 0.62 + ridge * 0.48 + microFiber * 0.25;
-    vec3 lightDirection = normalize(vec3(-0.65, 0.85, 1.25));
-    vec3 fillDirection = normalize(vec3(0.75, -0.50, 0.35));
+    vec3 lightDirection = normalize(vec3(-0.65 + 0.04 * sin(uniformActiveTime * 0.35), 0.85 + 0.03 * cos(uniformActiveTime * 0.41), 1.25));
+    vec3 fillDirection = normalize(vec3(0.75 - 0.03 * cos(uniformActiveTime * 0.29), -0.50 + 0.03 * sin(uniformActiveTime * 0.37), 0.35));
     vec3 viewDirection = -rayDirection;
     vec3 halfDirection = normalize(lightDirection + viewDirection);
     float diffuseLight = max(dot(surfaceNormal, lightDirection), 0.0);
@@ -186,14 +199,21 @@ void main(void) {
     sceneColor += vec3(0.26, 0.49, 0.44) * wetGleam;
     sceneColor *= (0.09 + 0.91 * throatOcclusion) * (0.18 + 0.82 * limbalShade);
     sceneColor += vec3(0.018, 0.060, 0.050) * fillLight * pow(1.0 - max(dot(surfaceNormal, viewDirection), 0.0), 3.0) * throatOcclusion;
-    float pupillaryLip = exp(-pow(abs(radius - 0.57) / 0.032, 2.0));
+    float respirationWave = sin(uniformActiveTime * 0.641) * 0.72 + sin(uniformActiveTime * 0.306 + 1.15) * 0.28;
+    float tidalWave = sin(uniformActiveTime * 0.306) * 0.68 + sin(uniformActiveTime * 0.462 + 2.05) * 0.32;
+    float pupilDilation = 0.038 * respirationWave + 0.012 * tidalWave;
+    float currentPupilLipRadius = (0.57 + 0.012 * sin(angle * 17.0)) * (1.0 + pupilDilation);
+    float pupillaryLip = exp(-pow(abs(radius - currentPupilLipRadius) / 0.032, 2.0));
     sceneColor += vec3(0.13, 0.074, 0.025) * pupillaryLip * diffuseLight * throatOcclusion;
   }
   if (corneaMask > 0.5) {
     vec3 reflectedDirection = reflect(cameraDirection, corneaNormal);
-    float upperSoftbox = exp(-pow(abs(reflectedDirection.x + 0.43) / 0.34, 4.0) - pow(abs(reflectedDirection.y - 0.62) / 0.055, 2.0));
-    float sideSoftbox = exp(-pow(abs(reflectedDirection.x - 0.74) / 0.030, 2.0) - pow(abs(reflectedDirection.y + 0.12) / 0.32, 4.0));
-    float broadReflection = pow(max(dot(reflectedDirection, normalize(vec3(-0.5, 0.7, 0.9))), 0.0), 18.0);
+    vec2 upperSoftboxCenter = vec2(-0.43 + 0.032 * sin(uniformActiveTime * 0.38 + 0.5), 0.62 + 0.024 * cos(uniformActiveTime * 0.27));
+    vec2 sideSoftboxCenter = vec2(0.74 + 0.026 * cos(uniformActiveTime * 0.33), -0.12 + 0.036 * sin(uniformActiveTime * 0.25 + 1.2));
+    float upperSoftbox = exp(-pow(abs(reflectedDirection.x - upperSoftboxCenter.x) / 0.34, 4.0) - pow(abs(reflectedDirection.y - upperSoftboxCenter.y) / 0.055, 2.0));
+    float sideSoftbox = exp(-pow(abs(reflectedDirection.x - sideSoftboxCenter.x) / 0.030, 2.0) - pow(abs(reflectedDirection.y - sideSoftboxCenter.y) / 0.32, 4.0));
+    vec3 broadLightVector = normalize(vec3(-0.50 + 0.07 * sin(uniformActiveTime * 0.31), 0.70 + 0.05 * cos(uniformActiveTime * 0.23), 0.90));
+    float broadReflection = pow(max(dot(reflectedDirection, broadLightVector), 0.0), 18.0);
     float fresnel = 0.025 + 0.65 * pow(1.0 - max(dot(-cameraDirection, corneaNormal), 0.0), 5.0);
     float clearTitle = smoothstep(0.17, 0.36, length(screenCoordinate));
     sceneColor += (vec3(0.63, 0.80, 0.73) * upperSoftbox * 0.23 + vec3(0.66, 0.43, 0.20) * sideSoftbox * 0.17 + vec3(0.16, 0.27, 0.23) * broadReflection * 0.10) * clearTitle;
@@ -216,6 +236,7 @@ void main(void) {
     let uniformIntensityLocation = null;
     let uniformZoomLocation = null;
     let uniformProjectLocation = null;
+    let uniformActiveTimeLocation = null;
 
     function cleanupPartialResources(targetShaderOne, targetShaderTwo, targetProgramInstance, targetBufferInstance) {
       try {
@@ -238,7 +259,7 @@ void main(void) {
     }
 
     function setupWebGLPipeline() {
-      if (!glContext) {
+      if (!glContext || glContext.isContextLost()) {
         return false;
       }
 
@@ -318,6 +339,8 @@ void main(void) {
         uniformIntensityLocation = glContext.getUniformLocation(constructedProgram, 'uniformIntensity');
         uniformZoomLocation = glContext.getUniformLocation(constructedProgram, 'uniformZoom');
         uniformProjectLocation = glContext.getUniformLocation(constructedProgram, 'uniformProject');
+        uniformActiveTimeLocation = glContext.getUniformLocation(constructedProgram, 'uniformActiveTime');
+
         glContext.deleteShader(compiledVertexShader);
         glContext.deleteShader(compiledFragmentShader);
 
@@ -357,15 +380,22 @@ void main(void) {
     let currentRotationAngle = 0.0;
     let lastEventClientX = window.innerWidth * 0.5;
     let lastEventClientY = window.innerHeight * 0.5;
-    let settlingStartTimestamp = 0;
+
+    let settlingStartTimestamp = 0.0;
     const pointerSettlingDuration = 500.0;
-    let animationFrameIdentifier = 0;
+    let isSettlingActive = false;
+
+    let activeElapsedSeconds = 0.0;
+    let lastFrameWallTimestamp = 0.0;
+
+    let schedulerTimeoutIdentifier = 0;
+    let schedulerAnimationFrameIdentifier = 0;
 
     const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
     const pointerCoarseQuery = window.matchMedia('(pointer: coarse)');
 
-    function checkMotionActive() {
-      if (reducedMotionQuery.matches || pointerCoarseQuery.matches) {
+    function checkMotionPermitted() {
+      if (reducedMotionQuery.matches) {
         return false;
       }
       const motionAttribute = documentRoot.getAttribute('data-motion');
@@ -393,19 +423,31 @@ void main(void) {
       return document.hidden === true || document.visibilityState === 'hidden';
     }
 
-    function stopSettlingAnimation() {
-      if (animationFrameIdentifier) {
-        window.cancelAnimationFrame(animationFrameIdentifier);
-        animationFrameIdentifier = 0;
+    function checkAmbientPermitted() {
+      return !isContextLost && glContext !== null && !glContext.isContextLost() && shaderProgram !== null &&
+             checkMotionPermitted() && checkAtlasViewActive() && !checkDocumentHidden();
+    }
+
+    function cancelScheduledFrame() {
+      if (schedulerTimeoutIdentifier) {
+        window.clearTimeout(schedulerTimeoutIdentifier);
+        schedulerTimeoutIdentifier = 0;
+      }
+      if (schedulerAnimationFrameIdentifier) {
+        window.cancelAnimationFrame(schedulerAnimationFrameIdentifier);
+        schedulerAnimationFrameIdentifier = 0;
       }
     }
 
-    function updateCanvasDimensions() {
-      if (isContextLost || !glContext) {
+    function updateCanvasDimensions(isInteractiveMode) {
+      if (isContextLost || !glContext || glContext.isContextLost()) {
         return false;
       }
-      const pixelBudgetScale = Math.sqrt(1050000 / Math.max(1, canvasElement.clientWidth * canvasElement.clientHeight));
-      const devicePixelScale = Math.min(window.devicePixelRatio || 1.0, 1.5, pixelBudgetScale);
+      const isCoarsePointer = pointerCoarseQuery.matches;
+      const targetPixelBudget = isInteractiveMode ? 1050000 : (isCoarsePointer ? 280000 : 600000);
+      const pixelBudgetScale = Math.sqrt(targetPixelBudget / Math.max(1, canvasElement.clientWidth * canvasElement.clientHeight));
+      const maxDeviceScale = isInteractiveMode ? 1.5 : (isCoarsePointer ? 1.25 : 1.5);
+      const devicePixelScale = Math.min(window.devicePixelRatio || 1.0, maxDeviceScale, pixelBudgetScale);
       const displayPixelWidth = Math.max(1, Math.floor(canvasElement.clientWidth * devicePixelScale));
       const displayPixelHeight = Math.max(1, Math.floor(canvasElement.clientHeight * devicePixelScale));
 
@@ -418,14 +460,16 @@ void main(void) {
       return false;
     }
 
-    function renderSingleFrame() {
-      if (isContextLost || !glContext || !shaderProgram || !checkAtlasViewActive() || checkDocumentHidden()) {
-        if (checkDocumentHidden()) {
-          stopSettlingAnimation();
+    function renderSingleFrame(isInteractiveMode) {
+      if (isContextLost || !glContext || glContext.isContextLost() || !shaderProgram || !checkAtlasViewActive() || checkDocumentHidden()) {
+        if (checkDocumentHidden() || !checkAtlasViewActive() || isContextLost || (glContext && glContext.isContextLost())) {
+          cancelScheduledFrame();
+          isSettlingActive = false;
+          lastFrameWallTimestamp = 0.0;
         }
         return;
       }
-      updateCanvasDimensions();
+      updateCanvasDimensions(isInteractiveMode);
       glContext.useProgram(shaderProgram);
       glContext.uniform2f(uniformResolutionLocation, canvasElement.width, canvasElement.height);
       glContext.uniform2f(uniformPointerLocation, currentPointerX, currentPointerY);
@@ -433,6 +477,7 @@ void main(void) {
       glContext.uniform1f(uniformIntensityLocation, 1.0);
       glContext.uniform1f(uniformZoomLocation, currentZoom);
       glContext.uniform1f(uniformProjectLocation, currentProject);
+      glContext.uniform1f(uniformActiveTimeLocation, activeElapsedSeconds);
       glContext.drawArrays(glContext.TRIANGLES, 0, 6);
 
       if (!documentRoot.classList.contains('has-kaleidoscope')) {
@@ -440,47 +485,131 @@ void main(void) {
       }
     }
 
-    function animationSettlingStep(currentFrameTimestamp) {
-      if (isContextLost || !glContext || !shaderProgram || !checkAtlasViewActive() || checkDocumentHidden()) {
-        stopSettlingAnimation();
+    function scheduleNextFrame(delayMilliseconds) {
+      cancelScheduledFrame();
+      if (!checkAmbientPermitted() && !isSettlingActive) {
+        lastFrameWallTimestamp = 0.0;
+        return;
+      }
+      if (delayMilliseconds > 4.0) {
+        schedulerTimeoutIdentifier = window.setTimeout(function () {
+          schedulerTimeoutIdentifier = 0;
+          schedulerAnimationFrameIdentifier = window.requestAnimationFrame(unifiedSchedulerTick);
+        }, Math.floor(delayMilliseconds));
+      } else {
+        schedulerAnimationFrameIdentifier = window.requestAnimationFrame(unifiedSchedulerTick);
+      }
+    }
+
+    function unifiedSchedulerTick(currentFrameTimestamp) {
+      schedulerAnimationFrameIdentifier = 0;
+      if (schedulerTimeoutIdentifier) {
+        window.clearTimeout(schedulerTimeoutIdentifier);
+        schedulerTimeoutIdentifier = 0;
+      }
+
+      if (!checkAtlasViewActive() || checkDocumentHidden() || isContextLost || !glContext || glContext.isContextLost() || !shaderProgram) {
+        cancelScheduledFrame();
+        isSettlingActive = false;
+        lastFrameWallTimestamp = 0.0;
+        return;
+      }
+
+      if (!checkMotionPermitted()) {
+        cancelScheduledFrame();
+        isSettlingActive = false;
+        lastFrameWallTimestamp = 0.0;
         return;
       }
 
       const currentTimestamp = currentFrameTimestamp || performance.now();
-      const elapsedMilliseconds = currentTimestamp - settlingStartTimestamp;
 
-      if (elapsedMilliseconds >= pointerSettlingDuration) {
-        currentPointerX = targetPointerX;
-        currentPointerY = targetPointerY;
-        currentRotationAngle = targetRotationAngle;
-        currentZoom = targetZoom;
-        currentProject = targetProject;
-        renderSingleFrame();
-        stopSettlingAnimation();
+      if (lastFrameWallTimestamp > 0.0) {
+        const deltaMilliseconds = currentTimestamp - lastFrameWallTimestamp;
+        const clampedDeltaMilliseconds = Math.min(Math.max(deltaMilliseconds, 0.0), 250.0);
+        activeElapsedSeconds += clampedDeltaMilliseconds * 0.001;
+      }
+      lastFrameWallTimestamp = currentTimestamp;
+
+      if (isSettlingActive) {
+        const elapsedMilliseconds = currentTimestamp - settlingStartTimestamp;
+        if (elapsedMilliseconds >= pointerSettlingDuration) {
+          currentPointerX = targetPointerX;
+          currentPointerY = targetPointerY;
+          currentRotationAngle = targetRotationAngle;
+          currentZoom = targetZoom;
+          currentProject = targetProject;
+          isSettlingActive = false;
+        } else {
+          const normalizedProgress = Math.min(Math.max(elapsedMilliseconds / pointerSettlingDuration, 0.0), 1.0);
+          const easingMultiplier = 1.0 - Math.pow(1.0 - normalizedProgress, 3.0);
+          currentPointerX = startPointerX + (targetPointerX - startPointerX) * easingMultiplier;
+          currentPointerY = startPointerY + (targetPointerY - startPointerY) * easingMultiplier;
+          currentRotationAngle = startRotationAngle + (targetRotationAngle - startRotationAngle) * easingMultiplier;
+          currentZoom = startZoom + (targetZoom - startZoom) * easingMultiplier;
+          currentProject = startProject + (targetProject - startProject) * easingMultiplier;
+        }
+        renderSingleFrame(true);
+
+        if (isSettlingActive) {
+          scheduleNextFrame(0.0);
+          return;
+        }
+      } else {
+        renderSingleFrame(false);
+      }
+
+      if (!checkAmbientPermitted()) {
+        cancelScheduledFrame();
+        lastFrameWallTimestamp = 0.0;
         return;
       }
 
-      const normalizedProgress = Math.min(Math.max(elapsedMilliseconds / pointerSettlingDuration, 0.0), 1.0);
-      const easingMultiplier = 1.0 - Math.pow(1.0 - normalizedProgress, 3.0);
+      const frameExecutionDuration = performance.now() - currentTimestamp;
+      const targetAmbientInterval = pointerCoarseQuery.matches ? 83.33 : 55.56;
+      const delayUntilNextFrame = Math.max(0.0, targetAmbientInterval - frameExecutionDuration);
+      scheduleNextFrame(delayUntilNextFrame);
+    }
 
-      currentPointerX = startPointerX + (targetPointerX - startPointerX) * easingMultiplier;
-      currentPointerY = startPointerY + (targetPointerY - startPointerY) * easingMultiplier;
-      currentRotationAngle = startRotationAngle + (targetRotationAngle - startRotationAngle) * easingMultiplier;
-      currentZoom = startZoom + (targetZoom - startZoom) * easingMultiplier;
-      currentProject = startProject + (targetProject - startProject) * easingMultiplier;
+    function triggerInteractiveSettling() {
+      if (!checkAtlasViewActive() || !checkMotionPermitted() || checkDocumentHidden() || isContextLost || (glContext && glContext.isContextLost())) {
+        return;
+      }
+      cancelScheduledFrame();
+      isSettlingActive = true;
+      settlingStartTimestamp = performance.now();
+      startPointerX = currentPointerX;
+      startPointerY = currentPointerY;
+      startRotationAngle = currentRotationAngle;
+      startZoom = currentZoom;
+      startProject = currentProject;
+      if (lastFrameWallTimestamp <= 0.0) {
+        lastFrameWallTimestamp = performance.now();
+      }
+      schedulerAnimationFrameIdentifier = window.requestAnimationFrame(unifiedSchedulerTick);
+    }
 
-      renderSingleFrame();
-      animationFrameIdentifier = window.requestAnimationFrame(animationSettlingStep);
+    function triggerAmbientMotion() {
+      if (!checkAmbientPermitted()) {
+        cancelScheduledFrame();
+        lastFrameWallTimestamp = 0.0;
+        return;
+      }
+      if (schedulerTimeoutIdentifier || schedulerAnimationFrameIdentifier) {
+        return;
+      }
+      lastFrameWallTimestamp = performance.now();
+      schedulerAnimationFrameIdentifier = window.requestAnimationFrame(unifiedSchedulerTick);
     }
 
     function handlePointerMove(pointerEvent) {
       if (pointerEvent.pointerType === 'touch') {
         return;
       }
-      if (!checkAtlasViewActive() || !checkMotionActive() || pointerCoarseQuery.matches) {
+      if (pointerCoarseQuery.matches) {
         return;
       }
-      if (checkDocumentHidden()) {
+      if (!checkAtlasViewActive() || !checkMotionPermitted() || checkDocumentHidden()) {
         return;
       }
 
@@ -497,68 +626,63 @@ void main(void) {
 
       targetPointerX = (clientCoordX / viewportWidth) * 2.0 - 1.0;
       targetPointerY = -((clientCoordY / viewportHeight) * 2.0 - 1.0);
-
       targetRotationAngle += (deltaCoordX * 0.55 - deltaCoordY * 0.40);
 
-      startPointerX = currentPointerX;
-      startPointerY = currentPointerY;
-      startRotationAngle = currentRotationAngle;
-      startZoom = currentZoom;
-      startProject = currentProject;
-      settlingStartTimestamp = performance.now();
-
-      if (!animationFrameIdentifier) {
-        animationFrameIdentifier = window.requestAnimationFrame(animationSettlingStep);
-      }
+      triggerInteractiveSettling();
     }
 
     function handleOpticsInput(inputEvent) {
-      if (!checkAtlasViewActive() || checkDocumentHidden() || reducedMotionQuery.matches || documentRoot.getAttribute('data-motion') === 'paused') return;
+      if (!checkAtlasViewActive() || checkDocumentHidden() || !checkMotionPermitted()) {
+        return;
+      }
       const inputDetail = inputEvent.detail || {};
-      const nextPointerX = inputDetail.reset ? 0.0 : (Number.isFinite(inputDetail.x) ? Math.max(-1, Math.min(1, inputDetail.x)) : targetPointerX);
-      const nextPointerY = inputDetail.reset ? 0.0 : (Number.isFinite(inputDetail.y) ? Math.max(-1, Math.min(1, inputDetail.y)) : targetPointerY);
-      const nextZoom = inputDetail.reset ? 0.0 : (Number.isFinite(inputDetail.zoom) ? Math.max(-1, Math.min(1, (inputDetail.zoom - 1.0) / 0.25)) : targetZoom);
+      const nextPointerX = inputDetail.reset ? 0.0 : (Number.isFinite(inputDetail.x) ? Math.max(-1.0, Math.min(1.0, inputDetail.x)) : targetPointerX);
+      const nextPointerY = inputDetail.reset ? 0.0 : (Number.isFinite(inputDetail.y) ? Math.max(-1.0, Math.min(1.0, inputDetail.y)) : targetPointerY);
+      const nextZoom = inputDetail.reset ? 0.0 : (Number.isFinite(inputDetail.zoom) ? Math.max(-1.0, Math.min(1.0, (inputDetail.zoom - 1.0) / 0.25)) : targetZoom);
       const nextRotation = inputDetail.reset ? 0.0 : targetRotationAngle;
       const nextProject = inputDetail.reset ? 0.0 : (inputDetail.project ? 1.0 : 0.0);
-      if (Math.abs(nextPointerX - targetPointerX) + Math.abs(nextPointerY - targetPointerY) + Math.abs(nextZoom - targetZoom) + Math.abs(nextProject - targetProject) + Math.abs(nextRotation - targetRotationAngle) < 0.0001) return;
+
+      if (Math.abs(nextPointerX - targetPointerX) + Math.abs(nextPointerY - targetPointerY) + Math.abs(nextZoom - targetZoom) + Math.abs(nextProject - targetProject) + Math.abs(nextRotation - targetRotationAngle) < 0.0001) {
+        return;
+      }
+
       targetPointerX = nextPointerX;
       targetPointerY = nextPointerY;
       targetZoom = nextZoom;
       targetProject = nextProject;
       targetRotationAngle = nextRotation;
-      startPointerX = currentPointerX;
-      startPointerY = currentPointerY;
-      startRotationAngle = currentRotationAngle;
-      startZoom = currentZoom;
-      startProject = currentProject;
-      settlingStartTimestamp = performance.now();
-      if (!animationFrameIdentifier) animationFrameIdentifier = window.requestAnimationFrame(animationSettlingStep);
+
+      triggerInteractiveSettling();
     }
 
     function handleResize() {
       if (!checkAtlasViewActive() || checkDocumentHidden()) {
         return;
       }
-      updateCanvasDimensions();
-      renderSingleFrame();
+      updateCanvasDimensions(isSettlingActive);
+      renderSingleFrame(isSettlingActive);
     }
 
     function handleVisibilityChange() {
       if (checkDocumentHidden()) {
-        stopSettlingAnimation();
+        cancelScheduledFrame();
+        isSettlingActive = false;
+        lastFrameWallTimestamp = 0.0;
       } else {
         if (checkAtlasViewActive()) {
-          renderSingleFrame();
+          syncDocumentState();
         }
       }
     }
 
     function syncDocumentState() {
       const isAtlasView = checkAtlasViewActive();
-      const isMotionAllowed = checkMotionActive();
+      const isMotionAllowed = checkMotionPermitted();
 
       if (!isAtlasView) {
-        stopSettlingAnimation();
+        cancelScheduledFrame();
+        isSettlingActive = false;
+        lastFrameWallTimestamp = 0.0;
         canvasElement.style.opacity = '0';
         canvasElement.style.visibility = 'hidden';
         return;
@@ -568,15 +692,21 @@ void main(void) {
       canvasElement.style.visibility = 'visible';
 
       if (!isMotionAllowed) {
-        stopSettlingAnimation();
+        cancelScheduledFrame();
+        isSettlingActive = false;
+        lastFrameWallTimestamp = 0.0;
         currentPointerX = targetPointerX;
         currentPointerY = targetPointerY;
         currentRotationAngle = targetRotationAngle;
         currentZoom = targetZoom;
         currentProject = targetProject;
+        renderSingleFrame(false);
+        return;
       }
 
-      renderSingleFrame();
+      if (!schedulerTimeoutIdentifier && !schedulerAnimationFrameIdentifier) {
+        triggerAmbientMotion();
+      }
     }
 
     const stateObserver = new MutationObserver(function (mutationRecords) {
@@ -606,7 +736,9 @@ void main(void) {
     canvasElement.addEventListener('webglcontextlost', function (eventObject) {
       eventObject.preventDefault();
       isContextLost = true;
-      stopSettlingAnimation();
+      cancelScheduledFrame();
+      isSettlingActive = false;
+      lastFrameWallTimestamp = 0.0;
       canvasElement.style.display = 'none';
       documentRoot.classList.remove('has-kaleidoscope');
     });
@@ -616,7 +748,10 @@ void main(void) {
       const restoredPipelineSuccess = setupWebGLPipeline();
       if (restoredPipelineSuccess) {
         canvasElement.style.display = '';
-        renderSingleFrame();
+        renderSingleFrame(false);
+        if (checkAmbientPermitted()) {
+          triggerAmbientMotion();
+        }
       } else {
         canvasElement.style.display = 'none';
         documentRoot.classList.remove('has-kaleidoscope');
@@ -627,7 +762,10 @@ void main(void) {
       canvasElement.style.opacity = '0';
       canvasElement.style.visibility = 'hidden';
     } else {
-      renderSingleFrame();
+      renderSingleFrame(false);
+      if (checkAmbientPermitted()) {
+        triggerAmbientMotion();
+      }
     }
   }
 

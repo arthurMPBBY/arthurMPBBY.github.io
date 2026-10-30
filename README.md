@@ -17,15 +17,18 @@ Portfólio interativo com navegação espacial, ambiente óptico procedural insp
 
 A referência de luz âmbar e atmosfera verde-petróleo evolui para uma interpretação original de íris, pupila e lente. O ambiente utiliza WebGL procedural; não depende de vídeo ou de imagens da Steam.
 
-A superfície curva possui relevo calculado por raymarching, borda elevada da pupila, oclusão entre fibras e refração em uma córnea esférica. São 113 feixes radiais com filamentos menores; a iluminação acompanha as normais da superfície. O renderizador limita o buffer a aproximadamente 1,05 milhão de pixels e DPR de no máximo 1,5, encerrando o ciclo após a acomodação da entrada.
+A superfície curva possui relevo calculado por raymarching, borda elevada da pupila, oclusão entre fibras e refração em uma córnea esférica. São 113 feixes radiais com filamentos menores. A pupila dilata suavemente, ondas de tensão percorrem as fibras e os reflexos da córnea se deslocam em ritmos distintos, mesmo sem movimento do ponteiro.
+
+A atualização ambiente tem cadência-alvo limitada a 18 desenhos por segundo em ponteiro fino e 12 em ponteiro grosso, com orçamentos de aproximadamente 600 mil e 280 mil pixels, respectivamente. Durante a interação, o buffer pode usar até 1,05 milhão de pixels, com DPR máximo de 1,5. Essas são configurações do renderizador, não uma garantia de FPS em todos os aparelhos.
 
 - **Atlas:** projetos e tipografia permanecem em HTML acessível sobre a cena; as esculturas acompanham discretamente o ponto de vista.
 - **Dentro da íris:** abre uma visão dedicada à arte, com arrasto, controle de profundidade e botão de retorno. O modo guarda a câmera do atlas e isola seus controles do teclado enquanto estiver aberto.
 - **Celular:** o arrasto envia coordenadas normalizadas à cena, sem sensores, permissões de orientação ou movimento automático permanente.
 - **Teclado:** setas alteram o ponto de vista; `+`/`-` ajustam profundidade; `0` centraliza; `Esc` retorna aos projetos com restauração de foco.
-- **Movimento:** pausa manual, preferência de movimento reduzido e aba oculta suspendem a interação visual. A renderização termina ao acomodar o movimento.
+- **Movimento:** a respiração continua enquanto o atlas estiver visível e o movimento permitido, inclusive em telas de toque. Pausa manual, movimento reduzido, aba oculta, leitura direta e salas de projetos interrompem a animação. O relógio de tempo ativo fica congelado durante a suspensão e retoma sem compensar o intervalo ausente.
 - **Falhas gráficas:** o portfólio continua disponível sem WebGL. Se o contexto for perdido dentro da experiência, os controles do atlas são restaurados.
 - **Separação de módulos:** `kaleidoscope.js` renderiza a cena; `optics-interface.js` controla exploração e gestos; `optics-interface.css` define a interface. A comunicação usa `portfolio:opticsinput` com coordenadas, profundidade e reset.
+- **Agendamento:** um único agendador combina a cadência ambiente com a acomodação de entradas. Não há um segundo ciclo de animação concorrente. A câmera do atlas ainda encerra seus próprios frames ao estabilizar; somente a íris possui movimento ambiente intencional.
 - **Medição local anterior à integração final:** no teste instrumentado do Astra em uma RX 7600, o desenho de desktop apresentou mediana de 14,4 ms e p95 de 16,9 ms, incluindo leitura síncrona de pixels. Isso não mede a experiência em um telefone físico; os testes móveis usam emulação de viewport.
 
 ---
@@ -117,10 +120,11 @@ O projeto oferece duas formas complementares de navegação e uma experiência �
 ## Verificação e Suíte de Testes
 
 - **Suíte de Ciclo de Vida do WebGL (`outputs/kaleidoscope-sol-review.cjs`):**
-  - 29/29 verificações automatizadas com sucesso.
-  - A interpolação tem alvo de 500 ms; a suíte verifica ausência de frames e desenhos permanentes após sua acomodação.
+  - As contagens e os resultados de cada execução ficam registrados nos relatórios JSON.
+  - A interpolação de entrada tem alvo de 500 ms; o movimento ambiente é verificado por pixels que mudam sem entrada e por cadência limitada, com suspensão em todos os estados de pausa.
   - Suspensão imediata em salas (`data-view="room"`), modo de leitura direta (`data-view="direct"`), deep links diretos (`#yahcw`, `#tuya`) e aba oculta (`document.hidden`).
   - Gating de DPR máximo de 1,5 em resoluções de 320px, 390px, 768px e 1440px.
   - Tolerância e resiliência: testes de perda de contexto WebGL com recuperação dinâmica de recursos (`WEBGL_lose_context`), falha de compilação, linkagem e injeção de erros nulos/exceções (fail-open sem afetar o atlas).
 - **Interface da íris (`outputs/iris-interface-review.cjs`):** testa clique real, preservação da câmera, foco, teclado, profundidade, arrasto touch, pausa, movimento reduzido, rotas externas e recuperação após perda de contexto. Os relatórios JSON registram os resultados de cada execução, local ou online.
+- **Revisão independente (`outputs/iris-living-sol-review.cjs`):** mede a evolução do fundo, o congelamento do tempo durante a pausa e a retomada sem salto. Também congela o uniforme de tempo apenas no harness para verificar que profundidades diferentes alteram a geometria independentemente da respiração.
 - Os testes gráficos automatizados usam Edge com SwiftShader. Não equivalem a uma medição de desempenho em todos os celulares ou GPUs físicos.
