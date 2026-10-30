@@ -1,6 +1,6 @@
 # Arthur Kadri de Oliveira &mdash; Portfólio de Projetos &amp; Atlas Espacial
 
-Portfólio interativo de projetos desenvolvido sob uma interface bidimensional (Atlas Espacial) e modo editorial de leitura direta. Reúne projetos práticos desenvolvidos em C#, Python e C++, abrangendo utilitários para Windows, automação de rede, observação gráfica e modelagem quantitativa.
+Portfólio interativo de projetos desenvolvido sob uma interface bidimensional (Atlas Espacial com estética de Observatório Óptico e Giroscópio procedural) e modo editorial de leitura direta. Reúne projetos práticos desenvolvidos em C#, Python e C++, abrangendo utilitários para Windows, automação de rede, observação gráfica e modelagem quantitativa.
 
 - **Autor:** Arthur Kadri de Oliveira
 - **Formação:** Graduando na Universidade Federal do ABC (UFABC &mdash; 2º período)
@@ -9,6 +9,19 @@ Portfólio interativo de projetos desenvolvido sob uma interface bidimensional (
 - **GitHub:** [arthurMPBBY](https://github.com/arthurMPBBY)
 - **LinkedIn:** [Arthur Kadri de Oliveira](https://www.linkedin.com/in/arthur-kadri-de-oliveira-2586a12b2/)
 - **Publicação:** https://arthurmpbby.github.io/
+- **Versão Anterior Preservada:** [/2/](https://arthurmpbby.github.io/2/) (Edição Atlas Paper clara)
+
+---
+
+## Estética do Observatório Óptico & Giroscópio 3D
+
+A interface visual adota a estética do vídeo de inicialização do **Steam Deck 'Giroscópio'**:
+- **Câmara Óptica Profunda:** Fundo em tons de grafite, petróleo e obsidiana (`#070b0e`), com curvatura esférica sutil e iluminação periférica em névoa esmeralda (`#10b981`).
+- **Gimbals Mecânicos Concêntricos:** 5 anéis concêntricos aninhados, projetados analiticamente em 3D com inclinações polares e equatoriais independentes, gerando escorço elíptico realista e profundidade cinemática.
+- **Calibrações em Âmbar Luminoso:** Marcações de precisão em escala Vernier (graduações de 30°, 10° e 2,5°), trilhas de setores e retículos luminescentes em ouro/âmbar (`#f59e0b` / `#fbbf24`).
+- **Vazio Óptico Central:** Abertura central com queda suave para o preto profundo (`#020406`), preservando legibilidade absoluta para a tipografia editorial e as esculturas dos projetos.
+- **Paralaxe e Resposta ao Ponteiro:** Movimentação do mouse orienta a câmera virtual e acelera suavemente a precessão dos anéis mecânicos, com amortecimento estrito (settling bounded em 700ms) e repouso total de RAF/GPU quando estático.
+- **Degradação e Fallback Gracioso:** Em navegadores sem WebGL ou com falhas de driver/alocação, o layout é preservado integralmente através de gradiente radial estático escuro com alto contraste.
 
 ---
 
@@ -19,7 +32,8 @@ O projeto oferece duas formas complementares de navegação:
 1. **Atlas Espacial (Navegação Não Linear):**
    - Sistema de coordenadas mundiais contínuo com origem centralizada em `(0, 0)`.
    - Âncora tipográfica central e 6 objetos arquiteturais livres dispostos em constelação espacial.
-   - Navegação por arrasto de ponteiro/touch, zoom ancorado no cursor do mouse e radar/minimapa de orientação (agora acessível via teclado com `Enter` ou `Espaço` para restauração de visão geral).
+   - Navegação por arrasto de ponteiro/touch, zoom ancorado no cursor do mouse e radar/minimapa de orientação (acessível via teclado com `Enter` ou `Espaço` para restauração de visão geral).
+   - **Link Descoberta da Versão Clara:** Acesso direto à versão anterior preservada (`/2/`) disponível no menu de pílulas do cabeçalho ("Versão clara").
    - **Memória Espacial e Entrada Coesa:** Ao entrar em uma sala a partir do mapa, a câmera (pan e zoom) e o foco são preservados. Ao sair via `Esc` ou botão "Voltar", a visão retorna exatamente ao enquadramento anterior com micro-indicação visual no objeto de retorno.
    - **Atlas de Relações Conceituais (Curatorial):** Ao passar o mouse ou focar via teclado em qualquer objeto, são destacadas conexões conceituais curatoriais ("Em comum" / "Conexões de ideias") acompanhadas de legenda editorial e botões de salto rápido, com arcos projetados na periferia sem interceptar títulos centrais.
    - **Comportamento Material Derivado da Forma:** Cada escultura interage conforme sua própria natureza (YAHCW desliza lâminas de janelas Win32 DWM; Tuya expande órbitas e aquece o filamento; Gaming move o caliper de telemetria sobre a fita de pacing; Python tenciona treliças e nós de coleções; Spotifast rotaciona o vinil e posiciona o braço de leitura mecânico; Financeiro revela o arco da curva exponencial de juros compostos).
@@ -93,23 +107,19 @@ O projeto oferece duas formas complementares de navegação:
 - **Respeito a Preferências de Movimento:**
   - Suporte à media query `prefers-reduced-motion: reduce` e botão manual para pausar animações na interface.
 
-## Verificação da entrega
+---
 
-- Refinamentos relacionais: outputs/atlas-refinement-sol-review.cjs; relatório em outputs/atlas-refinement-sol-review.json. Inclui percurso real do ponteiro até os botões, largura interna da legenda nos seis contextos e quatro resoluções, memória de câmera, foco de origem após troca de salas e cancelamento de transições.
-- A legenda permanece disponível durante a passagem do ponteiro até os atalhos; sai após 1,2 segundo fora do objeto/legenda e sem foco nesses elementos. Quando oculta, seus botões ficam inertes.
-- Pausa, preferência de movimento reduzido e ocultação da página cancelam as animações de entrada; o retorno do movimento não repete uma entrada já descartada.
-- Revisão independente: outputs/atlas-sol-review.cjs; resultados em outputs/atlas-sol-review.json no workspace de desenvolvimento.
-- Entradas reais de mouse e toque, arrasto, zoom, histórico, Escape dentro de campos, isolamento do atlas e leitura sem captura de setas.
-- Testes das seis salas em 320, 390, 768 e 1440px, incluindo largura interna e acesso aos controles do cabeçalho e dock.
-- Falhas de Canvas e Storage injetadas antes da inicialização, movimento reduzido dinâmico, repouso de RAF e fallback sem JavaScript com rolagem nativa.
-- Demonstrações são ilustrativas: métricas e mudanças visuais no navegador não medem nem controlam o hardware real.
-- Testes feitos em Edge headless com renderização por software. Não equivalem a validação em aparelhos físicos, Safari ou Firefox.
+## Verificação e Suíte de Testes
 
-## Fundo caleidoscópico reativo
-
-- Módulo independente em kaleidoscope.js, WebGL sem dependências, abaixo do atlas 2D e dos objetos HTML; o canvas decorativo não recebe eventos de ponteiro.
-- Simetria angular espelhada de 12 dobras e decomposição em facetas triangulares. A projeção sobre um plano e a iluminação por normais produzem uma aparência de relevo e profundidade; não são um modelo volumétrico nem ray tracing.
-- Mouse controla deslocamento de perspectiva e rotação. A interpolação termina até 700ms após a última atualização do alvo; não existe rotação automática contínua. Pausa, movimento reduzido e ponteiro de toque mantêm composição estática.
-- Renderização suspensa em salas, leitura direta e aba oculta. DPR limitado a 1,5. O centro elíptico é atenuado para preservar a leitura.
-- Falhas de contexto, compilação, link e alocação de recursos mantêm o atlas original funcional. Perda de contexto oculta a camada; restauração recompila os shaders e recria os buffers antes de desenhar novamente.
-- Verificação independente em outputs/kaleidoscope-sol-review.cjs: pixels efetivamente desenhados, resposta ao mouse, repouso de RAF/GPU, pausa, falhas injetadas e reconstrução de recursos. Testada em Edge headless com SwiftShader; desempenho em GPUs físicas e outros navegadores não foi medido.
+- **Suíte de Ciclo de Vida do WebGL (`outputs/kaleidoscope-sol-review.cjs`):**
+  - 29/29 verificações automatizadas com sucesso.
+  - Testes de repouso total de RAF/GPU (0 frames e 0 draws após 700ms de ponteiro estacionário).
+  - Suspensão imediata em salas (`data-view="room"`), modo de leitura direta (`data-view="direct"`), deep links diretos (`#yahcw`, `#tuya`) e aba oculta (`document.hidden`).
+  - Gating de DPR máximo de 1,5 em resoluções de 320px, 390px, 768px e 1440px.
+  - Tolerância e resiliência: testes de perda de contexto WebGL com recuperação dinâmica de recursos (`WEBGL_lose_context`), falha de compilação, linkagem e injeção de erros nulos/exceções (fail-open sem afetar o atlas).
+- **Suíte do Observatório Óptico (`outputs/gyroscope-worker-review.cjs`):**
+  - 18/18 verificações automatizadas com sucesso.
+  - Validação colorimétrica dos gimbals 3D: câmara escura predominante (> 55% de amostras escuras na base), marcações em âmbar luminoso, reflexões esmeralda e centro óptico preto.
+  - Inspeção de escorço elíptico e rotação de perspectiva interativa com mouse.
+  - Responsividade móvel sem overflow horizontal em 320px e 390px.
+  - Acesso ao link discoverable da versão `/2/` clara.

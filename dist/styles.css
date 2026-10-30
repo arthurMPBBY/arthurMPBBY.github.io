@@ -4,37 +4,41 @@
    ========================================================================== */
 
 :root {
-  /* Paleta Editorial Primária */
-  --color-paper: #f4f6f9;
-  --color-paper-light: #ffffff;
-  --color-paper-subtle: #e9edf2;
-  --color-paper-card: #ffffff;
+  /* Paleta Dark Optical Observatory (Steam Deck 'Giroscópio' Aesthetic) */
+  --color-paper: #070b0e;
+  --color-paper-light: #0d141b;
+  --color-paper-subtle: #131d27;
+  --color-paper-card: rgba(13, 20, 27, 0.85);
 
-  /* Tinta & Contraste */
-  --color-ink-primary: #0b0f15;
-  --color-ink-secondary: #242c38;
-  --color-ink-muted: #5c6779;
-  --color-ink-faint: #94a3b8;
+  /* Tinta & Contraste (Texto Claro de Alta Legibilidade Editorial) */
+  --color-ink-primary: #f1f5f9;
+  --color-ink-secondary: #94a3b8;
+  --color-ink-muted: #94a3b8;
+  --color-ink-faint: #8796a5;
 
-  /* Acento Vermelhão Contido (Editorial) */
-  --color-vermilion: #d9432e;
-  --color-vermilion-glow: rgba(217, 67, 46, 0.16);
-  --color-vermilion-hover: #c43825;
+  /* Acento Âmbar / Ouro Luminous (Giroscópio Precision) */
+  --color-vermilion: #f59e0b;
+  --color-vermilion-glow: rgba(245, 158, 11, 0.22);
+  --color-vermilion-hover: #fbbf24;
+
+  /* Acento Esmeralda Atmosférico */
+  --color-emerald: #10b981;
+  --color-emerald-glow: rgba(16, 185, 129, 0.20);
 
   /* Bordas Técnicas & Hairlines */
-  --border-hairline: 1px solid rgba(14, 18, 24, 0.12);
-  --border-strong: 1px solid rgba(14, 18, 24, 0.25);
-  --border-vermilion: 1px solid #d9432e;
+  --border-hairline: 1px solid rgba(255, 255, 255, 0.10);
+  --border-strong: 1px solid rgba(255, 255, 255, 0.20);
+  --border-vermilion: 1px solid #f59e0b;
 
   /* Tipografia */
   --font-heading: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   --font-body: 'DM Sans', system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
-  /* Eleva\u00e7ões e Sombras Frias */
-  --shadow-card: 0 4px 20px rgba(14, 18, 24, 0.06), 0 1px 3px rgba(14, 18, 24, 0.04);
-  --shadow-hover: 0 12px 32px rgba(14, 18, 24, 0.12), 0 2px 6px rgba(14, 18, 24, 0.06);
-  --shadow-dock: 0 8px 30px rgba(14, 18, 24, 0.12);
+  /* Elevações e Sombras Ópticas */
+  --shadow-card: 0 6px 24px rgba(0, 0, 0, 0.55), 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-hover: 0 14px 40px rgba(0, 0, 0, 0.75), 0 0 24px rgba(245, 158, 11, 0.20);
+  --shadow-dock: 0 12px 40px rgba(0, 0, 0, 0.75);
 
   /* Dimensões */
   --header-height: 64px;
@@ -52,6 +56,7 @@ html, body {
   width: 100%;
   height: 100%;
   background-color: var(--color-paper);
+  background-image: radial-gradient(circle at 50% 50%, #0d151c 0%, #070b0e 70%, #040608 100%);
   color: var(--color-ink-primary);
   font-family: var(--font-body);
   font-size: 15px;
@@ -127,7 +132,7 @@ select:focus-visible,
   left: 0;
   width: 100%;
   height: var(--header-height);
-  background-color: rgba(244, 246, 249, 0.94);
+  background-color: rgba(7, 11, 14, 0.90);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-bottom: var(--border-hairline);
@@ -165,8 +170,9 @@ select:focus-visible,
   justify-content: center;
   width: 32px;
   height: 32px;
-  background-color: var(--color-ink-primary);
-  color: var(--color-paper-light);
+  background-color: #121c25;
+  color: var(--color-vermilion);
+  border: 1px solid rgba(245, 158, 11, 0.35);
   font-family: var(--font-heading);
   font-weight: 800;
   font-size: 13px;
@@ -207,7 +213,7 @@ select:focus-visible,
 .nav-pill-btn {
   background: transparent;
   border: var(--border-hairline);
-  color: var(--color-ink-secondary);
+  color: var(--color-ink-primary);
   font-family: var(--font-mono);
   font-size: 12px;
   font-weight: 600;
@@ -217,7 +223,7 @@ select:focus-visible,
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background-color: var(--color-paper-light);
+  background-color: rgba(18, 27, 36, 0.75);
   transition: all 0.15s ease;
 }
 
@@ -231,6 +237,21 @@ select:focus-visible,
   height: 6px;
   border-radius: 50%;
   background-color: var(--color-vermilion);
+  box-shadow: 0 0 6px var(--color-vermilion);
+}
+
+.nav-version-pill {
+  text-decoration: none;
+  color: var(--color-ink-muted);
+  border-style: dashed;
+}
+.nav-version-pill:hover {
+  color: var(--color-ink-primary);
+  border-color: var(--color-ink-primary);
+}
+.pill-dot-clear {
+  background-color: #94a3b8;
+  box-shadow: none;
 }
 
 /* Ferramentas do Header */
@@ -241,9 +262,9 @@ select:focus-visible,
 }
 
 .tool-btn {
-  background: var(--color-paper-light);
+  background: rgba(18, 27, 36, 0.75);
   border: var(--border-hairline);
-  color: var(--color-ink-secondary);
+  color: var(--color-ink-primary);
   font-family: var(--font-mono);
   font-size: 12px;
   font-weight: 600;
@@ -262,9 +283,10 @@ select:focus-visible,
 }
 
 .tool-btn.active, .tool-btn[aria-pressed="true"] {
-  background-color: var(--color-ink-primary);
-  color: var(--color-paper-light);
-  border-color: var(--color-ink-primary);
+  background-color: var(--color-vermilion);
+  color: #070b0e;
+  border-color: var(--color-vermilion);
+  font-weight: 700;
 }
 
 .tool-btn.direct-reading-toggle .tool-indicator {
@@ -369,7 +391,7 @@ html[data-view="direct"] .kaleidoscope-canvas {
   width: 140px;
   height: 140px;
   transform: translate(-50%, -50%);
-  border: 1px dashed rgba(14, 18, 24, 0.18);
+  border: 1px dashed rgba(245, 158, 11, 0.35);
   border-radius: 50%;
   pointer-events: none;
 }
@@ -378,7 +400,7 @@ html[data-view="direct"] .kaleidoscope-canvas {
 .meridian-crosshair::after {
   content: "";
   position: absolute;
-  background-color: rgba(14, 18, 24, 0.2);
+  background-color: rgba(245, 158, 11, 0.25);
 }
 
 .meridian-crosshair::before {
@@ -404,7 +426,7 @@ html[data-view="direct"] .kaleidoscope-canvas {
   width: 280px;
   height: 280px;
   transform: translate(-50%, -50%);
-  border: 1px solid rgba(14, 18, 24, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.10);
   border-radius: 50%;
   pointer-events: none;
 }
@@ -433,10 +455,11 @@ html[data-view="direct"] .kaleidoscope-canvas {
   font-size: 52px;
   font-weight: 800;
   letter-spacing: -2px;
-  color: var(--color-ink-primary);
+  color: #ffffff;
   line-height: 1.05;
   margin-bottom: 8px;
   text-transform: uppercase;
+  text-shadow: 0 0 35px rgba(245, 158, 11, 0.25);
 }
 
 .meridian-lead {
@@ -455,14 +478,14 @@ html[data-view="direct"] .kaleidoscope-canvas {
   font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 600;
-  color: var(--color-ink-secondary);
-  background-color: rgba(255, 255, 255, 0.85);
+  color: var(--color-ink-primary);
+  background-color: rgba(13, 20, 27, 0.85);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   border: var(--border-hairline);
   padding: 5px 14px;
   border-radius: 20px;
-  box-shadow: 0 2px 8px rgba(14, 18, 24, 0.04);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
 }
 
 .hint-pulse {
@@ -867,7 +890,7 @@ html[data-view="direct"] .kaleidoscope-canvas {
 }
 
 .room-back-btn {
-  background-color: var(--color-paper-light);
+  background-color: rgba(18, 27, 36, 0.85);
   border: var(--border-strong);
   color: var(--color-ink-primary);
   font-family: var(--font-mono);
@@ -888,11 +911,12 @@ html[data-view="direct"] .kaleidoscope-canvas {
   padding: 2px 6px;
   border-radius: 3px;
   font-size: 11px;
+  color: var(--color-ink-secondary);
 }
 
 .room-back-btn:hover {
   background-color: var(--color-vermilion);
-  color: #ffffff;
+  color: #070b0e;
   border-color: var(--color-vermilion);
 }
 
@@ -906,7 +930,7 @@ html[data-view="direct"] .kaleidoscope-canvas {
 .room-index-num {
   font-weight: 800;
   color: var(--color-vermilion);
-  background-color: #ffffff;
+  background-color: #121c25;
   border: var(--border-hairline);
   padding: 4px 8px;
   border-radius: 4px;
@@ -937,8 +961,9 @@ html[data-view="direct"] .kaleidoscope-canvas {
 }
 
 .room-step-btn:hover {
-  border-color: var(--color-ink-primary);
-  color: var(--color-ink-primary);
+  background-color: var(--color-vermilion);
+  color: #070b0e;
+  border-color: var(--color-vermilion);
 }
 
 /* Layout Split da Sala */
@@ -1036,7 +1061,7 @@ html[data-view="direct"] .kaleidoscope-canvas {
 }
 
 .technical-notice {
-  background-color: #ffffff;
+  background-color: rgba(18, 27, 36, 0.85);
   border-left: 3px solid var(--color-vermilion);
   border-top: var(--border-hairline);
   border-right: var(--border-hairline);
@@ -1097,7 +1122,7 @@ html[data-view="direct"] .kaleidoscope-canvas {
 }
 
 .demo-card-frame {
-  background-color: #ffffff;
+  background-color: #0b1117;
   border: var(--border-strong);
   border-radius: 8px;
   box-shadow: var(--shadow-hover);
@@ -1111,7 +1136,7 @@ html[data-view="direct"] .kaleidoscope-canvas {
   align-items: center;
   justify-content: space-between;
   padding: 14px 20px;
-  background-color: #f8fafc;
+  background-color: #0e1620;
   border-bottom: var(--border-hairline);
 }
 
@@ -1121,8 +1146,8 @@ html[data-view="direct"] .kaleidoscope-canvas {
   font-weight: 800;
   letter-spacing: 0.5px;
   color: var(--color-vermilion);
-  background-color: rgba(217, 67, 46, 0.08);
-  border: 1px solid rgba(217, 67, 46, 0.3);
+  background-color: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.35);
   padding: 3px 8px;
   border-radius: 3px;
 }
@@ -2016,7 +2041,7 @@ html[data-view="direct"] .kaleidoscope-canvas {
   left: 50%;
   transform: translateX(-50%);
   height: var(--dock-height);
-  background-color: rgba(255, 255, 255, 0.94);
+  background-color: rgba(11, 17, 23, 0.90);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border: var(--border-strong);
@@ -2066,8 +2091,9 @@ html[data-view="direct"] .kaleidoscope-canvas {
 }
 
 .dock-item-btn.active {
-  background-color: var(--color-ink-primary);
-  color: #ffffff;
+  background-color: var(--color-vermilion);
+  color: #070b0e;
+  font-weight: 700;
 }
 
 .dock-num {
@@ -2077,13 +2103,13 @@ html[data-view="direct"] .kaleidoscope-canvas {
 }
 
 .dock-item-btn.active .dock-num {
-  color: #ffffff;
+  color: #070b0e;
 }
 
 .dock-separator {
   width: 1px;
   height: 24px;
-  background-color: rgba(14, 18, 24, 0.15);
+  background-color: rgba(255, 255, 255, 0.12);
 }
 
 .dock-zoom-controls {
@@ -2093,7 +2119,7 @@ html[data-view="direct"] .kaleidoscope-canvas {
 }
 
 .dock-tool-btn {
-  background-color: var(--color-paper-subtle);
+  background-color: rgba(255, 255, 255, 0.08);
   border: var(--border-hairline);
   color: var(--color-ink-primary);
   font-family: var(--font-mono);
@@ -2111,8 +2137,8 @@ html[data-view="direct"] .kaleidoscope-canvas {
 }
 
 .dock-tool-btn:hover {
-  background-color: var(--color-ink-primary);
-  color: #ffffff;
+  background-color: var(--color-vermilion);
+  color: #070b0e;
 }
 
 .dock-tool-btn.zoom-btn {
@@ -2134,9 +2160,9 @@ html[data-view="direct"] .kaleidoscope-canvas {
   right: 20px;
   width: 180px;
   height: 150px;
-  background-color: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background-color: rgba(11, 17, 23, 0.90);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border: var(--border-strong);
   border-radius: 8px;
   box-shadow: var(--shadow-card);
@@ -2151,7 +2177,7 @@ html[data-view="direct"] .kaleidoscope-canvas {
   align-items: center;
   justify-content: space-between;
   padding: 4px 8px;
-  background-color: #f8fafc;
+  background-color: #0e151d;
   border-bottom: var(--border-hairline);
   font-family: var(--font-mono);
   font-size: 9px;
@@ -2195,10 +2221,10 @@ html[data-view="direct"] .kaleidoscope-canvas {
 }
 
 .modal-dialog-card {
-  background-color: #ffffff;
+  background-color: #0d141b;
   border: var(--border-strong);
   border-radius: 8px;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.65);
   overflow: hidden;
 }
 
@@ -2207,7 +2233,7 @@ html[data-view="direct"] .kaleidoscope-canvas {
   align-items: center;
   justify-content: space-between;
   padding: 16px 20px;
-  background-color: #f8fafc;
+  background-color: #111a23;
   border-bottom: var(--border-hairline);
 }
 
@@ -2215,7 +2241,7 @@ html[data-view="direct"] .kaleidoscope-canvas {
   font-family: var(--font-heading);
   font-size: 18px;
   font-weight: 800;
-  color: var(--color-ink-primary);
+  color: #ffffff;
 }
 
 .modal-close-btn {
@@ -2712,13 +2738,13 @@ html[data-view="direct"] .dock-zoom-controls {
   align-items: center;
   gap: 16px;
   padding: 8px 16px;
-  background: rgba(244, 246, 249, 0.94);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(14, 18, 24, 0.12);
+  background: rgba(11, 17, 23, 0.94);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-left: 3px solid var(--color-vermilion);
   border-radius: 6px;
-  box-shadow: 0 4px 18px rgba(11, 15, 21, 0.08);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
 }
 
 .relation-banner-badge {
@@ -2862,4 +2888,138 @@ html[data-page-hidden] .spatial-artifact * {
     transition: none !important;
     clip-path: none !important;
   }
+}
+
+/* ==========================================================================
+   DARK OPTICAL OBSERVATORY: 6 SCULPTURAL PROJECT OBJECTS ADAPTATION
+   ========================================================================== */
+.label-title {
+  color: #ffffff !important;
+}
+
+.sculpture-svg rect[fill="#ffffff"],
+.sculpture-svg rect[fill="#f8fafc"] {
+  fill: #0f1722;
+}
+.sculpture-svg rect[fill="#e9edf2"],
+.sculpture-svg rect[fill="#e2e7ee"],
+.sculpture-svg rect[fill="#e2e8f0"] {
+  fill: #16222f;
+}
+.sculpture-svg text[fill="#0e1218"],
+.sculpture-svg text[fill="#2c3545"] {
+  fill: #f1f5f9;
+}
+.sculpture-svg text[fill="#5c6779"],
+.sculpture-svg text[fill="#4b5565"] {
+  fill: #94a3b8;
+}
+.sculpture-svg text[fill="#d9432e"] {
+  fill: #f59e0b;
+}
+.sculpture-svg line[stroke="#0e1218"] {
+  stroke: rgba(255, 255, 255, 0.28);
+}
+.sculpture-svg line[stroke="#cbd5e1"] {
+  stroke: rgba(255, 255, 255, 0.18);
+}
+.sculpture-svg path[stroke="#d9432e"] {
+  stroke: #f59e0b;
+}
+.sculpture-svg circle[fill="#d9432e"] {
+  fill: #f59e0b;
+}
+.sculpture-svg circle[stroke="#0e1218"] {
+  stroke: rgba(255, 255, 255, 0.35);
+}
+.sculpture-svg circle[fill="#ffffff"] {
+  fill: #0d141b;
+}
+.sculpture-svg rect[stroke="#0e1218"] {
+  stroke: rgba(255, 255, 255, 0.25);
+}
+.sculpture-svg rect[stroke="#d9432e"] {
+  stroke: #f59e0b;
+}
+
+/* Room Demos & Cards Dark Styling */
+.sim-window-tile {
+  background-color: #0f161f !important;
+  border-color: #1e2c3b !important;
+}
+.sim-window-tile .win-bar {
+  background-color: #16222f !important;
+  color: #f1f5f9 !important;
+}
+.sim-window-tile .win-content {
+  color: #94a3b8 !important;
+}
+.sim-action-btn {
+  background-color: var(--color-vermilion) !important;
+  color: #070b0e !important;
+}
+.sim-action-btn:hover {
+  background-color: var(--color-vermilion-hover) !important;
+}
+.sim-action-btn.secondary {
+  background-color: #121c25 !important;
+  border: var(--border-strong) !important;
+  color: var(--color-ink-primary) !important;
+}
+.sim-select-input, .sim-log-output {
+  background-color: #0e1620 !important;
+  border: var(--border-hairline) !important;
+  color: var(--color-ink-primary) !important;
+}
+.tuya-lamp-display, .finance-results-strip, .finance-chart-wrapper {
+  background-color: #0e1620 !important;
+  border: var(--border-hairline) !important;
+}
+.fixture-bulb {
+  background-color: #1e2c3a !important;
+  border-color: #33475b !important;
+}
+.fixture-bulb.is-on {
+  background-color: #fbbf24 !important;
+  border-color: #f59e0b !important;
+  box-shadow: 0 0 24px rgba(245, 158, 11, 0.65) !important;
+}
+.dossier-project-item {
+  background-color: #0d141b !important;
+}
+.dossier-notice {
+  background-color: #111a24 !important;
+}
+.indice-jump-btn {
+  background-color: #101923 !important;
+}
+.indice-jump-btn:hover {
+  background-color: #172330 !important;
+}
+.idx-badge {
+  background-color: #162330 !important;
+}
+.channel-row {
+  background-color: #101923 !important;
+}
+.copy-email-btn {
+  background-color: var(--color-vermilion) !important;
+  color: #070b0e !important;
+}
+#minimap-svg rect {
+  fill: #090e13 !important;
+  stroke: rgba(255, 255, 255, 0.15) !important;
+}
+#minimap-svg line {
+  stroke: rgba(255, 255, 255, 0.15) !important;
+}
+#minimap-svg circle {
+  fill: #f59e0b !important;
+}
+#minimap-svg text {
+  fill: #f1f5f9 !important;
+}
+#minimap-frustum {
+  stroke: #f59e0b !important;
+  fill: rgba(245, 158, 11, 0.15) !important;
 }
