@@ -2,6 +2,9 @@
   const documentRoot = document.documentElement;
 
   function initializeKaleidoscope() {
+    const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const pointerCoarseQuery = window.matchMedia('(pointer: coarse)');
+
     let canvasElement = document.getElementById('kaleidoscope-canvas');
     const viewportContainer = document.getElementById('spatial-viewport');
 
@@ -28,11 +31,11 @@
     try {
       glContext = canvasElement.getContext('webgl', {
         alpha: false,
-        depth: false,
+        depth: true,
         stencil: false,
-        antialias: false,
+        antialias: true,
         preserveDrawingBuffer: false,
-        powerPreference: 'low-power'
+        powerPreference: 'high-performance'
       }) || canvasElement.getContext('experimental-webgl');
     } catch (contextError) {
       glContext = null;
@@ -44,192 +47,186 @@
       return;
     }
 
-    const vertexShaderSource = [
-      'attribute vec2 attributeVertexPosition;',
+    const precisionHeader = [
+      '#ifdef GL_FRAGMENT_PRECISION_HIGH',
+      'precision highp float;',
+      '#else',
+      'precision mediump float;',
+      '#endif'
+    ].join('\n') + '\n';
+
+    const textureVertexShaderSource = [
+      'attribute vec2 attributePosition;',
+      'varying vec2 varyingUv;',
       'void main(void) {',
-      '  gl_Position = vec4(attributeVertexPosition, 0.0, 1.0);',
+      '  varyingUv = attributePosition * 0.5 + 0.5;',
+      '  gl_Position = vec4(attributePosition, 0.0, 1.0);',
       '}'
     ].join('\n');
 
-    const fragmentShaderSource = `
-#ifdef GL_FRAGMENT_PRECISION_HIGH
-precision highp float;
-#else
-precision mediump float;
-#endif
-uniform vec2 uniformResolution;
-uniform vec2 uniformPointer;
-uniform float uniformRotation;
-uniform float uniformIntensity;
-uniform float uniformZoom;
-uniform float uniformProject;
-uniform float uniformActiveTime;
+    const textureFragmentShaderSource = precisionHeader + [
+      'varying vec2 varyingUv;',
+      '#define PI 3.141592653589793',
+      'void main(void) {',
+      '  float angleRadian = varyingUv.x * 2.0 * PI;',
+      '  float radialDistance = 0.50 + varyingUv.y * 1.62;',
+      '  float waveTension = sin(angleRadian * 9.0 + radialDistance * 6.5) * 0.85;',
+      '  float waveRelief = sin(angleRadian * 5.0 - radialDistance * 7.2) * 0.65;',
+      '  float perturbationOne = sin(angleRadian * 13.0 + radialDistance * 5.2 + waveTension) * 2.1;',
+      '  float perturbationTwo = sin(angleRadian * 7.0 - radialDistance * 8.0 + waveRelief) * 1.25;',
+      '  float fiberPhase = angleRadian * 113.0 + perturbationOne + perturbationTwo + radialDistance * 7.0;',
+      '  float ridgeValue = 0.5 + 0.5 * sin(fiberPhase);',
+      '  float microFiber = pow(0.5 + 0.5 * sin(fiberPhase * 4.0 + sin(radialDistance * 24.0 + angleRadian * 19.0)), 5.0);',
+      '  float branchingPattern = 0.5 + 0.5 * sin(angleRadian * 47.0 + sin(angleRadian * 11.0) * 2.0 + radialDistance * 18.0);',
+      '  float mineralPattern = smoothstep(0.15, 0.85, sin(angleRadian * 9.0 + radialDistance * 4.0) * 0.32 + sin(angleRadian * 23.0 - radialDistance * 3.0) * 0.24 + 0.42);',
+      '  float fiberRelief = ridgeValue * 0.72 + microFiber * 0.28;',
+      '  gl_FragColor = vec4(clamp(fiberRelief, 0.0, 1.0), branchingPattern, mineralPattern, 1.0);',
+      '}'
+    ].join('\n');
 
-float fiberPhase(vec2 position) {
-  float radius = length(position);
-  float angle = atan(position.y, position.x);
-  float travelingTension = sin(angle * 9.0 + radius * 6.5 - uniformActiveTime * 0.462) * 0.85;
-  float travelingRelief = sin(angle * 5.0 - radius * 7.2 + uniformActiveTime * 0.306) * 0.65;
-  float perturbationOne = sin(angle * 13.0 + radius * 5.2 + travelingTension) * 2.1;
-  float perturbationTwo = sin(angle * 7.0 - radius * 8.0 + travelingRelief) * 1.25;
-  return angle * 113.0 + perturbationOne + perturbationTwo + radius * 7.0;
-}
-float irisHeight(vec2 position) {
-  float radius = length(position);
-  float angle = atan(position.y, position.x);
-  float phase = fiberPhase(position);
-  float bundles = pow(0.5 + 0.5 * sin(phase), 3.0);
-  float filaments = pow(0.5 + 0.5 * sin(phase * 4.0 + sin(radius * 24.0 + angle * 19.0)), 6.0);
-  float respirationWave = sin(uniformActiveTime * 0.641) * 0.72 + sin(uniformActiveTime * 0.306 + 1.15) * 0.28;
-  float tidalWave = sin(uniformActiveTime * 0.306) * 0.68 + sin(uniformActiveTime * 0.462 + 2.05) * 0.32;
-  float pupilDilation = 0.038 * respirationWave + 0.012 * tidalWave;
-  float radialGrowth = smoothstep(0.51, 0.68, radius) * (1.0 - smoothstep(1.65, 2.1, radius));
-  float collaretteRadius = (0.79 + 0.045 * sin(angle * 11.0) + 0.022 * sin(angle * 23.0)) * (1.0 + pupilDilation * 0.45);
-  float collarette = exp(-pow(abs(radius - collaretteRadius) / 0.064, 2.0));
-  float pupilLipRadius = (0.57 + 0.012 * sin(angle * 17.0)) * (1.0 + pupilDilation);
-  float pupilLip = exp(-pow(abs(radius - pupilLipRadius) / 0.041, 2.0));
-  float funnel = 0.23 - 0.85 * exp(-max(radius - 0.52 * (1.0 + pupilDilation), 0.0) * 2.35);
-  float tissueLift = (respirationWave * 0.018 + tidalWave * 0.008) * smoothstep(0.52, 0.95, radius) * (1.0 - smoothstep(1.45, 2.05, radius));
-  return funnel + tissueLift + radialGrowth * (bundles * 0.065 + filaments * 0.010 + 0.024 * sin(angle * 31.0 + radius * 12.0)) + collarette * (0.055 + bundles * 0.035) + pupilLip * 0.095;
-}
-float irisDistance(vec3 position) {
-  float radius = length(position.xy);
-  float angle = atan(position.y, position.x);
-  float respirationWave = sin(uniformActiveTime * 0.641) * 0.72 + sin(uniformActiveTime * 0.306 + 1.15) * 0.28;
-  float tidalWave = sin(uniformActiveTime * 0.306) * 0.68 + sin(uniformActiveTime * 0.462 + 2.05) * 0.32;
-  float pupilDilation = 0.038 * respirationWave + 0.012 * tidalWave;
-  float pupilRadius = (0.514 + 0.009 * sin(angle * 17.0) + 0.006 * sin(angle * 31.0)) * (1.0 + pupilDilation);
-  pupilRadius += min(position.z + 0.57, 0.0) * 0.20;
-  float surfaceDistance = (position.z - irisHeight(position.xy)) * 0.43;
-  return max(max(surfaceDistance, (pupilRadius - radius) * 0.74), (radius - 2.12) * 0.5);
-}
-vec3 irisNormal(vec3 position) {
-  vec2 normalOffsets = vec2(0.0020, -0.0020);
-  return normalize(normalOffsets.xyy * irisDistance(position + normalOffsets.xyy) + normalOffsets.yyx * irisDistance(position + normalOffsets.yyx) + normalOffsets.yxy * irisDistance(position + normalOffsets.yxy) + normalOffsets.xxx * irisDistance(position + normalOffsets.xxx));
-}
-float sphereIntersection(vec3 rayOrigin, vec3 rayDirection, vec3 sphereCenter, float sphereRadius) {
-  vec3 relativeOrigin = rayOrigin - sphereCenter;
-  float projectedOrigin = dot(relativeOrigin, rayDirection);
-  float discriminant = projectedOrigin * projectedOrigin - dot(relativeOrigin, relativeOrigin) + sphereRadius * sphereRadius;
-  return discriminant > 0.0 ? -projectedOrigin - sqrt(max(discriminant, 0.0)) : -1.0;
-}
-void main(void) {
-  vec2 screenCoordinate = (gl_FragCoord.xy - 0.5 * uniformResolution) / min(uniformResolution.x, uniformResolution.y);
-  vec3 cameraOrigin = vec3(0.24 + uniformPointer.x * 0.82, -0.28 + uniformPointer.y * 0.68, 2.68 - uniformZoom * 0.10);
-  vec3 cameraForward = normalize(vec3(0.0, 0.0, -0.24) - cameraOrigin);
-  vec3 cameraRight = normalize(cross(cameraForward, vec3(0.0, 1.0, 0.0)));
-  vec3 cameraUp = cross(cameraRight, cameraForward);
-  vec3 cameraDirection = normalize(cameraForward * 1.62 + cameraRight * screenCoordinate.x * 1.70 + cameraUp * screenCoordinate.y * 1.70);
-  vec3 rayOrigin = cameraOrigin;
-  vec3 rayDirection = cameraDirection;
-  vec3 corneaCenter = vec3(0.0, 0.0, -1.82);
-  float corneaDistance = sphereIntersection(cameraOrigin, cameraDirection, corneaCenter, 2.65);
-  vec3 corneaNormal = vec3(0.0, 0.0, 1.0);
-  float corneaMask = 0.0;
-  if (corneaDistance > 0.0) {
-    vec3 corneaPosition = cameraOrigin + cameraDirection * corneaDistance;
-    if (corneaPosition.z > -0.65) {
-      corneaNormal = normalize(corneaPosition - corneaCenter);
-      rayDirection = refract(cameraDirection, corneaNormal, 0.94);
-      rayOrigin = corneaPosition + rayDirection * 0.002;
-      corneaMask = 1.0;
-    }
-  }
-  float rotationAngle = uniformRotation * 0.055;
-  mat2 irisRotation = mat2(cos(rotationAngle), -sin(rotationAngle), sin(rotationAngle), cos(rotationAngle));
-  rayOrigin.xy = irisRotation * rayOrigin.xy;
-  rayDirection.xy = irisRotation * rayDirection.xy;
-  float rayTravel = max(0.0, (0.40 - rayOrigin.z) / rayDirection.z);
-  float rayEnd = (-1.18 - rayOrigin.z) / rayDirection.z;
-  float previousTravel = rayTravel;
-  float surfaceFound = 0.0;
-  vec3 surfacePosition = rayOrigin + rayDirection * rayTravel;
-  for (int marchIndex = 0; marchIndex < 52; marchIndex++) {
-    surfacePosition = rayOrigin + rayDirection * rayTravel;
-    float surfaceDistance = irisDistance(surfacePosition);
-    if (surfaceDistance < 0.0015) { surfaceFound = 1.0; break; }
-    previousTravel = rayTravel;
-    rayTravel += clamp(surfaceDistance, 0.003, 0.16);
-    if (rayTravel > rayEnd) break;
-  }
-  vec3 sceneColor = vec3(0.006, 0.011, 0.014);
-  if (surfaceFound > 0.5) {
-    float refinementFar = rayTravel;
-    float refinementNear = previousTravel;
-    for (int refinementIndex = 0; refinementIndex < 4; refinementIndex++) {
-      float refinementMiddle = (refinementNear + refinementFar) * 0.5;
-      float refinementDistance = irisDistance(rayOrigin + rayDirection * refinementMiddle);
-      if (refinementDistance < 0.0015) refinementFar = refinementMiddle;
-      else refinementNear = refinementMiddle;
-    }
-    surfacePosition = rayOrigin + rayDirection * refinementFar;
-    vec3 surfaceNormal = irisNormal(surfacePosition);
-    float radius = length(surfacePosition.xy);
-    float angle = atan(surfacePosition.y, surfacePosition.x);
-    float phase = fiberPhase(surfacePosition.xy);
-    float ridge = 0.5 + 0.5 * sin(phase);
-    float microFiber = pow(0.5 + 0.5 * sin(phase * 4.0 + sin(radius * 24.0 + angle * 19.0)), 5.0);
-    float branching = 0.5 + 0.5 * sin(angle * 47.0 + sin(angle * 11.0) * 2.0 + radius * 18.0);
-    float mineral = smoothstep(0.15, 0.85, sin(angle * 9.0 + radius * 4.0) * 0.32 + sin(angle * 23.0 - radius * 3.0) * 0.24 + 0.42);
-    float innerGold = (1.0 - smoothstep(0.67, 1.12, radius)) * 0.55;
-    vec3 petrolColor = mix(vec3(0.013, 0.066, 0.068), vec3(0.055, 0.23, 0.20), branching * 0.65 + ridge * 0.35);
-    vec3 bronzeColor = mix(vec3(0.17, 0.076, 0.022), vec3(0.46, 0.30, 0.11), ridge);
-    vec3 materialColor = mix(petrolColor, bronzeColor, clamp(mineral * 0.78 + innerGold, 0.0, 0.94));
-    materialColor *= 0.62 + ridge * 0.48 + microFiber * 0.25;
-    vec3 lightDirection = normalize(vec3(-0.65 + 0.04 * sin(uniformActiveTime * 0.35), 0.85 + 0.03 * cos(uniformActiveTime * 0.41), 1.25));
-    vec3 fillDirection = normalize(vec3(0.75 - 0.03 * cos(uniformActiveTime * 0.29), -0.50 + 0.03 * sin(uniformActiveTime * 0.37), 0.35));
-    vec3 viewDirection = -rayDirection;
-    vec3 halfDirection = normalize(lightDirection + viewDirection);
-    float diffuseLight = max(dot(surfaceNormal, lightDirection), 0.0);
-    float fillLight = max(dot(surfaceNormal, fillDirection), 0.0);
-    float shadow = 1.0;
-    float shadowTravel = 0.028;
-    for (int shadowIndex = 0; shadowIndex < 6; shadowIndex++) {
-      float occluder = irisDistance(surfacePosition + surfaceNormal * 0.012 + lightDirection * shadowTravel);
-      shadow = min(shadow, clamp(10.0 * occluder / shadowTravel, 0.15, 1.0));
-      shadowTravel += 0.047;
-    }
-    float throatOcclusion = smoothstep(-1.07, -0.38, surfacePosition.z);
-    float valleyOcclusion = 0.58 + ridge * 0.42;
-    float limbalShade = 1.0 - smoothstep(1.42, 2.08, radius);
-    float specularLight = pow(max(dot(surfaceNormal, halfDirection), 0.0), 34.0) * (0.18 + microFiber * 0.28);
-    float wetGleam = pow(max(dot(surfaceNormal, halfDirection), 0.0), 130.0) * 0.35;
-    sceneColor = materialColor * (0.20 + diffuseLight * shadow * 1.7 + fillLight * 0.32) * valleyOcclusion;
-    sceneColor += vec3(0.74, 0.51, 0.24) * specularLight * shadow;
-    sceneColor += vec3(0.26, 0.49, 0.44) * wetGleam;
-    sceneColor *= (0.09 + 0.91 * throatOcclusion) * (0.18 + 0.82 * limbalShade);
-    sceneColor += vec3(0.018, 0.060, 0.050) * fillLight * pow(1.0 - max(dot(surfaceNormal, viewDirection), 0.0), 3.0) * throatOcclusion;
-    float respirationWave = sin(uniformActiveTime * 0.641) * 0.72 + sin(uniformActiveTime * 0.306 + 1.15) * 0.28;
-    float tidalWave = sin(uniformActiveTime * 0.306) * 0.68 + sin(uniformActiveTime * 0.462 + 2.05) * 0.32;
-    float pupilDilation = 0.038 * respirationWave + 0.012 * tidalWave;
-    float currentPupilLipRadius = (0.57 + 0.012 * sin(angle * 17.0)) * (1.0 + pupilDilation);
-    float pupillaryLip = exp(-pow(abs(radius - currentPupilLipRadius) / 0.032, 2.0));
-    sceneColor += vec3(0.13, 0.074, 0.025) * pupillaryLip * diffuseLight * throatOcclusion;
-  }
-  if (corneaMask > 0.5) {
-    vec3 reflectedDirection = reflect(cameraDirection, corneaNormal);
-    vec2 upperSoftboxCenter = vec2(-0.43 + 0.032 * sin(uniformActiveTime * 0.38 + 0.5), 0.62 + 0.024 * cos(uniformActiveTime * 0.27));
-    vec2 sideSoftboxCenter = vec2(0.74 + 0.026 * cos(uniformActiveTime * 0.33), -0.12 + 0.036 * sin(uniformActiveTime * 0.25 + 1.2));
-    float upperSoftbox = exp(-pow(abs(reflectedDirection.x - upperSoftboxCenter.x) / 0.34, 4.0) - pow(abs(reflectedDirection.y - upperSoftboxCenter.y) / 0.055, 2.0));
-    float sideSoftbox = exp(-pow(abs(reflectedDirection.x - sideSoftboxCenter.x) / 0.030, 2.0) - pow(abs(reflectedDirection.y - sideSoftboxCenter.y) / 0.32, 4.0));
-    vec3 broadLightVector = normalize(vec3(-0.50 + 0.07 * sin(uniformActiveTime * 0.31), 0.70 + 0.05 * cos(uniformActiveTime * 0.23), 0.90));
-    float broadReflection = pow(max(dot(reflectedDirection, broadLightVector), 0.0), 18.0);
-    float fresnel = 0.025 + 0.65 * pow(1.0 - max(dot(-cameraDirection, corneaNormal), 0.0), 5.0);
-    float clearTitle = smoothstep(0.17, 0.36, length(screenCoordinate));
-    sceneColor += (vec3(0.63, 0.80, 0.73) * upperSoftbox * 0.23 + vec3(0.66, 0.43, 0.20) * sideSoftbox * 0.17 + vec3(0.16, 0.27, 0.23) * broadReflection * 0.10) * clearTitle;
-    sceneColor += vec3(0.09, 0.19, 0.17) * fresnel * 0.55;
-  }
-  sceneColor *= 0.66 + 0.34 * smoothstep(0.10, 0.27, length(screenCoordinate));
-  sceneColor *= 1.0 - smoothstep(0.70, 1.35, length(screenCoordinate)) * 0.40;
-  sceneColor *= uniformIntensity * (1.0 + uniformProject * 0.07);
-  sceneColor = vec3(1.0) - exp(-sceneColor * 1.30);
-  sceneColor = pow(max(sceneColor, vec3(0.0)), vec3(0.88));
-  gl_FragColor = vec4(sceneColor, 1.0);
-}
-`;
+    const mainVertexShaderSource = precisionHeader + [
+      'attribute vec3 attributeVertexPosition;',
+      'attribute vec2 attributeTexCoord;',
+      'attribute vec3 attributeNormal;',
+      'uniform vec2 uniformResolution;',
+      'uniform vec2 uniformPointer;',
+      'uniform float uniformRotation;',
+      'uniform float uniformZoom;',
+      'uniform float uniformActiveTime;',
+      'varying vec3 varyingWorldPosition;',
+      'varying vec3 varyingNormal;',
+      'varying vec2 varyingTexCoord;',
+      'varying vec3 varyingViewDirection;',
+      'void main(void) {',
+      '  float respirationWave = sin(uniformActiveTime * 0.641) * 0.72 + sin(uniformActiveTime * 0.306 + 1.15) * 0.28;',
+      '  float tidalWave = sin(uniformActiveTime * 0.306) * 0.68 + sin(uniformActiveTime * 0.462 + 2.05) * 0.32;',
+      '  float pupilDilation = 0.038 * respirationWave + 0.012 * tidalWave;',
+      '  vec3 localVertexPosition = attributeVertexPosition;',
+      '  vec3 localNormal = attributeNormal;',
+      '  float radialMagnitude = length(localVertexPosition.xy);',
+      '  float dilationWeight = 1.0 - smoothstep(0.52, 1.5, radialMagnitude);',
+      '  localVertexPosition.xy *= 1.0 + pupilDilation * dilationWeight;',
+      '  float tissueLift = (respirationWave * 0.018 + tidalWave * 0.008) * smoothstep(0.52, 0.95, radialMagnitude) * (1.0 - smoothstep(1.45, 2.05, radialMagnitude));',
+      '  localVertexPosition.z += tissueLift;',
+      '  float rotationAngle = uniformRotation * 0.055;',
+      '  mat2 rotationMatrix = mat2(cos(rotationAngle), -sin(rotationAngle), sin(rotationAngle), cos(rotationAngle));',
+      '  localVertexPosition.xy = rotationMatrix * localVertexPosition.xy;',
+      '  localNormal.xy = rotationMatrix * localNormal.xy;',
+      '  varyingWorldPosition = localVertexPosition;',
+      '  varyingNormal = normalize(localNormal);',
+      '  varyingTexCoord = attributeTexCoord;',
+      '  vec3 cameraOrigin = vec3(0.24 + uniformPointer.x * 0.82, -0.28 + uniformPointer.y * 0.68, 2.68 - uniformZoom * 0.10);',
+      '  vec3 cameraForward = normalize(vec3(0.0, 0.0, -0.24) - cameraOrigin);',
+      '  vec3 cameraRight = normalize(cross(cameraForward, vec3(0.0, 1.0, 0.0)));',
+      '  vec3 cameraUp = cross(cameraRight, cameraForward);',
+      '  varyingViewDirection = normalize(cameraOrigin - localVertexPosition);',
+      '  vec3 relativePosition = localVertexPosition - cameraOrigin;',
+      '  float cameraDepth = dot(relativePosition, cameraForward);',
+      '  float cameraCoordX = dot(relativePosition, cameraRight);',
+      '  float cameraCoordY = dot(relativePosition, cameraUp);',
+      '  float minimumResolution = min(uniformResolution.x, uniformResolution.y);',
+      '  float fovScale = 1.62 / 1.70;',
+      '  gl_Position = vec4(',
+      '    cameraCoordX * fovScale * (2.0 * minimumResolution / uniformResolution.x),',
+      '    cameraCoordY * fovScale * (2.0 * minimumResolution / uniformResolution.y),',
+      '    cameraDepth * 0.2 - 0.1,',
+      '    cameraDepth',
+      '  );',
+      '}'
+    ].join('\n');
+
+    const mainFragmentShaderSource = precisionHeader + [
+      'uniform vec2 uniformResolution;',
+      'uniform float uniformIntensity;',
+      'uniform float uniformProject;',
+      'uniform float uniformActiveTime;',
+      'uniform sampler2D uniformFiberTexture;',
+      'varying vec3 varyingWorldPosition;',
+      'varying vec3 varyingNormal;',
+      'varying vec2 varyingTexCoord;',
+      'varying vec3 varyingViewDirection;',
+      'void main(void) {',
+      '  float radialDistance = length(varyingWorldPosition.xy);',
+      '  float angleRadian = atan(varyingWorldPosition.y, varyingWorldPosition.x);',
+      '  float travelingTension = sin(angleRadian * 9.0 + radialDistance * 6.5 - uniformActiveTime * 0.462) * 0.85;',
+      '  float travelingRelief = sin(angleRadian * 5.0 - radialDistance * 7.2 + uniformActiveTime * 0.306) * 0.65;',
+      '  vec2 dynamicUv = vec2(varyingTexCoord.x + (travelingTension + travelingRelief) * 0.0018, varyingTexCoord.y);',
+      '  vec4 fiberSample = texture2D(uniformFiberTexture, dynamicUv);',
+      '  float ridgeIntensity = fiberSample.r;',
+      '  float branchingFactor = fiberSample.g;',
+      '  float mineralFactor = fiberSample.b;',
+      '  float microFiberGleam = pow(ridgeIntensity, 2.5);',
+      '  vec2 reliefOffset = vec2(0.0006, 0.0020);',
+      '  float heightRight = texture2D(uniformFiberTexture, dynamicUv + vec2(reliefOffset.x, 0.0)).r;',
+      '  float heightUp = texture2D(uniformFiberTexture, dynamicUv + vec2(0.0, reliefOffset.y)).r;',
+      '  float gradientU = (heightRight - ridgeIntensity) * 0.40;',
+      '  float gradientV = (heightUp - ridgeIntensity) * 0.40;',
+      '  vec3 surfaceNormalVector = normalize(varyingNormal);',
+      '  vec3 tangentAngular = normalize(vec3(-sin(angleRadian), cos(angleRadian), 0.0));',
+      '  vec3 tangentRadial = normalize(cross(surfaceNormalVector, tangentAngular));',
+      '  vec3 sculptedNormal = normalize(surfaceNormalVector - tangentAngular * gradientU - tangentRadial * gradientV);',
+      '  float innerGoldShimmer = (1.0 - smoothstep(0.67, 1.12, radialDistance)) * 0.55;',
+      '  vec3 petrolHue = mix(vec3(0.013, 0.066, 0.068), vec3(0.055, 0.23, 0.20), branchingFactor * 0.65 + ridgeIntensity * 0.35);',
+      '  vec3 bronzeHue = mix(vec3(0.17, 0.076, 0.022), vec3(0.46, 0.30, 0.11), ridgeIntensity);',
+      '  vec3 materialHue = mix(petrolHue, bronzeHue, clamp(mineralFactor * 0.78 + innerGoldShimmer, 0.0, 0.94));',
+      '  materialHue *= 0.62 + ridgeIntensity * 0.48 + microFiberGleam * 0.25;',
+      '  vec3 keyLightVector = normalize(vec3(-0.65 + 0.04 * sin(uniformActiveTime * 0.35), 0.85 + 0.03 * cos(uniformActiveTime * 0.41), 1.25));',
+      '  vec3 fillLightVector = normalize(vec3(0.75 - 0.03 * cos(uniformActiveTime * 0.29), -0.50 + 0.03 * sin(uniformActiveTime * 0.37), 0.35));',
+      '  vec3 normalizedViewVector = normalize(varyingViewDirection);',
+      '  vec3 specularHalfVector = normalize(keyLightVector + normalizedViewVector);',
+      '  float diffuseIllumination = max(dot(sculptedNormal, keyLightVector), 0.0);',
+      '  float fillIllumination = max(dot(sculptedNormal, fillLightVector), 0.0);',
+      '  float throatOcclusion = smoothstep(-1.07, -0.38, varyingWorldPosition.z);',
+      '  float valleyOcclusion = 0.58 + ridgeIntensity * 0.42;',
+      '  float limbalShading = 1.0 - smoothstep(1.42, 2.08, radialDistance);',
+      '  float specularHighlight = pow(max(dot(sculptedNormal, specularHalfVector), 0.0), 34.0) * (0.18 + microFiberGleam * 0.28);',
+      '  float wetReflectiveGleam = pow(max(dot(sculptedNormal, specularHalfVector), 0.0), 130.0) * 0.35;',
+      '  vec3 sceneComposition = materialHue * (0.20 + diffuseIllumination * 1.7 + fillIllumination * 0.32) * valleyOcclusion;',
+      '  sceneComposition += vec3(0.74, 0.51, 0.24) * specularHighlight;',
+      '  sceneComposition += vec3(0.26, 0.49, 0.44) * wetReflectiveGleam;',
+      '  sceneComposition *= (0.09 + 0.91 * throatOcclusion) * (0.18 + 0.82 * limbalShading);',
+      '  sceneComposition += vec3(0.018, 0.060, 0.050) * fillIllumination * pow(1.0 - max(dot(surfaceNormalVector, normalizedViewVector), 0.0), 3.0) * throatOcclusion;',
+      '  float respirationWave = sin(uniformActiveTime * 0.641) * 0.72 + sin(uniformActiveTime * 0.306 + 1.15) * 0.28;',
+      '  float tidalWave = sin(uniformActiveTime * 0.306) * 0.68 + sin(uniformActiveTime * 0.462 + 2.05) * 0.32;',
+      '  float pupilDilation = 0.038 * respirationWave + 0.012 * tidalWave;',
+      '  float currentPupilLipRadius = (0.57 + 0.012 * sin(angleRadian * 17.0)) * (1.0 + pupilDilation);',
+      '  float pupillaryLipGlow = exp(-pow(abs(radialDistance - currentPupilLipRadius) / 0.032, 2.0));',
+      '  sceneComposition += vec3(0.13, 0.074, 0.025) * pupillaryLipGlow * diffuseIllumination * throatOcclusion;',
+      '  float pupilEdgeCoverage = smoothstep(0.485, 0.525, radialDistance);',
+      '  sceneComposition = mix(vec3(0.003, 0.005, 0.007), sceneComposition, pupilEdgeCoverage);',
+      '  float limbusEdgeFade = smoothstep(2.05, 2.18, radialDistance);',
+      '  sceneComposition = mix(sceneComposition, vec3(0.006, 0.011, 0.014), limbusEdgeFade);',
+      '  vec2 screenCoordinates = (gl_FragCoord.xy - 0.5 * uniformResolution) / min(uniformResolution.x, uniformResolution.y);',
+      '  vec3 cornealNormal = normalize(vec3(screenCoordinates * 0.35, 1.0));',
+      '  vec3 cornealReflectedRay = reflect(-normalizedViewVector, cornealNormal);',
+      '  vec2 upperSoftboxPosition = vec2(-0.43 + 0.032 * sin(uniformActiveTime * 0.38 + 0.5), 0.62 + 0.024 * cos(uniformActiveTime * 0.27));',
+      '  vec2 sideSoftboxPosition = vec2(0.74 + 0.026 * cos(uniformActiveTime * 0.33), -0.12 + 0.036 * sin(uniformActiveTime * 0.25 + 1.2));',
+      '  float upperSoftboxIntensity = exp(-pow(abs(cornealReflectedRay.x - upperSoftboxPosition.x) / 0.34, 4.0) - pow(abs(cornealReflectedRay.y - upperSoftboxPosition.y) / 0.055, 2.0));',
+      '  float sideSoftboxIntensity = exp(-pow(abs(cornealReflectedRay.x - sideSoftboxPosition.x) / 0.030, 2.0) - pow(abs(cornealReflectedRay.y - sideSoftboxPosition.y) / 0.32, 4.0));',
+      '  vec3 broadLightDirection = normalize(vec3(-0.50 + 0.07 * sin(uniformActiveTime * 0.31), 0.70 + 0.05 * cos(uniformActiveTime * 0.23), 0.90));',
+      '  float broadSurfaceReflection = pow(max(dot(cornealReflectedRay, broadLightDirection), 0.0), 18.0);',
+      '  float cornealFresnel = 0.025 + 0.65 * pow(1.0 - max(dot(normalizedViewVector, cornealNormal), 0.0), 5.0);',
+      '  float clearTitleCorridor = smoothstep(0.17, 0.36, length(screenCoordinates));',
+      '  sceneComposition += (vec3(0.63, 0.80, 0.73) * upperSoftboxIntensity * 0.23 + vec3(0.66, 0.43, 0.20) * sideSoftboxIntensity * 0.17 + vec3(0.16, 0.27, 0.23) * broadSurfaceReflection * 0.10) * clearTitleCorridor;',
+      '  sceneComposition += vec3(0.09, 0.19, 0.17) * cornealFresnel * 0.55;',
+      '  sceneComposition *= 0.66 + 0.34 * smoothstep(0.10, 0.27, length(screenCoordinates));',
+      '  sceneComposition *= 1.0 - smoothstep(0.70, 1.35, length(screenCoordinates)) * 0.40;',
+      '  sceneComposition *= uniformIntensity * (1.0 + uniformProject * 0.07);',
+      '  sceneComposition = vec3(1.0) - exp(-sceneComposition * 1.30);',
+      '  sceneComposition = pow(max(sceneComposition, vec3(0.0)), vec3(0.88));',
+      '  gl_FragColor = vec4(sceneComposition, 1.0);',
+      '}'
+    ].join('\n');
 
     let shaderProgram = null;
     let vertexBuffer = null;
+    let fiberTexture = null;
+    let totalVertexCount = 0;
+
+    let positionAttributeLocation = -1;
+    let texCoordAttributeLocation = -1;
+    let normalAttributeLocation = -1;
+
     let uniformResolutionLocation = null;
     let uniformPointerLocation = null;
     let uniformRotationLocation = null;
@@ -237,8 +234,9 @@ void main(void) {
     let uniformZoomLocation = null;
     let uniformProjectLocation = null;
     let uniformActiveTimeLocation = null;
+    let fiberTextureUniformLocation = null;
 
-    function cleanupPartialResources(targetShaderOne, targetShaderTwo, targetProgramInstance, targetBufferInstance) {
+    function cleanupPartialResources(targetShaderOne, targetShaderTwo, targetProgramInstance, targetBufferInstance, targetTextureInstance) {
       try {
         if (targetShaderOne && glContext) {
           glContext.deleteShader(targetShaderOne);
@@ -252,10 +250,179 @@ void main(void) {
         if (targetBufferInstance && glContext) {
           glContext.deleteBuffer(targetBufferInstance);
         }
+        if (targetTextureInstance && glContext) {
+          glContext.deleteTexture(targetTextureInstance);
+        }
       } catch (cleanupError) {
         return false;
       }
       return true;
+    }
+
+    function generateProceduralTexture(targetGlContext, targetTexture) {
+      const maximumTextureDimension = targetGlContext.getParameter(targetGlContext.MAX_TEXTURE_SIZE) || 4096;
+      const computedTextureWidth = Math.min(pointerCoarseQuery.matches ? 2048 : 4096, maximumTextureDimension);
+      const computedTextureHeight = Math.min(pointerCoarseQuery.matches ? 512 : 1024, Math.floor(computedTextureWidth / 4));
+
+      let bakeCanvasElement = null;
+      let bakeGlContext = null;
+      let compiledBakeVs = null;
+      let compiledBakeFs = null;
+      let constructedBakeProg = null;
+      let quadBufferInstance = null;
+      let textureBakeSucceeded = false;
+
+      try {
+        bakeCanvasElement = document.createElement('canvas');
+        bakeCanvasElement.width = computedTextureWidth;
+        bakeCanvasElement.height = computedTextureHeight;
+        bakeGlContext = bakeCanvasElement.getContext('webgl', {
+          alpha: false,
+          depth: false,
+          stencil: false,
+          antialias: false,
+          preserveDrawingBuffer: true
+        });
+
+        if (bakeGlContext) {
+          compiledBakeVs = bakeGlContext.createShader(bakeGlContext.VERTEX_SHADER);
+          if (!compiledBakeVs) {
+            throw new Error('Texture vertex shader unavailable');
+          }
+          bakeGlContext.shaderSource(compiledBakeVs, textureVertexShaderSource);
+          bakeGlContext.compileShader(compiledBakeVs);
+          if (!bakeGlContext.getShaderParameter(compiledBakeVs, bakeGlContext.COMPILE_STATUS)) {
+            throw new Error('Texture vertex shader compilation failed');
+          }
+
+          compiledBakeFs = bakeGlContext.createShader(bakeGlContext.FRAGMENT_SHADER);
+          if (!compiledBakeFs) {
+            throw new Error('Texture fragment shader unavailable');
+          }
+          bakeGlContext.shaderSource(compiledBakeFs, textureFragmentShaderSource);
+          bakeGlContext.compileShader(compiledBakeFs);
+          if (!bakeGlContext.getShaderParameter(compiledBakeFs, bakeGlContext.COMPILE_STATUS)) {
+            throw new Error('Texture fragment shader compilation failed');
+          }
+
+          constructedBakeProg = bakeGlContext.createProgram();
+          if (!constructedBakeProg) {
+            throw new Error('Texture shader program unavailable');
+          }
+          bakeGlContext.attachShader(constructedBakeProg, compiledBakeVs);
+          bakeGlContext.attachShader(constructedBakeProg, compiledBakeFs);
+          bakeGlContext.linkProgram(constructedBakeProg);
+          if (!bakeGlContext.getProgramParameter(constructedBakeProg, bakeGlContext.LINK_STATUS)) {
+            throw new Error('Texture shader linking failed');
+          }
+
+          quadBufferInstance = bakeGlContext.createBuffer();
+          if (!quadBufferInstance) {
+            throw new Error('Texture geometry buffer unavailable');
+          }
+          bakeGlContext.bindBuffer(bakeGlContext.ARRAY_BUFFER, quadBufferInstance);
+          bakeGlContext.bufferData(bakeGlContext.ARRAY_BUFFER, new Float32Array([-1.0, -1.0, 1.0, -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0]), bakeGlContext.STATIC_DRAW);
+
+          bakeGlContext.viewport(0, 0, computedTextureWidth, computedTextureHeight);
+          bakeGlContext.useProgram(constructedBakeProg);
+          const posLocation = bakeGlContext.getAttribLocation(constructedBakeProg, 'attributePosition');
+          if (posLocation < 0) {
+            throw new Error('Texture vertex attribute unavailable');
+          }
+          bakeGlContext.enableVertexAttribArray(posLocation);
+          bakeGlContext.vertexAttribPointer(posLocation, 2, bakeGlContext.FLOAT, false, 0, 0);
+          bakeGlContext.drawArrays(bakeGlContext.TRIANGLES, 0, 6);
+
+          targetGlContext.pixelStorei(targetGlContext.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+          targetGlContext.pixelStorei(targetGlContext.UNPACK_COLORSPACE_CONVERSION_WEBGL, targetGlContext.NONE);
+          targetGlContext.bindTexture(targetGlContext.TEXTURE_2D, targetTexture);
+          targetGlContext.texImage2D(targetGlContext.TEXTURE_2D, 0, targetGlContext.RGBA, targetGlContext.RGBA, targetGlContext.UNSIGNED_BYTE, bakeCanvasElement);
+          textureBakeSucceeded = true;
+        }
+      } catch (bakeError) {
+        textureBakeSucceeded = false;
+      } finally {
+        if (bakeGlContext) {
+          try {
+            if (compiledBakeVs) {
+              bakeGlContext.deleteShader(compiledBakeVs);
+            }
+            if (compiledBakeFs) {
+              bakeGlContext.deleteShader(compiledBakeFs);
+            }
+            if (constructedBakeProg) {
+              bakeGlContext.deleteProgram(constructedBakeProg);
+            }
+            if (quadBufferInstance) {
+              bakeGlContext.deleteBuffer(quadBufferInstance);
+            }
+            const loseContextExtension = bakeGlContext.getExtension('WEBGL_lose_context');
+            if (loseContextExtension) {
+              loseContextExtension.loseContext();
+            }
+          } catch (resourceDisposeError) {
+          }
+        }
+        if (bakeCanvasElement) {
+          bakeCanvasElement.width = 1;
+          bakeCanvasElement.height = 1;
+          bakeCanvasElement = null;
+        }
+      }
+
+      if (!textureBakeSucceeded) {
+        const fallbackWidth = computedTextureWidth;
+        const fallbackHeight = computedTextureHeight;
+        const fallbackBytes = new Uint8Array(fallbackWidth * fallbackHeight * 4);
+
+        for (let pixelRow = 0; pixelRow < fallbackHeight; pixelRow += 1) {
+          const rowFraction = pixelRow / fallbackHeight;
+          const radialPosition = 0.50 + rowFraction * 1.62;
+
+          for (let pixelColumn = 0; pixelColumn < fallbackWidth; pixelColumn += 1) {
+            const columnFraction = pixelColumn / fallbackWidth;
+            const angleRadian = columnFraction * Math.PI * 2.0;
+
+            const waveTension = Math.sin(angleRadian * 9.0 + radialPosition * 6.5) * 0.85;
+            const waveRelief = Math.sin(angleRadian * 5.0 - radialPosition * 7.2) * 0.65;
+            const perturbationOne = Math.sin(angleRadian * 13.0 + radialPosition * 5.2 + waveTension) * 2.1;
+            const perturbationTwo = Math.sin(angleRadian * 7.0 - radialPosition * 8.0 + waveRelief) * 1.25;
+            const fiberPhase = angleRadian * 113.0 + perturbationOne + perturbationTwo + radialPosition * 7.0;
+
+            const ridgeValue = 0.5 + 0.5 * Math.sin(fiberPhase);
+            const microFiberGleam = Math.pow(0.5 + 0.5 * Math.sin(fiberPhase * 4.0 + Math.sin(radialPosition * 24.0 + angleRadian * 19.0)), 5.0);
+            const branchingFactor = 0.5 + 0.5 * Math.sin(angleRadian * 47.0 + Math.sin(angleRadian * 11.0) * 2.0 + radialPosition * 18.0);
+            const mineralFactor = Math.min(1.0, Math.max(0.0, (Math.sin(angleRadian * 9.0 + radialPosition * 4.0) * 0.32 + Math.sin(angleRadian * 23.0 - radialPosition * 3.0) * 0.24 + 0.42 - 0.15) / 0.70));
+            const fiberRelief = ridgeValue * 0.72 + microFiberGleam * 0.28;
+
+            const byteOffset = (pixelRow * fallbackWidth + pixelColumn) * 4;
+            fallbackBytes[byteOffset] = Math.min(255, Math.max(0, Math.round(fiberRelief * 255)));
+            fallbackBytes[byteOffset + 1] = Math.min(255, Math.max(0, Math.round(branchingFactor * 255)));
+            fallbackBytes[byteOffset + 2] = Math.min(255, Math.max(0, Math.round(mineralFactor * 255)));
+            fallbackBytes[byteOffset + 3] = 255;
+          }
+        }
+
+        targetGlContext.pixelStorei(targetGlContext.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+        targetGlContext.pixelStorei(targetGlContext.UNPACK_COLORSPACE_CONVERSION_WEBGL, targetGlContext.NONE);
+        targetGlContext.bindTexture(targetGlContext.TEXTURE_2D, targetTexture);
+        targetGlContext.texImage2D(targetGlContext.TEXTURE_2D, 0, targetGlContext.RGBA, fallbackWidth, fallbackHeight, 0, targetGlContext.RGBA, targetGlContext.UNSIGNED_BYTE, fallbackBytes);
+      }
+
+      targetGlContext.bindTexture(targetGlContext.TEXTURE_2D, targetTexture);
+      targetGlContext.texParameteri(targetGlContext.TEXTURE_2D, targetGlContext.TEXTURE_WRAP_S, targetGlContext.REPEAT);
+      targetGlContext.texParameteri(targetGlContext.TEXTURE_2D, targetGlContext.TEXTURE_WRAP_T, targetGlContext.CLAMP_TO_EDGE);
+      targetGlContext.texParameteri(targetGlContext.TEXTURE_2D, targetGlContext.TEXTURE_MIN_FILTER, targetGlContext.LINEAR_MIPMAP_LINEAR);
+      targetGlContext.texParameteri(targetGlContext.TEXTURE_2D, targetGlContext.TEXTURE_MAG_FILTER, targetGlContext.LINEAR);
+      targetGlContext.generateMipmap(targetGlContext.TEXTURE_2D);
+
+      const anisotropicExtension = targetGlContext.getExtension('EXT_texture_filter_anisotropic') ||
+                                   targetGlContext.getExtension('WEBKIT_EXT_texture_filter_anisotropic') ||
+                                   targetGlContext.getExtension('MOZ_EXT_texture_filter_anisotropic');
+      if (anisotropicExtension) {
+        const maximumAnisotropy = targetGlContext.getParameter(anisotropicExtension.MAX_TEXTURE_MAX_ANISOTROPY_EXT) || 4;
+        targetGlContext.texParameterf(targetGlContext.TEXTURE_2D, anisotropicExtension.TEXTURE_MAX_ANISOTROPY_EXT, Math.min(4.0, maximumAnisotropy));
+      }
     }
 
     function setupWebGLPipeline() {
@@ -263,94 +430,188 @@ void main(void) {
         return false;
       }
 
-      let compiledVertexShader = null;
-      let compiledFragmentShader = null;
-      let constructedProgram = null;
-      let allocatedBuffer = null;
+      let allocatedFiberTexture = null;
+      let compiledMainVs = null;
+      let compiledMainFs = null;
+      let constructedMainProg = null;
+      let allocatedMeshBuffer = null;
 
       try {
-        compiledVertexShader = glContext.createShader(glContext.VERTEX_SHADER);
-        if (!compiledVertexShader) {
-          return false;
-        }
-        glContext.shaderSource(compiledVertexShader, vertexShaderSource);
-        glContext.compileShader(compiledVertexShader);
-        if (!glContext.getShaderParameter(compiledVertexShader, glContext.COMPILE_STATUS)) {
-          cleanupPartialResources(compiledVertexShader, null, null, null);
+        allocatedFiberTexture = glContext.createTexture();
+        if (!allocatedFiberTexture) {
           return false;
         }
 
-        compiledFragmentShader = glContext.createShader(glContext.FRAGMENT_SHADER);
-        if (!compiledFragmentShader) {
-          cleanupPartialResources(compiledVertexShader, null, null, null);
+        generateProceduralTexture(glContext, allocatedFiberTexture);
+
+        const totalSectors = 256;
+        const totalRings = 96;
+        const vertexData = [];
+
+        function evaluateHeight(radialDistance) {
+          if (radialDistance < 0.44) {
+            return -1.25;
+          }
+          const collaretteElevation = Math.exp(-Math.pow((radialDistance - 0.80) / 0.064, 2.0)) * 0.055;
+          const pupilLipElevation = Math.exp(-Math.pow((radialDistance - 0.56) / 0.041, 2.0)) * 0.095;
+          const lipFadeIn = Math.min(1.0, Math.max(0.0, (radialDistance - 0.44) / 0.06));
+
+          let baseSurfaceZ = 0.0;
+          if (radialDistance < 0.52) {
+            const hermiteFraction = (radialDistance - 0.44) / 0.08;
+            const hermiteFactor = hermiteFraction * hermiteFraction * (3.0 - 2.0 * hermiteFraction);
+            baseSurfaceZ = -1.25 + hermiteFactor * 0.63;
+          } else if (radialDistance <= 2.12) {
+            baseSurfaceZ = 0.23 - 0.85 * Math.exp(-(radialDistance - 0.52) * 2.35);
+          } else {
+            baseSurfaceZ = 0.23 - 0.85 * Math.exp(-(2.12 - 0.52) * 2.35);
+          }
+          return baseSurfaceZ + collaretteElevation + pupilLipElevation * lipFadeIn;
+        }
+
+        function evaluateProfile(radialDistance) {
+          const surfaceZ = evaluateHeight(radialDistance);
+          const deltaRadialStep = 0.002;
+          const heightPlus = evaluateHeight(radialDistance + deltaRadialStep);
+          const heightMinus = evaluateHeight(radialDistance - deltaRadialStep);
+          const slopeZ = (heightPlus - heightMinus) / (2.0 * deltaRadialStep);
+          return { surfaceZ: surfaceZ, slopeZ: slopeZ };
+        }
+
+        const ringRadii = [];
+        for (let ringStep = 0; ringStep <= totalRings; ringStep += 1) {
+          const ringProgress = ringStep / totalRings;
+          let computedRadius = 0.0;
+          if (ringProgress < 0.17) {
+            computedRadius = (ringProgress / 0.17) * 0.44;
+          } else if (ringProgress < 0.38) {
+            computedRadius = 0.44 + ((ringProgress - 0.17) / 0.21) * (0.60 - 0.44);
+          } else if (ringProgress < 0.58) {
+            computedRadius = 0.60 + ((ringProgress - 0.38) / 0.20) * (0.95 - 0.60);
+          } else if (ringProgress < 0.83) {
+            computedRadius = 0.95 + ((ringProgress - 0.58) / 0.25) * (2.12 - 0.95);
+          } else {
+            computedRadius = 2.12 + ((ringProgress - 0.83) / 0.17) * (4.20 - 2.12);
+          }
+          ringRadii.push(computedRadius);
+        }
+
+        for (let ringIndex = 0; ringIndex < totalRings; ringIndex += 1) {
+          const radiusInner = ringRadii[ringIndex];
+          const radiusOuter = ringRadii[ringIndex + 1];
+          const profileInner = evaluateProfile(radiusInner);
+          const profileOuter = evaluateProfile(radiusOuter);
+
+          for (let sectorIndex = 0; sectorIndex < totalSectors; sectorIndex += 1) {
+            const sectorProgressStart = sectorIndex / totalSectors;
+            const sectorProgressEnd = (sectorIndex + 1) / totalSectors;
+            const angleStart = sectorProgressStart * Math.PI * 2.0;
+            const angleEnd = sectorProgressEnd * Math.PI * 2.0;
+
+            function appendVertex(radialPosition, angleValue, profileData, textureU) {
+              const positionX = radialPosition * Math.cos(angleValue);
+              const positionY = radialPosition * Math.sin(angleValue);
+              const positionZ = profileData.surfaceZ;
+
+              let normalX = -Math.cos(angleValue) * profileData.slopeZ;
+              let normalY = -Math.sin(angleValue) * profileData.slopeZ;
+              let normalZ = 1.0;
+              const normalLength = Math.hypot(normalX, normalY, normalZ) || 1.0;
+              normalX /= normalLength;
+              normalY /= normalLength;
+              normalZ /= normalLength;
+
+              const textureV = Math.min(1.0, Math.max(0.0, (radialPosition - 0.52) / (2.12 - 0.52)));
+              vertexData.push(positionX, positionY, positionZ, textureU, textureV, normalX, normalY, normalZ);
+            }
+
+            appendVertex(radiusInner, angleStart, profileInner, sectorProgressStart);
+            appendVertex(radiusOuter, angleStart, profileOuter, sectorProgressStart);
+            appendVertex(radiusInner, angleEnd, profileInner, sectorProgressEnd);
+
+            appendVertex(radiusInner, angleEnd, profileInner, sectorProgressEnd);
+            appendVertex(radiusOuter, angleStart, profileOuter, sectorProgressStart);
+            appendVertex(radiusOuter, angleEnd, profileOuter, sectorProgressEnd);
+          }
+        }
+
+        allocatedMeshBuffer = glContext.createBuffer();
+        if (!allocatedMeshBuffer) {
+          cleanupPartialResources(null, null, null, null, allocatedFiberTexture);
           return false;
         }
-        glContext.shaderSource(compiledFragmentShader, fragmentShaderSource);
-        glContext.compileShader(compiledFragmentShader);
-        if (!glContext.getShaderParameter(compiledFragmentShader, glContext.COMPILE_STATUS)) {
-          cleanupPartialResources(compiledVertexShader, compiledFragmentShader, null, null);
+        glContext.bindBuffer(glContext.ARRAY_BUFFER, allocatedMeshBuffer);
+        glContext.bufferData(glContext.ARRAY_BUFFER, new Float32Array(vertexData), glContext.STATIC_DRAW);
+        totalVertexCount = vertexData.length / 8;
+
+        compiledMainVs = glContext.createShader(glContext.VERTEX_SHADER);
+        if (!compiledMainVs) {
+          cleanupPartialResources(null, null, null, allocatedMeshBuffer, allocatedFiberTexture);
+          return false;
+        }
+        glContext.shaderSource(compiledMainVs, mainVertexShaderSource);
+        glContext.compileShader(compiledMainVs);
+        if (!glContext.getShaderParameter(compiledMainVs, glContext.COMPILE_STATUS)) {
+          cleanupPartialResources(compiledMainVs, null, null, allocatedMeshBuffer, allocatedFiberTexture);
           return false;
         }
 
-        constructedProgram = glContext.createProgram();
-        if (!constructedProgram) {
-          cleanupPartialResources(compiledVertexShader, compiledFragmentShader, null, null);
+        compiledMainFs = glContext.createShader(glContext.FRAGMENT_SHADER);
+        if (!compiledMainFs) {
+          cleanupPartialResources(compiledMainVs, null, null, allocatedMeshBuffer, allocatedFiberTexture);
           return false;
         }
-        glContext.attachShader(constructedProgram, compiledVertexShader);
-        glContext.attachShader(constructedProgram, compiledFragmentShader);
-        glContext.linkProgram(constructedProgram);
-
-        if (!glContext.getProgramParameter(constructedProgram, glContext.LINK_STATUS)) {
-          cleanupPartialResources(compiledVertexShader, compiledFragmentShader, constructedProgram, null);
+        glContext.shaderSource(compiledMainFs, mainFragmentShaderSource);
+        glContext.compileShader(compiledMainFs);
+        if (!glContext.getShaderParameter(compiledMainFs, glContext.COMPILE_STATUS)) {
+          cleanupPartialResources(compiledMainVs, compiledMainFs, null, allocatedMeshBuffer, allocatedFiberTexture);
           return false;
         }
 
-        glContext.useProgram(constructedProgram);
-
-        const quadVertices = new Float32Array([
-          -1.0, -1.0,
-           1.0, -1.0,
-          -1.0,  1.0,
-          -1.0,  1.0,
-           1.0, -1.0,
-           1.0,  1.0
-        ]);
-
-        allocatedBuffer = glContext.createBuffer();
-        if (!allocatedBuffer) {
-          cleanupPartialResources(compiledVertexShader, compiledFragmentShader, constructedProgram, null);
+        constructedMainProg = glContext.createProgram();
+        if (!constructedMainProg) {
+          cleanupPartialResources(compiledMainVs, compiledMainFs, null, allocatedMeshBuffer, allocatedFiberTexture);
           return false;
         }
-        glContext.bindBuffer(glContext.ARRAY_BUFFER, allocatedBuffer);
-        glContext.bufferData(glContext.ARRAY_BUFFER, quadVertices, glContext.STATIC_DRAW);
-
-        const positionAttributeLocation = glContext.getAttribLocation(constructedProgram, 'attributeVertexPosition');
-        if (positionAttributeLocation < 0) {
-          cleanupPartialResources(compiledVertexShader, compiledFragmentShader, constructedProgram, allocatedBuffer);
+        glContext.attachShader(constructedMainProg, compiledMainVs);
+        glContext.attachShader(constructedMainProg, compiledMainFs);
+        glContext.linkProgram(constructedMainProg);
+        if (!glContext.getProgramParameter(constructedMainProg, glContext.LINK_STATUS)) {
+          cleanupPartialResources(compiledMainVs, compiledMainFs, constructedMainProg, allocatedMeshBuffer, allocatedFiberTexture);
           return false;
         }
-        glContext.enableVertexAttribArray(positionAttributeLocation);
-        glContext.vertexAttribPointer(positionAttributeLocation, 2, glContext.FLOAT, false, 0, 0);
 
-        uniformResolutionLocation = glContext.getUniformLocation(constructedProgram, 'uniformResolution');
-        uniformPointerLocation = glContext.getUniformLocation(constructedProgram, 'uniformPointer');
-        uniformRotationLocation = glContext.getUniformLocation(constructedProgram, 'uniformRotation');
-        uniformIntensityLocation = glContext.getUniformLocation(constructedProgram, 'uniformIntensity');
-        uniformZoomLocation = glContext.getUniformLocation(constructedProgram, 'uniformZoom');
-        uniformProjectLocation = glContext.getUniformLocation(constructedProgram, 'uniformProject');
-        uniformActiveTimeLocation = glContext.getUniformLocation(constructedProgram, 'uniformActiveTime');
+        positionAttributeLocation = glContext.getAttribLocation(constructedMainProg, 'attributeVertexPosition');
+        texCoordAttributeLocation = glContext.getAttribLocation(constructedMainProg, 'attributeTexCoord');
+        normalAttributeLocation = glContext.getAttribLocation(constructedMainProg, 'attributeNormal');
 
-        glContext.deleteShader(compiledVertexShader);
-        glContext.deleteShader(compiledFragmentShader);
+        if (positionAttributeLocation < 0 || texCoordAttributeLocation < 0 || normalAttributeLocation < 0) {
+          cleanupPartialResources(compiledMainVs, compiledMainFs, constructedMainProg, allocatedMeshBuffer, allocatedFiberTexture);
+          return false;
+        }
 
-        shaderProgram = constructedProgram;
-        vertexBuffer = allocatedBuffer;
+        uniformResolutionLocation = glContext.getUniformLocation(constructedMainProg, 'uniformResolution');
+        uniformPointerLocation = glContext.getUniformLocation(constructedMainProg, 'uniformPointer');
+        uniformRotationLocation = glContext.getUniformLocation(constructedMainProg, 'uniformRotation');
+        uniformIntensityLocation = glContext.getUniformLocation(constructedMainProg, 'uniformIntensity');
+        uniformZoomLocation = glContext.getUniformLocation(constructedMainProg, 'uniformZoom');
+        uniformProjectLocation = glContext.getUniformLocation(constructedMainProg, 'uniformProject');
+        uniformActiveTimeLocation = glContext.getUniformLocation(constructedMainProg, 'uniformActiveTime');
+        fiberTextureUniformLocation = glContext.getUniformLocation(constructedMainProg, 'uniformFiberTexture');
+
+        glContext.deleteShader(compiledMainVs);
+        glContext.deleteShader(compiledMainFs);
+
+        shaderProgram = constructedMainProg;
+        vertexBuffer = allocatedMeshBuffer;
+        fiberTexture = allocatedFiberTexture;
         return true;
       } catch (pipelineError) {
-        cleanupPartialResources(compiledVertexShader, compiledFragmentShader, constructedProgram, allocatedBuffer);
+        cleanupPartialResources(compiledMainVs, compiledMainFs, constructedMainProg, allocatedMeshBuffer, allocatedFiberTexture);
         shaderProgram = null;
         vertexBuffer = null;
+        fiberTexture = null;
+        totalVertexCount = 0;
         return false;
       }
     }
@@ -365,34 +626,26 @@ void main(void) {
     let isContextLost = false;
     let targetPointerX = 0.0;
     let targetPointerY = 0.0;
-    let startPointerX = 0.0;
-    let startPointerY = 0.0;
     let currentPointerX = 0.0;
     let currentPointerY = 0.0;
     let targetZoom = 0.0;
-    let startZoom = 0.0;
     let currentZoom = 0.0;
     let targetProject = 0.0;
-    let startProject = 0.0;
     let currentProject = 0.0;
     let targetRotationAngle = 0.0;
-    let startRotationAngle = 0.0;
     let currentRotationAngle = 0.0;
     let lastEventClientX = window.innerWidth * 0.5;
     let lastEventClientY = window.innerHeight * 0.5;
 
-    let settlingStartTimestamp = 0.0;
-    const pointerSettlingDuration = 500.0;
     let isSettlingActive = false;
+    const smoothingTimeConstant = 0.040;
 
     let activeElapsedSeconds = 0.0;
     let lastFrameWallTimestamp = 0.0;
+    let lastRenderWallTimestamp = 0.0;
 
     let schedulerTimeoutIdentifier = 0;
     let schedulerAnimationFrameIdentifier = 0;
-
-    const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const pointerCoarseQuery = window.matchMedia('(pointer: coarse)');
 
     function checkMotionPermitted() {
       if (reducedMotionQuery.matches) {
@@ -439,17 +692,24 @@ void main(void) {
       }
     }
 
-    function updateCanvasDimensions(isInteractiveMode) {
+    function updateCanvasDimensions() {
       if (isContextLost || !glContext || glContext.isContextLost()) {
         return false;
       }
-      const isCoarsePointer = pointerCoarseQuery.matches;
-      const targetPixelBudget = isInteractiveMode ? 1050000 : (isCoarsePointer ? 280000 : 600000);
-      const pixelBudgetScale = Math.sqrt(targetPixelBudget / Math.max(1, canvasElement.clientWidth * canvasElement.clientHeight));
-      const maxDeviceScale = isInteractiveMode ? 1.5 : (isCoarsePointer ? 1.25 : 1.5);
-      const devicePixelScale = Math.min(window.devicePixelRatio || 1.0, maxDeviceScale, pixelBudgetScale);
-      const displayPixelWidth = Math.max(1, Math.floor(canvasElement.clientWidth * devicePixelScale));
-      const displayPixelHeight = Math.max(1, Math.floor(canvasElement.clientHeight * devicePixelScale));
+      const clientWidth = canvasElement.clientWidth || window.innerWidth || 1;
+      const clientHeight = canvasElement.clientHeight || window.innerHeight || 1;
+      const systemDevicePixelRatio = window.devicePixelRatio || 1.0;
+      const effectiveDevicePixelRatio = Math.max(1.0, Math.min(systemDevicePixelRatio, 2.0));
+      let displayPixelWidth = Math.max(1, Math.round(clientWidth * effectiveDevicePixelRatio));
+      let displayPixelHeight = Math.max(1, Math.round(clientHeight * effectiveDevicePixelRatio));
+
+      const maximumPixelCap = 4150000;
+      const totalPixels = displayPixelWidth * displayPixelHeight;
+      if (totalPixels > maximumPixelCap) {
+        const reductionScale = Math.sqrt(maximumPixelCap / totalPixels);
+        displayPixelWidth = Math.max(clientWidth, Math.round(displayPixelWidth * reductionScale));
+        displayPixelHeight = Math.max(clientHeight, Math.round(displayPixelHeight * reductionScale));
+      }
 
       if (canvasElement.width !== displayPixelWidth || canvasElement.height !== displayPixelHeight) {
         canvasElement.width = displayPixelWidth;
@@ -460,7 +720,7 @@ void main(void) {
       return false;
     }
 
-    function renderSingleFrame(isInteractiveMode) {
+    function renderSingleFrame() {
       if (isContextLost || !glContext || glContext.isContextLost() || !shaderProgram || !checkAtlasViewActive() || checkDocumentHidden()) {
         if (checkDocumentHidden() || !checkAtlasViewActive() || isContextLost || (glContext && glContext.isContextLost())) {
           cancelScheduledFrame();
@@ -469,8 +729,28 @@ void main(void) {
         }
         return;
       }
-      updateCanvasDimensions(isInteractiveMode);
+      updateCanvasDimensions();
       glContext.useProgram(shaderProgram);
+      glContext.viewport(0, 0, canvasElement.width, canvasElement.height);
+      glContext.clearColor(0.006, 0.011, 0.014, 1.0);
+      glContext.clear(glContext.COLOR_BUFFER_BIT | glContext.DEPTH_BUFFER_BIT);
+      glContext.enable(glContext.DEPTH_TEST);
+
+      glContext.bindBuffer(glContext.ARRAY_BUFFER, vertexBuffer);
+      const strideBytes = 32;
+      glContext.enableVertexAttribArray(positionAttributeLocation);
+      glContext.vertexAttribPointer(positionAttributeLocation, 3, glContext.FLOAT, false, strideBytes, 0);
+
+      glContext.enableVertexAttribArray(texCoordAttributeLocation);
+      glContext.vertexAttribPointer(texCoordAttributeLocation, 2, glContext.FLOAT, false, strideBytes, 12);
+
+      glContext.enableVertexAttribArray(normalAttributeLocation);
+      glContext.vertexAttribPointer(normalAttributeLocation, 3, glContext.FLOAT, false, strideBytes, 20);
+
+      glContext.activeTexture(glContext.TEXTURE0);
+      glContext.bindTexture(glContext.TEXTURE_2D, fiberTexture);
+      glContext.uniform1i(fiberTextureUniformLocation, 0);
+
       glContext.uniform2f(uniformResolutionLocation, canvasElement.width, canvasElement.height);
       glContext.uniform2f(uniformPointerLocation, currentPointerX, currentPointerY);
       glContext.uniform1f(uniformRotationLocation, currentRotationAngle);
@@ -478,7 +758,8 @@ void main(void) {
       glContext.uniform1f(uniformZoomLocation, currentZoom);
       glContext.uniform1f(uniformProjectLocation, currentProject);
       glContext.uniform1f(uniformActiveTimeLocation, activeElapsedSeconds);
-      glContext.drawArrays(glContext.TRIANGLES, 0, 6);
+
+      glContext.drawArrays(glContext.TRIANGLES, 0, totalVertexCount);
 
       if (!documentRoot.classList.contains('has-kaleidoscope')) {
         documentRoot.classList.add('has-kaleidoscope');
@@ -491,7 +772,7 @@ void main(void) {
         lastFrameWallTimestamp = 0.0;
         return;
       }
-      if (delayMilliseconds > 4.0) {
+      if (delayMilliseconds > 3.0) {
         schedulerTimeoutIdentifier = window.setTimeout(function () {
           schedulerTimeoutIdentifier = 0;
           schedulerAnimationFrameIdentifier = window.requestAnimationFrame(unifiedSchedulerTick);
@@ -523,41 +804,50 @@ void main(void) {
       }
 
       const currentTimestamp = currentFrameTimestamp || performance.now();
+      const targetFrameInterval = pointerCoarseQuery.matches ? 33.33 : 16.0;
+
+      if (!isSettlingActive && lastRenderWallTimestamp > 0.0) {
+        const elapsedSinceLastRender = currentTimestamp - lastRenderWallTimestamp;
+        if (elapsedSinceLastRender < targetFrameInterval - 1.5) {
+          schedulerAnimationFrameIdentifier = window.requestAnimationFrame(unifiedSchedulerTick);
+          return;
+        }
+      }
+
+      let deltaSeconds = 0.016;
 
       if (lastFrameWallTimestamp > 0.0) {
         const deltaMilliseconds = currentTimestamp - lastFrameWallTimestamp;
         const clampedDeltaMilliseconds = Math.min(Math.max(deltaMilliseconds, 0.0), 250.0);
-        activeElapsedSeconds += clampedDeltaMilliseconds * 0.001;
+        deltaSeconds = clampedDeltaMilliseconds * 0.001;
+        activeElapsedSeconds += deltaSeconds;
       }
       lastFrameWallTimestamp = currentTimestamp;
 
       if (isSettlingActive) {
-        const elapsedMilliseconds = currentTimestamp - settlingStartTimestamp;
-        if (elapsedMilliseconds >= pointerSettlingDuration) {
+        const smoothingAlpha = 1.0 - Math.exp(-deltaSeconds / smoothingTimeConstant);
+        currentPointerX += (targetPointerX - currentPointerX) * smoothingAlpha;
+        currentPointerY += (targetPointerY - currentPointerY) * smoothingAlpha;
+        currentRotationAngle += (targetRotationAngle - currentRotationAngle) * smoothingAlpha;
+        currentZoom += (targetZoom - currentZoom) * smoothingAlpha;
+        currentProject += (targetProject - currentProject) * smoothingAlpha;
+
+        const distanceRemaining = Math.hypot(targetPointerX - currentPointerX, targetPointerY - currentPointerY) +
+                                  Math.abs(targetRotationAngle - currentRotationAngle) +
+                                  Math.abs(targetZoom - currentZoom) +
+                                  Math.abs(targetProject - currentProject);
+        if (distanceRemaining < 0.0004) {
           currentPointerX = targetPointerX;
           currentPointerY = targetPointerY;
           currentRotationAngle = targetRotationAngle;
           currentZoom = targetZoom;
           currentProject = targetProject;
           isSettlingActive = false;
-        } else {
-          const normalizedProgress = Math.min(Math.max(elapsedMilliseconds / pointerSettlingDuration, 0.0), 1.0);
-          const easingMultiplier = 1.0 - Math.pow(1.0 - normalizedProgress, 3.0);
-          currentPointerX = startPointerX + (targetPointerX - startPointerX) * easingMultiplier;
-          currentPointerY = startPointerY + (targetPointerY - startPointerY) * easingMultiplier;
-          currentRotationAngle = startRotationAngle + (targetRotationAngle - startRotationAngle) * easingMultiplier;
-          currentZoom = startZoom + (targetZoom - startZoom) * easingMultiplier;
-          currentProject = startProject + (targetProject - startProject) * easingMultiplier;
         }
-        renderSingleFrame(true);
-
-        if (isSettlingActive) {
-          scheduleNextFrame(0.0);
-          return;
-        }
-      } else {
-        renderSingleFrame(false);
       }
+
+      renderSingleFrame();
+      lastRenderWallTimestamp = performance.now();
 
       if (!checkAmbientPermitted()) {
         cancelScheduledFrame();
@@ -565,28 +855,25 @@ void main(void) {
         return;
       }
 
-      const frameExecutionDuration = performance.now() - currentTimestamp;
-      const targetAmbientInterval = pointerCoarseQuery.matches ? 83.33 : 55.56;
-      const delayUntilNextFrame = Math.max(0.0, targetAmbientInterval - frameExecutionDuration);
-      scheduleNextFrame(delayUntilNextFrame);
+      if (isSettlingActive) {
+        scheduleNextFrame(0.0);
+      } else {
+        schedulerAnimationFrameIdentifier = window.requestAnimationFrame(unifiedSchedulerTick);
+      }
     }
 
     function triggerInteractiveSettling() {
       if (!checkAtlasViewActive() || !checkMotionPermitted() || checkDocumentHidden() || isContextLost || (glContext && glContext.isContextLost())) {
         return;
       }
-      cancelScheduledFrame();
       isSettlingActive = true;
-      settlingStartTimestamp = performance.now();
-      startPointerX = currentPointerX;
-      startPointerY = currentPointerY;
-      startRotationAngle = currentRotationAngle;
-      startZoom = currentZoom;
-      startProject = currentProject;
       if (lastFrameWallTimestamp <= 0.0) {
         lastFrameWallTimestamp = performance.now();
       }
-      schedulerAnimationFrameIdentifier = window.requestAnimationFrame(unifiedSchedulerTick);
+      if (!schedulerAnimationFrameIdentifier) {
+        cancelScheduledFrame();
+        schedulerAnimationFrameIdentifier = window.requestAnimationFrame(unifiedSchedulerTick);
+      }
     }
 
     function triggerAmbientMotion() {
@@ -659,8 +946,8 @@ void main(void) {
       if (!checkAtlasViewActive() || checkDocumentHidden()) {
         return;
       }
-      updateCanvasDimensions(isSettlingActive);
-      renderSingleFrame(isSettlingActive);
+      updateCanvasDimensions();
+      renderSingleFrame();
     }
 
     function handleVisibilityChange() {
@@ -700,7 +987,7 @@ void main(void) {
         currentRotationAngle = targetRotationAngle;
         currentZoom = targetZoom;
         currentProject = targetProject;
-        renderSingleFrame(false);
+        renderSingleFrame();
         return;
       }
 
@@ -748,7 +1035,7 @@ void main(void) {
       const restoredPipelineSuccess = setupWebGLPipeline();
       if (restoredPipelineSuccess) {
         canvasElement.style.display = '';
-        renderSingleFrame(false);
+        renderSingleFrame();
         if (checkAmbientPermitted()) {
           triggerAmbientMotion();
         }
@@ -762,7 +1049,7 @@ void main(void) {
       canvasElement.style.opacity = '0';
       canvasElement.style.visibility = 'hidden';
     } else {
-      renderSingleFrame(false);
+      renderSingleFrame();
       if (checkAmbientPermitted()) {
         triggerAmbientMotion();
       }
