@@ -99,7 +99,9 @@
 }
 
 .optics-interface[hidden],
-.optics-interface [hidden] {
+.optics-interface [hidden],
+html[data-view="direct"] .optics-interface,
+body.mode-direct .optics-interface {
   display: none !important;
 }
 

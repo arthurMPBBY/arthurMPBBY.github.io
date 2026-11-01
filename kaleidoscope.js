@@ -55,6 +55,92 @@
       '#endif'
     ].join('\n') + '\n';
 
+    const spaceVertexShaderSource = precisionHeader + [
+      'attribute vec2 attributePosition;',
+      'varying vec2 varyingScreenCoord;',
+      'void main(void) {',
+      '  varyingScreenCoord = attributePosition;',
+      '  gl_Position = vec4(attributePosition, 0.9999, 1.0);',
+      '}'
+    ].join('\n');
+
+    const spaceFragmentShaderSource = precisionHeader + [
+      'uniform vec2 uniformResolution;',
+      'uniform vec2 uniformPointer;',
+      'uniform float uniformZoom;',
+      'uniform float uniformRotation;',
+      'uniform float uniformActiveTime;',
+      'varying vec2 varyingScreenCoord;',
+      'vec4 computeCosmicHash(vec2 gridCell) {',
+      '  vec4 hashVector = fract(sin(vec4(',
+      '    dot(gridCell, vec2(127.1, 311.7)),',
+      '    dot(gridCell, vec2(269.5, 183.3)),',
+      '    dot(gridCell, vec2(419.2, 371.9)),',
+      '    dot(gridCell, vec2(531.3, 627.1))',
+      '  )) * 43758.5453);',
+      '  return hashVector;',
+      '}',
+      'vec3 renderStarLayer(vec2 sampleCoordinates, float gridScale, float minimumStarBrightness, float starSharpness, vec3 baseStarColor) {',
+      '  vec2 scaledCoordinates = sampleCoordinates * gridScale;',
+      '  vec2 baseCellIndex = floor(scaledCoordinates);',
+      '  vec2 localCellFraction = fract(scaledCoordinates);',
+      '  vec3 layerAccumulation = vec3(0.0);',
+      '  float pixelSpan = gridScale / min(uniformResolution.x, uniformResolution.y);',
+      '  float pixelVariance = pixelSpan * pixelSpan / 6.0;',
+      '  float filteredCoreSharpness = starSharpness / (1.0 + starSharpness * pixelVariance);',
+      '  float haloSharpness = starSharpness * 0.08;',
+      '  float filteredHaloSharpness = haloSharpness / (1.0 + haloSharpness * pixelVariance);',
+      '  for (int stepOffsetY = 0; stepOffsetY < 3; stepOffsetY += 1) {',
+      '    for (int stepOffsetX = 0; stepOffsetX < 3; stepOffsetX += 1) {',
+      '      vec2 neighborOffset = vec2(float(stepOffsetX - 1), float(stepOffsetY - 1));',
+      '      vec2 neighborCell = baseCellIndex + neighborOffset;',
+      '      vec4 starParameters = computeCosmicHash(neighborCell);',
+      '      vec2 starLocalPosition = neighborOffset + starParameters.xy * 0.76 + 0.12;',
+      '      vec2 vectorToStar = localCellFraction - starLocalPosition;',
+      '      float distanceSquared = dot(vectorToStar, vectorToStar);',
+      '      float starProbability = starParameters.z;',
+      '      if (starProbability > minimumStarBrightness) {',
+      '        float normalizedLuminance = (starProbability - minimumStarBrightness) / (1.0 - minimumStarBrightness);',
+      '        float starCoreIntensity = exp(-distanceSquared * filteredCoreSharpness) * (filteredCoreSharpness / starSharpness) * normalizedLuminance;',
+      '        float starHaloIntensity = exp(-distanceSquared * filteredHaloSharpness) * (filteredHaloSharpness / haloSharpness) * (normalizedLuminance * 0.22);',
+      '        vec3 spectralTint = mix(baseStarColor, vec3(0.88, 0.94, 1.0), starParameters.w * 0.55);',
+      '        if (starParameters.w > 0.82) {',
+      '          spectralTint = mix(spectralTint, vec3(1.0, 0.88, 0.72), (starParameters.w - 0.82) / 0.18);',
+      '        }',
+      '        layerAccumulation += spectralTint * (starCoreIntensity + starHaloIntensity);',
+      '      }',
+      '    }',
+      '  }',
+      '  return layerAccumulation;',
+      '}',
+      'void main(void) {',
+      '  vec2 centeredCoordinates = (gl_FragCoord.xy - 0.5 * uniformResolution) / min(uniformResolution.x, uniformResolution.y);',
+      '  float cosmicRotation = uniformRotation * 0.015;',
+      '  mat2 cosmicRotationMatrix = mat2(cos(cosmicRotation), -sin(cosmicRotation), sin(cosmicRotation), cos(cosmicRotation));',
+      '  centeredCoordinates = cosmicRotationMatrix * centeredCoordinates;',
+      '  float zoomScaleFactor = 1.0 - uniformZoom * 0.035;',
+      '  centeredCoordinates *= zoomScaleFactor;',
+      '  vec2 cosmicDriftVector = vec2(uniformActiveTime * 0.0016, uniformActiveTime * 0.0008);',
+      '  vec2 deepLayerCoordinates = centeredCoordinates + uniformPointer * 0.032 + cosmicDriftVector * 0.45;',
+      '  vec2 midLayerCoordinates = centeredCoordinates + uniformPointer * 0.072 + cosmicDriftVector * 0.95;',
+      '  vec2 foreLayerCoordinates = centeredCoordinates + uniformPointer * 0.125 + cosmicDriftVector * 1.55;',
+      '  vec3 deepStarsAccumulation = renderStarLayer(deepLayerCoordinates, 76.0, 0.62, 900.0, vec3(0.56, 0.70, 0.82));',
+      '  vec3 midStarsAccumulation = renderStarLayer(midLayerCoordinates, 38.0, 0.72, 480.0, vec3(0.74, 0.86, 0.96));',
+      '  vec3 foreStarsAccumulation = renderStarLayer(foreLayerCoordinates, 17.0, 0.85, 230.0, vec3(0.88, 0.95, 1.0));',
+      '  vec2 dustLayerCoordinates = centeredCoordinates + uniformPointer * 0.048 + cosmicDriftVector * 0.65;',
+      '  float wavePatternOne = sin(dustLayerCoordinates.x * 1.85 + dustLayerCoordinates.y * 1.25 + uniformActiveTime * 0.015);',
+      '  float wavePatternTwo = cos(dustLayerCoordinates.x * 2.75 - dustLayerCoordinates.y * 1.95 + wavePatternOne * 0.72);',
+      '  float wavePatternThree = sin(dustLayerCoordinates.x * 4.20 + dustLayerCoordinates.y * 3.10 - uniformActiveTime * 0.022);',
+      '  float combinedDust = wavePatternOne * 0.45 + wavePatternTwo * 0.35 + wavePatternThree * 0.20;',
+      '  float dustDensityValue = smoothstep(-0.35, 0.75, combinedDust);',
+      '  float perimeterDistanceFactor = smoothstep(0.40, 1.60, length(centeredCoordinates));',
+      '  vec3 interstellarDustColor = mix(vec3(0.012, 0.026, 0.032), vec3(0.022, 0.045, 0.054), wavePatternTwo * 0.5 + 0.5) * dustDensityValue * (0.42 + 0.58 * perimeterDistanceFactor) * 0.42;',
+      '  vec3 voidBaseColor = vec3(0.003, 0.005, 0.008);',
+      '  vec3 spaceSceneComposition = voidBaseColor + interstellarDustColor + deepStarsAccumulation * 0.65 + midStarsAccumulation * 0.85 + foreStarsAccumulation * 1.10;',
+      '  gl_FragColor = vec4(spaceSceneComposition, 1.0);',
+      '}'
+    ].join('\n');
+
     const textureVertexShaderSource = [
       'attribute vec2 attributePosition;',
       'varying vec2 varyingUv;',
@@ -125,7 +211,7 @@
       '  float cameraCoordX = dot(relativePosition, cameraRight);',
       '  float cameraCoordY = dot(relativePosition, cameraUp);',
       '  float minimumResolution = min(uniformResolution.x, uniformResolution.y);',
-      '  float fovScale = 1.62 / 1.70;',
+      '  float fovScale = 1.54 / 1.70;',
       '  gl_Position = vec4(',
       '    cameraCoordX * fovScale * (2.0 * minimumResolution / uniformResolution.x),',
       '    cameraCoordY * fovScale * (2.0 * minimumResolution / uniformResolution.y),',
@@ -194,8 +280,13 @@
       '  sceneComposition += vec3(0.13, 0.074, 0.025) * pupillaryLipGlow * diffuseIllumination * throatOcclusion;',
       '  float pupilEdgeCoverage = smoothstep(0.485, 0.525, radialDistance);',
       '  sceneComposition = mix(vec3(0.003, 0.005, 0.007), sceneComposition, pupilEdgeCoverage);',
-      '  float limbusEdgeFade = smoothstep(2.05, 2.18, radialDistance);',
-      '  sceneComposition = mix(sceneComposition, vec3(0.006, 0.011, 0.014), limbusEdgeFade);',
+      '  float limbusCoverage = 1.0 - smoothstep(2.04, 2.18, radialDistance);',
+      '  if (limbusCoverage <= 0.001) {',
+      '    discard;',
+      '  }',
+      '  float atmosphericSeparation = smoothstep(1.86, 2.06, radialDistance) * (1.0 - smoothstep(2.06, 2.18, radialDistance));',
+      '  vec3 atmosphericColor = vec3(0.024, 0.052, 0.068);',
+      '  sceneComposition += atmosphericColor * atmosphericSeparation * 0.85;',
       '  vec2 screenCoordinates = (gl_FragCoord.xy - 0.5 * uniformResolution) / min(uniformResolution.x, uniformResolution.y);',
       '  vec3 cornealNormal = normalize(vec3(screenCoordinates * 0.35, 1.0));',
       '  vec3 cornealReflectedRay = reflect(-normalizedViewVector, cornealNormal);',
@@ -207,14 +298,14 @@
       '  float broadSurfaceReflection = pow(max(dot(cornealReflectedRay, broadLightDirection), 0.0), 18.0);',
       '  float cornealFresnel = 0.025 + 0.65 * pow(1.0 - max(dot(normalizedViewVector, cornealNormal), 0.0), 5.0);',
       '  float clearTitleCorridor = smoothstep(0.17, 0.36, length(screenCoordinates));',
-      '  sceneComposition += (vec3(0.63, 0.80, 0.73) * upperSoftboxIntensity * 0.23 + vec3(0.66, 0.43, 0.20) * sideSoftboxIntensity * 0.17 + vec3(0.16, 0.27, 0.23) * broadSurfaceReflection * 0.10) * clearTitleCorridor;',
-      '  sceneComposition += vec3(0.09, 0.19, 0.17) * cornealFresnel * 0.55;',
+      '  float corneaEnvelope = 1.0 - smoothstep(2.00, 2.16, radialDistance);',
+      '  sceneComposition += ((vec3(0.63, 0.80, 0.73) * upperSoftboxIntensity * 0.23 + vec3(0.66, 0.43, 0.20) * sideSoftboxIntensity * 0.17 + vec3(0.16, 0.27, 0.23) * broadSurfaceReflection * 0.10) * clearTitleCorridor + vec3(0.09, 0.19, 0.17) * cornealFresnel * 0.55) * corneaEnvelope;',
       '  sceneComposition *= 0.66 + 0.34 * smoothstep(0.10, 0.27, length(screenCoordinates));',
       '  sceneComposition *= 1.0 - smoothstep(0.70, 1.35, length(screenCoordinates)) * 0.40;',
       '  sceneComposition *= uniformIntensity * (1.0 + uniformProject * 0.07);',
       '  sceneComposition = vec3(1.0) - exp(-sceneComposition * 1.30);',
       '  sceneComposition = pow(max(sceneComposition, vec3(0.0)), vec3(0.88));',
-      '  gl_FragColor = vec4(sceneComposition, 1.0);',
+      '  gl_FragColor = vec4(sceneComposition, limbusCoverage);',
       '}'
     ].join('\n');
 
@@ -236,7 +327,16 @@
     let uniformActiveTimeLocation = null;
     let fiberTextureUniformLocation = null;
 
-    function cleanupPartialResources(targetShaderOne, targetShaderTwo, targetProgramInstance, targetBufferInstance, targetTextureInstance) {
+    let spaceShaderProgram = null;
+    let spaceQuadBuffer = null;
+    let spacePositionAttributeLocation = -1;
+    let spaceResolutionUniformLocation = null;
+    let spacePointerUniformLocation = null;
+    let spaceZoomUniformLocation = null;
+    let spaceRotationUniformLocation = null;
+    let spaceActiveTimeUniformLocation = null;
+
+    function cleanupPartialResources(targetShaderOne, targetShaderTwo, targetProgramInstance, targetBufferInstance, targetTextureInstance, spaceShaderOne, spaceShaderTwo, spaceProgramInstance, spaceBufferInstance) {
       try {
         if (targetShaderOne && glContext) {
           glContext.deleteShader(targetShaderOne);
@@ -252,6 +352,18 @@
         }
         if (targetTextureInstance && glContext) {
           glContext.deleteTexture(targetTextureInstance);
+        }
+        if (spaceShaderOne && glContext) {
+          glContext.deleteShader(spaceShaderOne);
+        }
+        if (spaceShaderTwo && glContext) {
+          glContext.deleteShader(spaceShaderTwo);
+        }
+        if (spaceProgramInstance && glContext) {
+          glContext.deleteProgram(spaceProgramInstance);
+        }
+        if (spaceBufferInstance && glContext) {
+          glContext.deleteBuffer(spaceBufferInstance);
         }
       } catch (cleanupError) {
         return false;
@@ -435,10 +547,74 @@
       let compiledMainFs = null;
       let constructedMainProg = null;
       let allocatedMeshBuffer = null;
+      let compiledSpaceVs = null;
+      let compiledSpaceFs = null;
+      let constructedSpaceProg = null;
+      let allocatedSpaceBuffer = null;
 
       try {
+        allocatedSpaceBuffer = glContext.createBuffer();
+        if (!allocatedSpaceBuffer) {
+          return false;
+        }
+        glContext.bindBuffer(glContext.ARRAY_BUFFER, allocatedSpaceBuffer);
+        glContext.bufferData(glContext.ARRAY_BUFFER, new Float32Array([-1.0, -1.0, 1.0, -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0]), glContext.STATIC_DRAW);
+
+        compiledSpaceVs = glContext.createShader(glContext.VERTEX_SHADER);
+        if (!compiledSpaceVs) {
+          cleanupPartialResources(null, null, null, null, null, null, null, null, allocatedSpaceBuffer);
+          return false;
+        }
+        glContext.shaderSource(compiledSpaceVs, spaceVertexShaderSource);
+        glContext.compileShader(compiledSpaceVs);
+        if (!glContext.getShaderParameter(compiledSpaceVs, glContext.COMPILE_STATUS)) {
+          cleanupPartialResources(null, null, null, null, null, compiledSpaceVs, null, null, allocatedSpaceBuffer);
+          return false;
+        }
+
+        compiledSpaceFs = glContext.createShader(glContext.FRAGMENT_SHADER);
+        if (!compiledSpaceFs) {
+          cleanupPartialResources(null, null, null, null, null, compiledSpaceVs, null, null, allocatedSpaceBuffer);
+          return false;
+        }
+        glContext.shaderSource(compiledSpaceFs, spaceFragmentShaderSource);
+        glContext.compileShader(compiledSpaceFs);
+        if (!glContext.getShaderParameter(compiledSpaceFs, glContext.COMPILE_STATUS)) {
+          cleanupPartialResources(null, null, null, null, null, compiledSpaceVs, compiledSpaceFs, null, allocatedSpaceBuffer);
+          return false;
+        }
+
+        constructedSpaceProg = glContext.createProgram();
+        if (!constructedSpaceProg) {
+          cleanupPartialResources(null, null, null, null, null, compiledSpaceVs, compiledSpaceFs, null, allocatedSpaceBuffer);
+          return false;
+        }
+        glContext.attachShader(constructedSpaceProg, compiledSpaceVs);
+        glContext.attachShader(constructedSpaceProg, compiledSpaceFs);
+        glContext.linkProgram(constructedSpaceProg);
+        if (!glContext.getProgramParameter(constructedSpaceProg, glContext.LINK_STATUS)) {
+          cleanupPartialResources(null, null, null, null, null, compiledSpaceVs, compiledSpaceFs, constructedSpaceProg, allocatedSpaceBuffer);
+          return false;
+        }
+
+        const spacePositionLocation = glContext.getAttribLocation(constructedSpaceProg, 'attributePosition');
+        if (spacePositionLocation < 0) {
+          cleanupPartialResources(null, null, null, null, null, compiledSpaceVs, compiledSpaceFs, constructedSpaceProg, allocatedSpaceBuffer);
+          return false;
+        }
+
+        const spaceResolutionLoc = glContext.getUniformLocation(constructedSpaceProg, 'uniformResolution');
+        const spacePointerLoc = glContext.getUniformLocation(constructedSpaceProg, 'uniformPointer');
+        const spaceZoomLoc = glContext.getUniformLocation(constructedSpaceProg, 'uniformZoom');
+        const spaceRotationLoc = glContext.getUniformLocation(constructedSpaceProg, 'uniformRotation');
+        const spaceActiveTimeLoc = glContext.getUniformLocation(constructedSpaceProg, 'uniformActiveTime');
+
+        glContext.deleteShader(compiledSpaceVs);
+        glContext.deleteShader(compiledSpaceFs);
+
         allocatedFiberTexture = glContext.createTexture();
         if (!allocatedFiberTexture) {
+          cleanupPartialResources(null, null, null, null, null, null, null, constructedSpaceProg, allocatedSpaceBuffer);
           return false;
         }
 
@@ -491,7 +667,7 @@
           } else if (ringProgress < 0.83) {
             computedRadius = 0.95 + ((ringProgress - 0.58) / 0.25) * (2.12 - 0.95);
           } else {
-            computedRadius = 2.12 + ((ringProgress - 0.83) / 0.17) * (4.20 - 2.12);
+            computedRadius = 2.12 + ((ringProgress - 0.83) / 0.17) * (2.28 - 2.12);
           }
           ringRadii.push(computedRadius);
         }
@@ -537,7 +713,7 @@
 
         allocatedMeshBuffer = glContext.createBuffer();
         if (!allocatedMeshBuffer) {
-          cleanupPartialResources(null, null, null, null, allocatedFiberTexture);
+          cleanupPartialResources(null, null, null, null, allocatedFiberTexture, null, null, constructedSpaceProg, allocatedSpaceBuffer);
           return false;
         }
         glContext.bindBuffer(glContext.ARRAY_BUFFER, allocatedMeshBuffer);
@@ -546,38 +722,38 @@
 
         compiledMainVs = glContext.createShader(glContext.VERTEX_SHADER);
         if (!compiledMainVs) {
-          cleanupPartialResources(null, null, null, allocatedMeshBuffer, allocatedFiberTexture);
+          cleanupPartialResources(null, null, null, allocatedMeshBuffer, allocatedFiberTexture, null, null, constructedSpaceProg, allocatedSpaceBuffer);
           return false;
         }
         glContext.shaderSource(compiledMainVs, mainVertexShaderSource);
         glContext.compileShader(compiledMainVs);
         if (!glContext.getShaderParameter(compiledMainVs, glContext.COMPILE_STATUS)) {
-          cleanupPartialResources(compiledMainVs, null, null, allocatedMeshBuffer, allocatedFiberTexture);
+          cleanupPartialResources(compiledMainVs, null, null, allocatedMeshBuffer, allocatedFiberTexture, null, null, constructedSpaceProg, allocatedSpaceBuffer);
           return false;
         }
 
         compiledMainFs = glContext.createShader(glContext.FRAGMENT_SHADER);
         if (!compiledMainFs) {
-          cleanupPartialResources(compiledMainVs, null, null, allocatedMeshBuffer, allocatedFiberTexture);
+          cleanupPartialResources(compiledMainVs, null, null, allocatedMeshBuffer, allocatedFiberTexture, null, null, constructedSpaceProg, allocatedSpaceBuffer);
           return false;
         }
         glContext.shaderSource(compiledMainFs, mainFragmentShaderSource);
         glContext.compileShader(compiledMainFs);
         if (!glContext.getShaderParameter(compiledMainFs, glContext.COMPILE_STATUS)) {
-          cleanupPartialResources(compiledMainVs, compiledMainFs, null, allocatedMeshBuffer, allocatedFiberTexture);
+          cleanupPartialResources(compiledMainVs, compiledMainFs, null, allocatedMeshBuffer, allocatedFiberTexture, null, null, constructedSpaceProg, allocatedSpaceBuffer);
           return false;
         }
 
         constructedMainProg = glContext.createProgram();
         if (!constructedMainProg) {
-          cleanupPartialResources(compiledMainVs, compiledMainFs, null, allocatedMeshBuffer, allocatedFiberTexture);
+          cleanupPartialResources(compiledMainVs, compiledMainFs, null, allocatedMeshBuffer, allocatedFiberTexture, null, null, constructedSpaceProg, allocatedSpaceBuffer);
           return false;
         }
         glContext.attachShader(constructedMainProg, compiledMainVs);
         glContext.attachShader(constructedMainProg, compiledMainFs);
         glContext.linkProgram(constructedMainProg);
         if (!glContext.getProgramParameter(constructedMainProg, glContext.LINK_STATUS)) {
-          cleanupPartialResources(compiledMainVs, compiledMainFs, constructedMainProg, allocatedMeshBuffer, allocatedFiberTexture);
+          cleanupPartialResources(compiledMainVs, compiledMainFs, constructedMainProg, allocatedMeshBuffer, allocatedFiberTexture, null, null, constructedSpaceProg, allocatedSpaceBuffer);
           return false;
         }
 
@@ -586,7 +762,7 @@
         normalAttributeLocation = glContext.getAttribLocation(constructedMainProg, 'attributeNormal');
 
         if (positionAttributeLocation < 0 || texCoordAttributeLocation < 0 || normalAttributeLocation < 0) {
-          cleanupPartialResources(compiledMainVs, compiledMainFs, constructedMainProg, allocatedMeshBuffer, allocatedFiberTexture);
+          cleanupPartialResources(compiledMainVs, compiledMainFs, constructedMainProg, allocatedMeshBuffer, allocatedFiberTexture, null, null, constructedSpaceProg, allocatedSpaceBuffer);
           return false;
         }
 
@@ -605,12 +781,22 @@
         shaderProgram = constructedMainProg;
         vertexBuffer = allocatedMeshBuffer;
         fiberTexture = allocatedFiberTexture;
+        spaceShaderProgram = constructedSpaceProg;
+        spaceQuadBuffer = allocatedSpaceBuffer;
+        spacePositionAttributeLocation = spacePositionLocation;
+        spaceResolutionUniformLocation = spaceResolutionLoc;
+        spacePointerUniformLocation = spacePointerLoc;
+        spaceZoomUniformLocation = spaceZoomLoc;
+        spaceRotationUniformLocation = spaceRotationLoc;
+        spaceActiveTimeUniformLocation = spaceActiveTimeLoc;
         return true;
       } catch (pipelineError) {
-        cleanupPartialResources(compiledMainVs, compiledMainFs, constructedMainProg, allocatedMeshBuffer, allocatedFiberTexture);
+        cleanupPartialResources(compiledMainVs, compiledMainFs, constructedMainProg, allocatedMeshBuffer, allocatedFiberTexture, compiledSpaceVs, compiledSpaceFs, constructedSpaceProg, allocatedSpaceBuffer);
         shaderProgram = null;
         vertexBuffer = null;
         fiberTexture = null;
+        spaceShaderProgram = null;
+        spaceQuadBuffer = null;
         totalVertexCount = 0;
         return false;
       }
@@ -677,7 +863,7 @@
     }
 
     function checkAmbientPermitted() {
-      return !isContextLost && glContext !== null && !glContext.isContextLost() && shaderProgram !== null &&
+      return !isContextLost && glContext !== null && !glContext.isContextLost() && shaderProgram !== null && spaceShaderProgram !== null &&
              checkMotionPermitted() && checkAtlasViewActive() && !checkDocumentHidden();
     }
 
@@ -721,7 +907,7 @@
     }
 
     function renderSingleFrame() {
-      if (isContextLost || !glContext || glContext.isContextLost() || !shaderProgram || !checkAtlasViewActive() || checkDocumentHidden()) {
+      if (isContextLost || !glContext || glContext.isContextLost() || !shaderProgram || !spaceShaderProgram || !checkAtlasViewActive() || checkDocumentHidden()) {
         if (checkDocumentHidden() || !checkAtlasViewActive() || isContextLost || (glContext && glContext.isContextLost())) {
           cancelScheduledFrame();
           isSettlingActive = false;
@@ -730,11 +916,29 @@
         return;
       }
       updateCanvasDimensions();
-      glContext.useProgram(shaderProgram);
       glContext.viewport(0, 0, canvasElement.width, canvasElement.height);
-      glContext.clearColor(0.006, 0.011, 0.014, 1.0);
+      glContext.clearColor(0.003, 0.005, 0.008, 1.0);
       glContext.clear(glContext.COLOR_BUFFER_BIT | glContext.DEPTH_BUFFER_BIT);
+
+      glContext.disable(glContext.DEPTH_TEST);
+      glContext.disable(glContext.BLEND);
+      glContext.useProgram(spaceShaderProgram);
+      glContext.bindBuffer(glContext.ARRAY_BUFFER, spaceQuadBuffer);
+      glContext.enableVertexAttribArray(spacePositionAttributeLocation);
+      glContext.vertexAttribPointer(spacePositionAttributeLocation, 2, glContext.FLOAT, false, 0, 0);
+      glContext.uniform2f(spaceResolutionUniformLocation, canvasElement.width, canvasElement.height);
+      glContext.uniform2f(spacePointerUniformLocation, currentPointerX, currentPointerY);
+      glContext.uniform1f(spaceZoomUniformLocation, currentZoom);
+      glContext.uniform1f(spaceRotationUniformLocation, currentRotationAngle);
+      glContext.uniform1f(spaceActiveTimeUniformLocation, activeElapsedSeconds);
+      glContext.drawArrays(glContext.TRIANGLES, 0, 6);
+      glContext.disableVertexAttribArray(spacePositionAttributeLocation);
+
       glContext.enable(glContext.DEPTH_TEST);
+      glContext.depthFunc(glContext.LEQUAL);
+      glContext.enable(glContext.BLEND);
+      glContext.blendFunc(glContext.SRC_ALPHA, glContext.ONE_MINUS_SRC_ALPHA);
+      glContext.useProgram(shaderProgram);
 
       glContext.bindBuffer(glContext.ARRAY_BUFFER, vertexBuffer);
       const strideBytes = 32;
@@ -760,6 +964,11 @@
       glContext.uniform1f(uniformActiveTimeLocation, activeElapsedSeconds);
 
       glContext.drawArrays(glContext.TRIANGLES, 0, totalVertexCount);
+
+      glContext.disableVertexAttribArray(positionAttributeLocation);
+      glContext.disableVertexAttribArray(texCoordAttributeLocation);
+      glContext.disableVertexAttribArray(normalAttributeLocation);
+      glContext.disable(glContext.BLEND);
 
       if (!documentRoot.classList.contains('has-kaleidoscope')) {
         documentRoot.classList.add('has-kaleidoscope');
@@ -789,7 +998,7 @@
         schedulerTimeoutIdentifier = 0;
       }
 
-      if (!checkAtlasViewActive() || checkDocumentHidden() || isContextLost || !glContext || glContext.isContextLost() || !shaderProgram) {
+      if (!checkAtlasViewActive() || checkDocumentHidden() || isContextLost || !glContext || glContext.isContextLost() || !shaderProgram || !spaceShaderProgram) {
         cancelScheduledFrame();
         isSettlingActive = false;
         lastFrameWallTimestamp = 0.0;
@@ -1026,6 +1235,12 @@
       cancelScheduledFrame();
       isSettlingActive = false;
       lastFrameWallTimestamp = 0.0;
+      shaderProgram = null;
+      vertexBuffer = null;
+      fiberTexture = null;
+      spaceShaderProgram = null;
+      spaceQuadBuffer = null;
+      totalVertexCount = 0;
       canvasElement.style.display = 'none';
       documentRoot.classList.remove('has-kaleidoscope');
     });

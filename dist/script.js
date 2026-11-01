@@ -18,7 +18,7 @@
     financeiro: { coordX: 0, coordY: 350, zoom: 1.15 }
   };
 
-  const PROJECT_SEQUENCE = ['yahcw', 'tuya', 'gaming', 'python', 'spotifast', 'financeiro'];
+  const PROJECT_SEQUENCE = ['yahcw', 'tuya', 'gaming', 'python', 'spotifast', 'financeiro', 'cota'];
 
   const CONCEPTUAL_RELATIONS = {
     yahcw: {
@@ -761,23 +761,40 @@
       }
 
       if (lastFocusedRoomId) {
-        const trigger = savedAtlasFocus && savedAtlasFocus.isConnected && !savedAtlasFocus.closest('[inert]') && savedAtlasFocus !== document.body ? savedAtlasFocus : document.querySelector('[data-enter-room="' + lastFocusedRoomId + '"]');
+        const trigger = savedAtlasFocus && savedAtlasFocus.isConnected && savedAtlasFocus.getClientRects().length > 0 && !savedAtlasFocus.closest('[inert]') && savedAtlasFocus !== document.body ? savedAtlasFocus : document.querySelector('[data-enter-room="' + (lastFocusedRoomId === 'cota' ? 'financeiro' : lastFocusedRoomId) + '"]');
         if (trigger && typeof trigger.focus === 'function') {
           trigger.focus({ preventScroll: true });
         }
         const originArtifact = trigger && trigger.closest('.spatial-artifact');
         indicateReturnOnArtifact(originArtifact ? originArtifact.getAttribute('data-project') : lastFocusedRoomId);
         savedAtlasFocus = null;
+      } else if (savedAtlasFocus && savedAtlasFocus.isConnected && !savedAtlasFocus.closest('[inert]') && savedAtlasFocus !== document.body) {
+        if (typeof savedAtlasFocus.focus === 'function') {
+          savedAtlasFocus.focus({ preventScroll: true });
+        }
+        savedAtlasFocus = null;
+      } else {
+        const directBtn = document.getElementById('btn-direct-reading');
+        if (directBtn && typeof directBtn.focus === 'function') {
+          directBtn.focus({ preventScroll: true });
+        }
       }
       announceLiveStatus('Retornou ao Atlas Espacial.');
       return;
     }
 
     if (route === 'leitura') {
+      if (!currentActiveRoom && !isDirectReadingActive) {
+        savedAtlasFocus = document.activeElement;
+        savedAtlasCamera = {
+          panX: cameraState.currentPanX,
+          panY: cameraState.currentPanY,
+          zoom: cameraState.currentZoom
+        };
+      }
       closeAllRoomsInternal();
       closeAllOverlaysInternal();
       enterDirectReadingInternal();
-      // currentActiveRoom DEVE ser estritamente null ao entrar em leitura!
       currentActiveRoom = null;
       isDirectReadingActive = true;
       updateDockActive(null);
@@ -798,7 +815,7 @@
     }
 
     const resolvedProject = (route === 'laboratorio') ? 'financeiro' : route;
-    if (PROJECT_COORDINATES[resolvedProject]) {
+    if (PROJECT_COORDINATES[resolvedProject] || resolvedProject === 'cota') {
       if (!currentActiveRoom && !isDirectReadingActive) {
         savedAtlasFocus = document.activeElement;
         savedAtlasCamera = {
@@ -815,7 +832,7 @@
       currentActiveRoom = resolvedProject;
       lastFocusedRoomId = resolvedProject;
       isDirectReadingActive = false;
-      updateDockActive(resolvedProject);
+      updateDockActive(resolvedProject === 'cota' ? null : resolvedProject);
       setSpatialViewportInert(true);
       announceLiveStatus('Entrou na sala do projeto: ' + resolvedProject);
       return;
@@ -899,6 +916,17 @@
     });
   }
 
+  function updateHeaderHeightVar() {
+    const headerElement = document.querySelector('.atlas-header');
+    if (headerElement) {
+      document.documentElement.style.removeProperty('--header-height');
+      const computedHeight = headerElement.offsetHeight;
+      if (computedHeight > 0) {
+        document.documentElement.style.setProperty('--header-height', computedHeight + 'px');
+      }
+    }
+  }
+
   function enterDirectReadingInternal() {
     if (animationFrameHandle) {
       cancelAnimationFrame(animationFrameHandle);
@@ -918,6 +946,26 @@
       readingBtn.setAttribute('aria-pressed', 'true');
       readingBtn.classList.add('active');
     }
+
+    const dockElement = document.getElementById('atlas-dock');
+    if (dockElement) {
+      dockElement.setAttribute('inert', '');
+      dockElement.setAttribute('aria-hidden', 'true');
+    }
+
+    const minimapElement = document.getElementById('atlas-minimap-container');
+    if (minimapElement) {
+      minimapElement.setAttribute('inert', '');
+      minimapElement.setAttribute('aria-hidden', 'true');
+    }
+
+    const bannerElement = document.getElementById('atlas-relation-banner');
+    if (bannerElement) {
+      bannerElement.setAttribute('inert', '');
+      bannerElement.setAttribute('aria-hidden', 'true');
+    }
+
+    updateHeaderHeightVar();
 
     const returnBtn = document.getElementById('btn-return-to-atlas');
     if (returnBtn && typeof returnBtn.focus === 'function') {
@@ -939,6 +987,24 @@
     if (readingBtn) {
       readingBtn.setAttribute('aria-pressed', 'false');
       readingBtn.classList.remove('active');
+    }
+
+    const dockElement = document.getElementById('atlas-dock');
+    if (dockElement) {
+      dockElement.removeAttribute('inert');
+      dockElement.removeAttribute('aria-hidden');
+    }
+
+    const minimapElement = document.getElementById('atlas-minimap-container');
+    if (minimapElement) {
+      minimapElement.removeAttribute('inert');
+      minimapElement.removeAttribute('aria-hidden');
+    }
+
+    const bannerElement = document.getElementById('atlas-relation-banner');
+    if (bannerElement) {
+      bannerElement.removeAttribute('inert');
+      bannerElement.removeAttribute('aria-hidden');
     }
   }
 
@@ -1839,6 +1905,7 @@
 
     // Redimensionamento de Janela
     window.addEventListener('resize', function () {
+      updateHeaderHeightVar();
       if (!currentActiveRoom && !isDirectReadingActive) {
         const fitZoom = calculateOverviewFit();
         cameraState.targetZoom = fitZoom;
@@ -1867,6 +1934,7 @@
   }
 
   function initializeAtlasApp() {
+    updateHeaderHeightVar();
     initializeMotionControls();
     initializeEmailCopy();
     initializeKeyboardNavigation();

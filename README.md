@@ -23,6 +23,8 @@ A malha possui 256 setores e 96 anéis, com maior concentração de amostras jun
 
 A atualização ambiente em desktop tem cadência-alvo de 60 desenhos por segundo. A câmera acompanha a entrada por interpolação baseada em tempo, e a interação pode acompanhar o ritmo de `requestAnimationFrame` do navegador. O buffer mantém as mesmas dimensões durante o movimento ambiente e a interação: parte da resolução CSS nativa, considera DPR até 2 e limita a ampliação a aproximadamente 4,15 milhões de pixels, sem reduzir abaixo das dimensões CSS. Isso elimina a troca visível de resolução ao mover o ponteiro. A cadência efetiva depende do navegador e do dispositivo.
 
+O espaço sideral é desenhado antes da íris, no mesmo contexto WebGL e agendador. Três camadas de estrelas possuem paralaxe distinta, com poeira difusa discreta ao fundo. A borda externa da malha revela o espaço por cobertura suave; a pupila permanece opaca. O tamanho das estrelas considera a área de cada pixel para reduzir cintilação em movimento, sem depender do MSAA para suavizar detalhes procedurais. Não há vídeo, textura remota ou segundo ciclo de animação.
+
 - **Atlas:** projetos e tipografia permanecem em HTML acessível sobre a cena; as esculturas acompanham discretamente o ponto de vista.
 - **Dentro da íris:** abre uma visão dedicada à arte, com arrasto, controle de profundidade e botão de retorno. O modo guarda a câmera do atlas e isola seus controles do teclado enquanto estiver aberto.
 - **Celular:** o arrasto envia coordenadas normalizadas à cena, sem sensores, permissões de orientação ou movimento automático permanente.
@@ -33,9 +35,9 @@ A atualização ambiente em desktop tem cadência-alvo de 60 desenhos por segund
 - **Agendamento:** um único agendador combina a cadência ambiente com a acomodação de entradas. Não há um segundo ciclo de animação concorrente. A câmera do atlas ainda encerra seus próprios frames ao estabilizar; somente a íris possui movimento ambiente intencional.
 - **Medições:** os relatórios de qualidade e desempenho em `outputs/iris-smooth-sol-*` registram a comparação com a versão anterior, separando cadência, resposta dos uniformes da câmera e custo de desenho com leitura síncrona. Essa leitura inclui sincronização e custo do driver; não é um temporizador exclusivo da GPU. Os testes de viewport móvel em desktop não medem desempenho de um telefone físico.
 
-Comparação local em Edge headless, ANGLE/D3D11 e RX 7600, com viewport 1920×1080 e DPR 1:
+Comparação da otimização de 30/10/2026, anterior à camada sideral, em Edge headless, ANGLE/D3D11 e RX 7600, com viewport 1920×1080 e DPR 1:
 
-| Medida | Versão anterior `0965896` | Renderizador atual |
+| Medida | Versão anterior `0965896` | Íris nativa `d252baf` |
 | --- | --- | --- |
 | Buffer ambiente | 1032×580 | 1920×1080 |
 | Cadência de desenhos submetidos | 16,2/s | 60,0/s |
@@ -44,6 +46,8 @@ Comparação local em Edge headless, ANGLE/D3D11 e RX 7600, com viewport 1920×1
 | Amostras MSAA observadas | 0 | 4 |
 
 São resultados dessa execução, não garantias para outros dispositivos ou medições de apresentação em uma janela visível a 180 Hz.
+
+Na comparação posterior com a camada sideral (`outputs/cosmos-sol-bench-review.json`), a mesma GPU manteve 1920×1080, 59,7 desenhos/s e 88,7 ms até 90% do destino da câmera. O p95 de desenho com leitura síncrona dos dois passes foi de 4,5 ms. A cadência e o custo sincronizado são medidos separadamente.
 
 ---
 
@@ -65,10 +69,21 @@ O projeto oferece duas formas complementares de navegação e uma experiência �
    - Acessível pelo cabeçalho ("Leitura direta") ou via hash `#leitura`.
    - Layout linear focado em leitura sequencial e impressão/revisão ágil por recrutadores.
    - Desativa a captura de teclado e gestos da câmera para permitir rolagem vertical nativa.
+   - Oculta por completo viewport, dock, minimapa e controles ópticos, retirando essas camadas também da interação por teclado. Os contatos e links longos quebram linha, e o espaçamento acompanha a altura real do cabeçalho.
+   - Preserva o enquadramento e o foco ao retornar ao atlas, com o botão final acessível após a rolagem completa.
+
+O Cota Aberta tem sala própria em `#cota`, descoberta pelo índice, pela leitura direta e pela estação de finanças. As seis esculturas e as rotas anteriores permanecem disponíveis; a sala nova participa da navegação anterior/próximo sem alterar as coordenadas do minimapa.
 
 ---
 
 ## Projetos em Destaque
+
+### Cota Aberta — análise de dados de fundos
+
+- **Tecnologias:** Python 3.11+, SQLite e Streamlit.
+- **Descrição:** Pesquisa por CNPJ e subclasse, análise de cotas em intervalos de datas, patrimônio, captações, resgates e cotistas. Inclui importação mensal da CVM e de CSV local, exportação CSV, rastreabilidade e diagnóstico de dados ausentes.
+- **Limites:** A demonstração do projeto usa dados sintéticos identificados. Ausência não vira zero; não há CDI, ranking, nomes comerciais inventados ou recomendação de investimento. O portfólio apresenta o projeto e seu fluxo; GitHub Pages não executa o backend Python/Streamlit.
+- **Repositório:** [github.com/arthurMPBBY/cota-aberta](https://github.com/arthurMPBBY/cota-aberta).
 
 ### 1. YAHCW (Yet Another Hot Corners for Windows)
 - **Tecnologias:** C#, .NET, WinForms, Win32 API, Desktop Window Manager (DWM).
@@ -133,6 +148,8 @@ O projeto oferece duas formas complementares de navegação e uma experiência �
 
 ## Verificação e Suíte de Testes
 
+- **Leitura e conteúdo (`outputs/cosmos-sol-review.cjs`):** verifica isolamento visual, espaço do cabeçalho, contatos sem sobreposição, links, rolagem até o botão final e retorno ao atlas em 1920, 1440, 768, 390, 320 e 720 px (este último em DPR 2, equivalente ao espaço disponível de uma janela de 1440 px com zoom de 200%). Inclui descoberta do Cota Aberta, rotas, histórico e IDs.
+- **Fundo sideral (`outputs/cosmos-sol-benchmark.cjs`):** compara com o snapshot `d252baf`, separando cadência, resposta da câmera, dimensões do buffer e desenho com leitura síncrona. Não interpreta tempo de submissão de comandos como execução da GPU.
 - **Suíte de Ciclo de Vida do WebGL (`outputs/kaleidoscope-sol-review.cjs`):**
   - As contagens e os resultados de cada execução ficam registrados nos relatórios JSON.
   - A interpolação de entrada usa uma constante de tempo de 40 ms; o movimento ambiente é verificado por pixels que mudam sem entrada, com suspensão em todos os estados de pausa.
