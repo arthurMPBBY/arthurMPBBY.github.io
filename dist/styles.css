@@ -576,7 +576,7 @@ html[data-view="direct"] .kaleidoscope-canvas {
 .spatial-artifact:hover .artifact-trigger,
 .spatial-artifact:focus-within .artifact-trigger,
 .spatial-artifact.is-highlighted .artifact-trigger {
-  transform: translateY(-2px);
+  transform: none;
 }
 
 .spatial-artifact.is-highlighted .artifact-trigger {
@@ -611,48 +611,24 @@ html[data-view="direct"] .kaleidoscope-canvas {
 }
 
 @keyframes artifactReturnPulse {
-  0% { transform: translate(-50%, -50%) scale(1); filter: drop-shadow(0 0 0 rgba(217, 67, 46, 0)); }
-  40% { transform: translate(-50%, -50%) scale(1.03); filter: drop-shadow(0 0 16px rgba(217, 67, 46, 0.45)); }
-  100% { transform: translate(-50%, -50%) scale(1); filter: drop-shadow(0 12px 24px rgba(11, 15, 21, 0.08)); }
+  0% { transform: translate(-50%, -50%); filter: drop-shadow(0 0 0 rgba(217, 67, 46, 0)); }
+  40% { transform: translate(-50%, -50%); filter: drop-shadow(0 0 16px rgba(217, 67, 46, 0.45)); }
+  100% { transform: translate(-50%, -50%); filter: drop-shadow(0 12px 24px rgba(11, 15, 21, 0.08)); }
 }
 
 /* Comportamentos materiais singulares derivados da forma e assunto */
 
-/* 01. YAHCW: Lâminas de janelas Win32 DWM que se separam */
+/* 01. YAHCW: Lâminas de janelas Win32 DWM estacionárias */
 .artifact-yahcw .stacked-window {
-  transition: transform 0.36s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.artifact-yahcw:hover .window-back,
-.artifact-yahcw:focus-within .window-back,
-.artifact-yahcw.is-highlighted .window-back {
-  transform: translate(148px, 14px);
-}
-.artifact-yahcw:hover .window-mid,
-.artifact-yahcw:focus-within .window-mid,
-.artifact-yahcw.is-highlighted .window-mid {
-  transform: translate(66px, 50px);
+  transition: filter 0.3s ease;
 }
 .artifact-yahcw:hover .window-front,
 .artifact-yahcw:focus-within .window-front,
 .artifact-yahcw.is-highlighted .window-front {
-  transform: translate(12px, 88px);
+  filter: drop-shadow(0 0 6px rgba(222, 184, 123, 0.45));
 }
 
-/* 02. Tuya: Órbita de rede e aquecimento sutil do filamento */
-.artifact-tuya .orbit-local,
-.artifact-tuya .orbit-cloud {
-  transition: transform 0.38s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.artifact-tuya:hover .orbit-local,
-.artifact-tuya:focus-within .orbit-local,
-.artifact-tuya.is-highlighted .orbit-local {
-  transform: translate(-8px, -2px);
-}
-.artifact-tuya:hover .orbit-cloud,
-.artifact-tuya:focus-within .orbit-cloud,
-.artifact-tuya.is-highlighted .orbit-cloud {
-  transform: translate(10px, 4px);
-}
+/* 02. Tuya: Órbita de rede estacionária e aquecimento do filamento */
 .artifact-tuya .sculpture-tuya path[stroke="#d9432e"] {
   transition: stroke-width 0.3s ease, filter 0.3s ease;
 }
@@ -663,102 +639,39 @@ html[data-view="direct"] .kaleidoscope-canvas {
   filter: drop-shadow(0 0 4px rgba(217, 67, 46, 0.35));
 }
 
-/* 03. Gaming: Deslocamento do caliper de telemetria e pacing */
-.artifact-gaming .telemetry-caliper,
-.artifact-gaming .json-bracket {
-  transition: transform 0.34s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.artifact-gaming:hover .telemetry-caliper,
-.artifact-gaming:focus-within .telemetry-caliper,
-.artifact-gaming.is-highlighted .telemetry-caliper {
-  transform: translate(174px, 34px);
-}
-.artifact-gaming:hover .json-bracket,
-.artifact-gaming:focus-within .json-bracket,
-.artifact-gaming.is-highlighted .json-bracket {
-  transform: translate(285px, 20px);
-}
+/* 03. Gaming: Telemetria e pacing com feedback cromático sem deformação */
 .artifact-gaming .sculpture-gaming path[stroke="#0e1218"] {
-  transition: stroke-width 0.28s ease;
+  transition: stroke-width 0.28s ease, stroke 0.28s ease;
 }
 .artifact-gaming:hover .sculpture-gaming path[stroke="#0e1218"],
 .artifact-gaming:focus-within .sculpture-gaming path[stroke="#0e1218"],
 .artifact-gaming.is-highlighted .sculpture-gaming path[stroke="#0e1218"] {
   stroke-width: 2.6px;
+  stroke: #deb87b;
 }
 
-/* 04. Python: Tensão estrutural das treliças e nós de coleções */
-.artifact-python .sculpture-python rect[x="45"],
-.artifact-python .sculpture-python rect[x="35"] {
-  transition: transform 0.34s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.artifact-python:hover .sculpture-python rect[x="45"],
-.artifact-python:hover .sculpture-python rect[x="35"],
-.artifact-python:focus-within .sculpture-python rect[x="45"],
-.artifact-python:focus-within .sculpture-python rect[x="35"],
-.artifact-python.is-highlighted .sculpture-python rect[x="45"],
-.artifact-python.is-highlighted .sculpture-python rect[x="35"] {
-  transform: translateX(-6px);
-}
-.artifact-python .sculpture-python rect[x="290"],
-.artifact-python .sculpture-python rect[x="300"] {
-  transition: transform 0.34s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.artifact-python:hover .sculpture-python rect[x="290"],
-.artifact-python:hover .sculpture-python rect[x="300"],
-.artifact-python:focus-within .sculpture-python rect[x="290"],
-.artifact-python:focus-within .sculpture-python rect[x="300"],
-.artifact-python.is-highlighted .sculpture-python rect[x="290"],
-.artifact-python.is-highlighted .sculpture-python rect[x="300"] {
-  transform: translateX(6px);
-}
+/* 04. Python: Treliças e nós de coleções com realce estrutural */
 .artifact-python .sculpture-python line {
   transition: stroke-opacity 0.3s ease, stroke-width 0.3s ease;
 }
 .artifact-python:hover .sculpture-python line,
 .artifact-python:focus-within .sculpture-python line,
 .artifact-python.is-highlighted .sculpture-python line {
-  stroke-opacity: 0.65;
+  stroke-opacity: 0.85;
   stroke-width: 1.6px;
 }
 
-/* 05. Spotifast: Pequena rotação mecânica do vinil e braço de leitura */
+/* 05. Spotifast: Geometria estacionária com realce de leitura */
 .artifact-spotifast .sculpture-spotifast circle[cx="165"][r="85"] {
-  transform-origin: 165px 110px;
-  transition: transform 0.42s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.artifact-spotifast .sculpture-spotifast path[d*="M 330 26"] {
-  transform-origin: 330px 26px;
-  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.artifact-spotifast .palette-swatches {
-  transition: transform 0.34s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: filter 0.3s ease;
 }
 .artifact-spotifast:hover .sculpture-spotifast circle[cx="165"][r="85"],
 .artifact-spotifast:focus-within .sculpture-spotifast circle[cx="165"][r="85"],
 .artifact-spotifast.is-highlighted .sculpture-spotifast circle[cx="165"][r="85"] {
-  transform: rotate(20deg);
-}
-.artifact-spotifast:hover .sculpture-spotifast path[d*="M 330 26"],
-.artifact-spotifast:focus-within .sculpture-spotifast path[d*="M 330 26"],
-.artifact-spotifast.is-highlighted .sculpture-spotifast path[d*="M 330 26"] {
-  transform: rotate(5deg);
-}
-.artifact-spotifast:hover .palette-swatches,
-.artifact-spotifast:focus-within .palette-swatches,
-.artifact-spotifast.is-highlighted .palette-swatches {
-  transform: translate(271px, 82px);
+  filter: drop-shadow(0 0 6px rgba(222, 184, 123, 0.4));
 }
 
-/* 06. Financeiro: Curva exponencial revelada e elevação do marco */
-.artifact-financeiro .milestone-plaque {
-  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.artifact-financeiro:hover .milestone-plaque,
-.artifact-financeiro:focus-within .milestone-plaque,
-.artifact-financeiro.is-highlighted .milestone-plaque {
-  transform: translate(245px, 12px);
-}
+/* 06. Financeiro: Curva exponencial com realce do marco */
 .artifact-financeiro .sculpture-financeiro path[stroke="#d9432e"] {
   transition: stroke-width 0.32s ease, filter 0.32s ease;
 }

@@ -598,8 +598,8 @@
 
   // Roda do mouse no Atlas: age EXCLUSIVAMENTE na profundidade da íris
   function handleWheelZoom(wheelEvent) {
-    // Permite Ctrl+wheel para zoom nativo do navegador
-    if (wheelEvent.ctrlKey) {
+    // Permite Ctrl+wheel e Cmd+wheel para zoom nativo do navegador
+    if (wheelEvent.ctrlKey || wheelEvent.metaKey) {
       return;
     }
 

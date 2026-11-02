@@ -63,7 +63,7 @@ O projeto oferece duas formas complementares de navegação e uma experiência �
    - **Link Descoberta da Versão Clara:** Acesso direto à versão anterior preservada (`/2/`) disponível no menu de pílulas do cabeçalho ("Versão clara").
    - **Memória Espacial e Entrada Coesa:** Ao entrar em uma sala a partir do mapa, o foco é preservado. Ao sair via `Esc` ou botão "Voltar", a visão retorna de forma coesa com micro-indicação visual no objeto de retorno.
    - **Atlas de Relações Conceituais (Curatorial):** Ao passar o mouse ou focar via teclado em qualquer objeto, são destacadas conexões conceituais curatoriais ("Em comum" / "Conexões de ideias") acompanhadas de legenda editorial e botões de salto rápido, com arcos projetados na periferia sem interceptar títulos centrais.
-   - **Comportamento Material Derivado da Forma:** Cada escultura interage conforme sua própria natureza (YAHCW desliza lâminas de janelas Win32 DWM; Tuya expande órbitas e aquece o filamento; Gaming move o caliper de telemetria sobre a fita de pacing; Python tenciona treliças e nós de coleções; Spotifast rotaciona o vinil e posiciona o braço de leitura mecânico; Financeiro revela o arco da curva exponencial de juros compostos).
+   - **Comportamento Material e Esculturas Estacionárias:** As esculturas mantêm sua geometria estritamente estacionária (sem translação ou rotação espacial por movimento de ponteiro ou hover), com realces cromáticos, traçados e filtros específicos derivados de sua identidade temática (iluminação e aquecimento em Tuya, realce tonal em Gaming, destaque estrutural em Python, leitura óptica em Spotifast e destaque do marco em Financeiro).
 
 2. **Modo Leitura Direta (Linear):**
    - Acessível pelo cabeçalho ("Leitura direta") ou via hash `#leitura`.

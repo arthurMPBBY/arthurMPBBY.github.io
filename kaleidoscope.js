@@ -930,7 +930,7 @@
       glContext.vertexAttribPointer(spacePositionAttributeLocation, 2, glContext.FLOAT, false, 0, 0);
       glContext.uniform2f(spaceResolutionUniformLocation, canvasElement.width, canvasElement.height);
       glContext.uniform2f(spacePointerUniformLocation, currentPointerX, currentPointerY);
-      glContext.uniform1f(spaceZoomUniformLocation, currentZoom);
+      glContext.uniform1f(spaceZoomUniformLocation, 0.0);
       glContext.uniform1f(spaceRotationUniformLocation, currentRotationAngle);
       glContext.uniform1f(spaceActiveTimeUniformLocation, activeElapsedSeconds);
       glContext.drawArrays(glContext.TRIANGLES, 0, 6);

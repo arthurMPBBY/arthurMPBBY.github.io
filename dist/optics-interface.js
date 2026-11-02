@@ -39,9 +39,8 @@
   }
 
   function updateMaterialPerspective() {
-    const active = motionAllowed() && !coarsePointer.matches;
-    root.style.setProperty('--iris-pitch', (active ? gazeY * -4 : 0).toFixed(2) + 'deg');
-    root.style.setProperty('--iris-yaw', (active ? gazeX * 6 : 0).toFixed(2) + 'deg');
+    root.style.setProperty('--iris-pitch', '0deg');
+    root.style.setProperty('--iris-yaw', '0deg');
   }
 
   function setImmersive(nextState, restoreFocus) {
@@ -141,6 +140,7 @@
   window.addEventListener('pointercancel', finishDrag, true);
   window.addEventListener('wheel', wheelEvent => {
     if (!immersive || !viewport.contains(wheelEvent.target)) return;
+    if (wheelEvent.ctrlKey || wheelEvent.metaKey) return;
     wheelEvent.preventDefault();
     wheelEvent.stopImmediatePropagation();
     if (!motionAllowed()) return;
