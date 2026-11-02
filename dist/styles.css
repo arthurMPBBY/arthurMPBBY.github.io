@@ -2199,25 +2199,27 @@ html[data-view="direct"] .kaleidoscope-canvas {
   bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
-  height: var(--dock-height);
+  height: auto;
+  min-height: 40px;
   background-color: rgba(11, 17, 23, 0.90);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border: var(--border-strong);
-  border-radius: 30px;
+  border-radius: 28px;
   box-shadow: var(--shadow-dock);
   z-index: 900;
   display: flex;
   align-items: center;
-  padding: 0 16px;
-  max-width: 95vw;
-  touch-action: pan-x;
+  padding: 4px 8px;
+  max-width: fit-content;
+  width: auto;
+  pointer-events: auto;
 }
 
 .dock-inner {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .dock-projects-group {
@@ -2296,6 +2298,12 @@ html[data-view="direct"] .kaleidoscope-canvas {
 }
 
 .dock-tool-btn:hover {
+  background-color: var(--color-vermilion);
+  color: #070b0e;
+}
+
+.dock-tool-btn.active,
+.dock-tool-btn[aria-pressed="true"] {
   background-color: var(--color-vermilion);
   color: #070b0e;
 }
@@ -2969,58 +2977,27 @@ html[data-view="direct"] .kaleidoscope-canvas {
     display: none !important;
   }
 
-  /* Dock persistente com alvos de toque acessíveis e padding seguro */
+  /* Dock persistente com controles essenciais discretos */
   .atlas-dock {
     bottom: 12px !important;
-    padding: 6px 8px !important;
-    width: calc(100% - 24px) !important;
+    padding: 4px 8px !important;
+    width: auto !important;
+    max-width: calc(100% - 24px) !important;
     height: auto !important;
-    border-radius: 20px !important;
+    border-radius: 24px !important;
   }
 
   .dock-inner {
-    width: 100%;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .dock-actions-group,
-  .dock-zoom-controls {
-    display: flex;
+    width: auto;
+    flex-direction: row;
     justify-content: center;
-    gap: 6px;
+    gap: 8px;
   }
 
-  .dock-actions-group .dock-tool-btn,
-  .dock-zoom-controls .dock-tool-btn {
-    min-height: 32px;
-    padding: 4px 10px;
-    font-size: 11px;
-  }
-
-  .dock-projects-group {
-    width: 100%;
-    justify-content: space-between;
-    gap: 0;
-  }
-
-  .dock-projects-group .dock-item-btn {
-    min-width: 36px;
+  .dock-inner .dock-tool-btn {
     min-height: 38px;
-    padding: 4px 6px;
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-    font-size: 10px;
-  }
-
-  .dock-projects-group .dock-name {
-    display: block;
-    font-size: 7.5px;
-  }
-
-  .dock-separator {
-    display: none;
+    padding: 6px 12px;
+    font-size: 11px;
   }
 
   .room-inner {

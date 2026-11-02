@@ -1809,32 +1809,14 @@
       relationBanner.addEventListener('focusout', scheduleRelationDismissal);
     }
 
-    // Controles de Zoom da Íris no Dock
+    // Controle de Visão Geral no Dock
     const dockOverview = document.getElementById('btn-dock-overview');
     if (dockOverview) {
       dockOverview.addEventListener('click', function () {
         dispatchIrisZoom(0.0, true);
         navigateToRoute('atlas', true);
         resetCameraToOverview(true);
-        announceLiveStatus('Enquadramento padrão do Atlas e da íris restaurado.');
-      });
-    }
-
-    const dockZoomIn = document.getElementById('btn-dock-zoom-in');
-    if (dockZoomIn) {
-      dockZoomIn.addEventListener('click', function () {
-        const nextZoom = Math.min(1.0, targetIrisZoom + 0.25);
-        dispatchIrisZoom(nextZoom, false);
-        announceLiveStatus('Íris aproximada.');
-      });
-    }
-
-    const dockZoomOut = document.getElementById('btn-dock-zoom-out');
-    if (dockZoomOut) {
-      dockZoomOut.addEventListener('click', function () {
-        const nextZoom = Math.max(0.0, targetIrisZoom - 0.25);
-        dispatchIrisZoom(nextZoom, nextZoom === 0.0);
-        announceLiveStatus(nextZoom === 0.0 ? 'Íris no enquadramento padrão.' : 'Íris recuada.');
+        announceLiveStatus('Visão geral do Atlas restaurada.');
       });
     }
 
@@ -1891,13 +1873,6 @@
     const btnContato = document.getElementById('btn-header-contato');
     if (btnContato) {
       btnContato.addEventListener('click', function () {
-        navigateToRoute('contato', true);
-      });
-    }
-
-    const btnDockContato = document.getElementById('btn-dock-contato');
-    if (btnDockContato) {
-      btnDockContato.addEventListener('click', function () {
         navigateToRoute('contato', true);
       });
     }

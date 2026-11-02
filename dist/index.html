@@ -1474,65 +1474,17 @@
     </div>
 
 
-    <!-- 4. DOCK PERSISTENTE DO ATLAS (RODAPÉ) -->
-    <div id="atlas-dock" class="atlas-dock" role="toolbar" aria-label="Barra de navegação rápida do Atlas">
+    <!-- 4. CONTROLES ESSENCIAIS DO ATLAS (DOCK DISCRETO) -->
+    <div id="atlas-dock" class="atlas-dock" role="toolbar" aria-label="Controles essenciais do sistema">
       <div class="dock-inner">
-        <!-- Seletor de Salas / Planos -->
-        <div class="dock-projects-group">
-          <button type="button" class="dock-item-btn" data-dock-target="yahcw" title="Ir para 01 YAHCW">
-            <span class="dock-num">01</span>
-            <span class="dock-name">YAHCW</span>
-          </button>
-          <button type="button" class="dock-item-btn" data-dock-target="tuya" title="Ir para 02 tuya-smart-lamps">
-            <span class="dock-num">02</span>
-            <span class="dock-name">Tuya</span>
-          </button>
-          <button type="button" class="dock-item-btn" data-dock-target="gaming" title="Ir para 03 gaming-fps-hud">
-            <span class="dock-num">03</span>
-            <span class="dock-name">Gaming</span>
-          </button>
-          <button type="button" class="dock-item-btn" data-dock-target="python" title="Ir para 04 python-curso">
-            <span class="dock-num">04</span>
-            <span class="dock-name">Python</span>
-          </button>
-          <button type="button" class="dock-item-btn" data-dock-target="spotifast" title="Ir para 05 spotifast-neon-theme">
-            <span class="dock-num">05</span>
-            <span class="dock-name">Spotifast</span>
-          </button>
-          <button type="button" class="dock-item-btn" data-dock-target="financeiro" title="Ir para 06 Laboratório Financeiro">
-            <span class="dock-num">06</span>
-            <span class="dock-name">Finanças</span>
-          </button>
-        </div>
-
-        <div class="dock-separator" aria-hidden="true"></div>
-
-        <!-- Acesso a Contato & Preferências de Movimento -->
-        <div class="dock-actions-group">
-          <button type="button" class="dock-tool-btn" id="btn-dock-contato" aria-haspopup="dialog" aria-controls="overlay-contato" title="Contato direto" aria-label="Abrir canais de contato">
-            <span class="tool-text">Contato</span>
-          </button>
-          <button type="button" class="dock-tool-btn motion-toggle" id="motion-toggle-btn" aria-pressed="false" title="Pausar animações" aria-label="Pausar animações de câmera e partículas">
-            <span class="motion-icon" aria-hidden="true"></span>
-            <span class="tool-text" id="motion-status-label">Efeitos</span>
-          </button>
-        </div>
-
-        <div class="dock-separator" aria-hidden="true"></div>
-
-        <!-- Controles de Zoom & Visão Geral (Acessíveis em Mobile & Desktop) -->
-        <div class="dock-zoom-controls">
-          <button type="button" class="dock-tool-btn zoom-btn" id="btn-dock-zoom-out" title="Recuar íris ao enquadramento padrão" aria-label="Recuar íris ao enquadramento padrão">
-            <span aria-hidden="true">&minus;</span>
-          </button>
-          <button type="button" class="dock-tool-btn" id="btn-dock-overview" title="Restaurar enquadramento padrão da íris e do Atlas" aria-label="Restaurar enquadramento padrão da íris e do Atlas">
-            <span class="tool-glyph" aria-hidden="true">&odot;</span>
-            <span class="tool-text">Geral</span>
-          </button>
-          <button type="button" class="dock-tool-btn zoom-btn" id="btn-dock-zoom-in" title="Aproximar íris com profundidade 3D" aria-label="Aproximar íris com profundidade 3D">
-            <span aria-hidden="true">&plus;</span>
-          </button>
-        </div>
+        <button type="button" class="dock-tool-btn" id="btn-dock-overview" title="Restaurar visão geral do Atlas" aria-label="Restaurar visão geral do Atlas">
+          <span class="tool-glyph" aria-hidden="true">&odot;</span>
+          <span class="tool-text">Visão geral</span>
+        </button>
+        <button type="button" class="dock-tool-btn motion-toggle" id="motion-toggle-btn" aria-pressed="false" title="Pausar animações de câmera e partículas" aria-label="Pausar animações de câmera e partículas">
+          <span class="motion-icon" aria-hidden="true"></span>
+          <span class="tool-text" id="motion-status-label">Pausar animações</span>
+        </button>
       </div>
     </div>
 
