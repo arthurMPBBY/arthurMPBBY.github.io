@@ -1895,6 +1895,20 @@
       });
     }
 
+    const btnDockContato = document.getElementById('btn-dock-contato');
+    if (btnDockContato) {
+      btnDockContato.addEventListener('click', function () {
+        navigateToRoute('contato', true);
+      });
+    }
+
+    const btnMeridianContato = document.getElementById('btn-meridian-contato');
+    if (btnMeridianContato) {
+      btnMeridianContato.addEventListener('click', function () {
+        navigateToRoute('contato', true);
+      });
+    }
+
     // Fechar Overlays
     const closeOverlayBtns = document.querySelectorAll('[data-action="close-overlay"]');
     closeOverlayBtns.forEach(function (btn) {

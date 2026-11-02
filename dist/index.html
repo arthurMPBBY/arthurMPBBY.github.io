@@ -22,64 +22,6 @@
 <body class="mode-atlas">
   <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
 
-  <!-- Header fixo editorial -->
-  <header class="atlas-header" role="banner">
-    <div class="header-inner">
-      <div class="header-brand-block">
-        <a href="#atlas" class="brand-link" id="brand-home-link" aria-label="Arthur Kadri - Retornar ao Atlas">
-          <span class="brand-glyph" aria-hidden="true">AK</span>
-          <div class="brand-text-group">
-            <span class="brand-name">Arthur Kadri</span>
-            <span class="brand-sub">Atlas de Sistemas &middot; Íris</span>
-          </div>
-        </a>
-      </div>
-
-      <nav class="atlas-nav" aria-label="Navegação do sistema">
-        <ul class="nav-pills">
-          <li>
-            <button type="button" class="nav-pill-btn" id="btn-header-indice" aria-haspopup="dialog" aria-controls="overlay-indice">
-              <span class="pill-dot" aria-hidden="true"></span>
-              <span>Índice</span>
-            </button>
-          </li>
-          <li>
-            <button type="button" class="nav-pill-btn" id="btn-header-sobre" aria-haspopup="dialog" aria-controls="overlay-sobre">
-              <span>Sobre</span>
-            </button>
-          </li>
-          <li>
-            <button type="button" class="nav-pill-btn" id="btn-header-contato" aria-haspopup="dialog" aria-controls="overlay-contato">
-              <span>Contato</span>
-            </button>
-          </li>
-          <li>
-            <a href="/2/" class="nav-pill-btn nav-version-pill" title="Acessar versão anterior em papel claro (Atlas Paper v2)" aria-label="Versão clara anterior">
-              <span class="pill-dot pill-dot-clear" aria-hidden="true"></span>
-              <span>Versão clara</span>
-            </a>
-          </li>
-        </ul>
-      </nav>
-
-      <div class="header-tools">
-        <!-- Modo Leitura Direta (para recrutadores / HR) -->
-        <button type="button" class="tool-btn direct-reading-toggle" id="btn-direct-reading" aria-pressed="false" aria-label="Alternar para modo de leitura direta linear">
-          <span class="tool-indicator" aria-hidden="true"></span>
-          <span class="tool-label-short" aria-hidden="true">Texto</span>
-          <span class="tool-label-full" id="reading-mode-label">Leitura direta</span>
-        </button>
-
-        <!-- Controle de animação / persistência -->
-        <button type="button" class="tool-btn motion-toggle" id="motion-toggle-btn" aria-pressed="false" aria-label="Pausar animações de câmera e partículas">
-          <span class="motion-icon" aria-hidden="true"></span>
-          <span class="tool-label-short" aria-hidden="true">Efeitos</span>
-          <span class="tool-label-full" id="motion-status-label">Pausar animações</span>
-        </button>
-      </div>
-    </div>
-  </header>
-
   <!-- Região de anúncios de acessibilidade -->
   <div id="live-announcer" class="sr-only" aria-live="polite"></div>
 
@@ -104,6 +46,12 @@
             <span class="meridian-academic-tag">UFABC &middot; 2&ordm; período</span>
             <h1 class="meridian-title">Arthur Kadri</h1>
             <p class="meridian-lead">Entre sistemas, dados e possibilidades.<br><span class="meridian-career">Busco estágio em Análise de Dados &amp; Finanças.</span></p>
+            <div class="meridian-contact-group">
+              <button type="button" class="meridian-contact-btn" id="btn-meridian-contato" aria-haspopup="dialog" aria-controls="overlay-contato" title="Abrir canais de contato direto">
+                <span class="contact-dot" aria-hidden="true"></span>
+                <span>Contato direto</span>
+              </button>
+            </div>
             <div class="meridian-hint" aria-hidden="true">
               <span class="hint-pulse"></span>
               <span>Atlas de Sistemas &middot; Roda do mouse ou controles para zoom na íris &middot; Selecione um projeto</span>
@@ -515,39 +463,7 @@
         </article>
 
       </div> <!-- /#spatial-world -->
-
-      <div id="atlas-relation-banner" class="atlas-relation-banner" aria-live="polite" aria-atomic="true">
-        <div class="relation-banner-inner">
-          <div class="relation-banner-badge">
-            <span class="relation-banner-tag">Conexões de ideias</span>
-            <span class="relation-banner-pair" id="relation-pair-label"></span>
-          </div>
-          <p class="relation-banner-text" id="relation-editorial-text"></p>
-          <div class="relation-banner-actions" id="relation-jump-actions"></div>
-        </div>
-      </div>
     </div> <!-- /#spatial-viewport -->
-
-    <section class="optics-interface" id="optics-interface" aria-label="Exploração da íris" hidden>
-      <div class="optics-caption" id="optics-caption" hidden>
-        <span class="optics-edition">ESTUDO ÓPTICO / 01</span>
-        <h2>Dentro da íris.</h2>
-        <p>Arraste para mudar o ponto de vista.<br>Explore a profundidade. Encontre outra perspectiva.</p>
-      </div>
-      <div class="optics-actions">
-        <button type="button" class="optics-view-toggle" id="btn-optics-view" aria-pressed="false" aria-controls="optics-caption optics-adjustments">
-          <svg viewBox="0 0 36 22" width="30" height="20" aria-hidden="true"><path d="M2 11C10-1 26-1 34 11C26 23 10 23 2 11Z" fill="none" stroke="currentColor"/><circle cx="18" cy="11" r="6" fill="none" stroke="currentColor"/><circle cx="18" cy="11" r="2" fill="currentColor"/></svg>
-          <span id="optics-toggle-label">Dentro da íris</span>
-          <span class="optics-toggle-arrow" aria-hidden="true">↗</span>
-        </button>
-        <div class="optics-adjustments" id="optics-adjustments" hidden>
-          <label for="optics-depth">Profundidade <input id="optics-depth" type="range" min="100" max="125" value="100" step="1"></label>
-          <button type="button" id="optics-reset">Centralizar</button>
-          <button type="button" id="optics-motion" aria-pressed="false">Pausar movimento</button>
-        </div>
-      </div>
-      <span class="optics-key-hint" id="optics-key-hint" hidden>Setas para olhar &middot; Esc para voltar</span>
-    </section>
 
 
     <!-- 2. CONTAINER DAS 6 SALAS DEDICADAS (FULL VIEWPORT) -->
@@ -1591,6 +1507,19 @@
 
         <div class="dock-separator" aria-hidden="true"></div>
 
+        <!-- Acesso a Contato & Preferências de Movimento -->
+        <div class="dock-actions-group">
+          <button type="button" class="dock-tool-btn" id="btn-dock-contato" aria-haspopup="dialog" aria-controls="overlay-contato" title="Contato direto" aria-label="Abrir canais de contato">
+            <span class="tool-text">Contato</span>
+          </button>
+          <button type="button" class="dock-tool-btn motion-toggle" id="motion-toggle-btn" aria-pressed="false" title="Pausar animações" aria-label="Pausar animações de câmera e partículas">
+            <span class="motion-icon" aria-hidden="true"></span>
+            <span class="tool-text" id="motion-status-label">Efeitos</span>
+          </button>
+        </div>
+
+        <div class="dock-separator" aria-hidden="true"></div>
+
         <!-- Controles de Zoom & Visão Geral (Acessíveis em Mobile & Desktop) -->
         <div class="dock-zoom-controls">
           <button type="button" class="dock-tool-btn zoom-btn" id="btn-dock-zoom-out" title="Recuar íris ao enquadramento padrão" aria-label="Recuar íris ao enquadramento padrão">
@@ -1604,46 +1533,6 @@
             <span aria-hidden="true">&plus;</span>
           </button>
         </div>
-      </div>
-    </div>
-
-
-    <p class="atlas-mobile-hint">Toque num objeto ou escolha um projeto abaixo. Use os controles para aproximar a íris.</p>
-
-    <!-- 5. MINIMAPA INTERATIVO DO ATLAS -->
-    <div id="atlas-minimap-container" class="atlas-minimap-container" aria-label="Radar cartográfico dos projetos" role="region">
-      <div class="minimap-header">
-        <span class="minimap-title">RADAR / MINIMAPA</span>
-        <span class="minimap-coords" id="minimap-coord-readout">0, 0</span>
-      </div>
-      <div class="minimap-radar-box" id="minimap-radar" tabindex="0" role="button" aria-label="Radar do Atlas. Clique em uma estação para abrir o projeto">
-        <svg id="minimap-svg" viewBox="-1000 -800 2000 1600" width="100%" height="100%">
-          <rect x="-990" y="-790" width="1980" height="1580" fill="#f8fafc" stroke="#0e1218" stroke-width="12" stroke-opacity="0.15" />
-          <line x1="-990" y1="0" x2="990" y2="0" stroke="#0e1218" stroke-width="6" stroke-dasharray="20 20" stroke-opacity="0.2" />
-          <line x1="0" y1="-790" x2="0" y2="790" stroke="#0e1218" stroke-width="6" stroke-dasharray="20 20" stroke-opacity="0.2" />
-
-          <!-- Pontos dos 6 objetos no minimapa nas coordenadas atualizadas -->
-          <circle cx="-440" cy="-220" r="45" fill="#0e1218" class="minimap-node" data-project="yahcw" />
-          <text x="-420" y="-250" font-family="'JetBrains Mono', monospace" font-size="64" font-weight="700" fill="#0e1218">01</text>
-
-          <circle cx="440" cy="-220" r="45" fill="#0e1218" class="minimap-node" data-project="tuya" />
-          <text x="460" y="-250" font-family="'JetBrains Mono', monospace" font-size="64" font-weight="700" fill="#0e1218">02</text>
-
-          <circle cx="-450" cy="220" r="45" fill="#0e1218" class="minimap-node" data-project="gaming" />
-          <text x="-430" y="290" font-family="'JetBrains Mono', monospace" font-size="64" font-weight="700" fill="#0e1218">03</text>
-
-          <circle cx="450" cy="220" r="45" fill="#0e1218" class="minimap-node" data-project="python" />
-          <text x="470" y="290" font-family="'JetBrains Mono', monospace" font-size="64" font-weight="700" fill="#0e1218">04</text>
-
-          <circle cx="0" cy="-350" r="45" fill="#0e1218" class="minimap-node" data-project="spotifast" />
-          <text x="20" y="-380" font-family="'JetBrains Mono', monospace" font-size="64" font-weight="700" fill="#0e1218">05</text>
-
-          <circle cx="0" cy="350" r="45" fill="#d9432e" class="minimap-node" data-project="financeiro" />
-          <text x="20" y="420" font-family="'JetBrains Mono', monospace" font-size="64" font-weight="700" fill="#d9432e">06</text>
-
-          <!-- Retângulo de Visão / Frustum da Câmera -->
-          <rect id="minimap-frustum" x="-400" y="-300" width="800" height="600" fill="#d9432e" fill-opacity="0.12" stroke="#d9432e" stroke-width="12" />
-        </svg>
       </div>
     </div>
 
@@ -1837,6 +1726,5 @@
   <script src="finance-lab.js"></script>
   <script src="cloud-morph.js"></script>
   <script src="script.js?v=20261101-iris-zoom-v2"></script>
-  <script src="optics-interface.js?v=20261101-iris-zoom-v2"></script>
 </body>
 </html>

@@ -41,7 +41,7 @@
   --shadow-dock: 0 12px 40px rgba(0, 0, 0, 0.75);
 
   /* Dimensões */
-  --header-height: 64px;
+  --header-height: 0px;
   --dock-height: 56px;
 }
 
@@ -103,6 +103,16 @@ body.mode-direct .atlas-mobile-hint {
   pointer-events: none !important;
 }
 
+/* Elementos removidos na simplificação */
+.atlas-header,
+.atlas-minimap-container,
+.atlas-relation-banner,
+.optics-interface {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
 /* Skip Link */
 .skip-link {
   position: absolute;
@@ -148,22 +158,11 @@ select:focus-visible,
 }
 
 /* ==========================================================================
-   HEADER FIXO EDITORIAL
+   HEADER FIXO EDITORIAL (DESATIVADO NA SIMPLIFICAÇÃO)
    ========================================================================== */
 
 .atlas-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: var(--header-height);
-  background-color: rgba(7, 11, 14, 0.90);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: var(--border-hairline);
-  z-index: 1000;
-  display: flex;
-  align-items: center;
+  display: none !important;
 }
 
 .header-inner {
@@ -497,8 +496,52 @@ html[data-view="direct"] .kaleidoscope-canvas {
   font-size: 14px;
   color: var(--color-ink-secondary);
   line-height: 1.45;
-  margin-bottom: 14px;
+  margin-bottom: 10px;
   max-width: 440px;
+}
+
+.meridian-contact-group {
+  margin: 4px 0 12px 0;
+  display: flex;
+  justify-content: center;
+}
+
+.meridian-contact-btn {
+  all: unset;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  border-radius: 20px;
+  border: 1px solid rgba(222, 184, 123, 0.4);
+  background: rgba(14, 22, 29, 0.75);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: var(--color-ink-primary);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  touch-action: manipulation;
+}
+
+.meridian-contact-btn:hover,
+.meridian-contact-btn:focus-visible {
+  border-color: var(--color-vermilion);
+  background: rgba(222, 184, 123, 0.2);
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(222, 184, 123, 0.25);
+}
+
+.meridian-contact-btn .contact-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--color-vermilion);
+  box-shadow: 0 0 6px var(--color-vermilion);
 }
 
 .meridian-hint {
@@ -2257,6 +2300,12 @@ html[data-view="direct"] .kaleidoscope-canvas {
   color: #070b0e;
 }
 
+.dock-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 .dock-tool-btn.zoom-btn {
   width: 34px;
   height: 34px;
@@ -2269,23 +2318,9 @@ html[data-view="direct"] .kaleidoscope-canvas {
   border-radius: 50%;
 }
 
-/* Minimapa / Radar */
+/* Minimapa / Radar (Desativado na Simplificação) */
 .atlas-minimap-container {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  width: 180px;
-  height: 150px;
-  background-color: rgba(11, 17, 23, 0.90);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: var(--border-strong);
-  border-radius: 8px;
-  box-shadow: var(--shadow-card);
-  z-index: 900;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+  display: none !important;
 }
 
 .minimap-header {
@@ -2565,7 +2600,7 @@ html[data-view="direct"] .kaleidoscope-canvas {
 
 @media (max-width: 768px) {
   :root {
-    --header-height: 108px;
+    --header-height: 0px;
   }
 
   .header-inner {
@@ -2687,7 +2722,7 @@ html[data-view="direct"] .kaleidoscope-canvas {
 @media (max-width: 600px) {
   :root {
     --atlas-scale: 1;
-    --header-height: 108px;
+    --header-height: 0px;
   }
 
   .header-inner {
@@ -2720,7 +2755,7 @@ html[data-view="direct"] .kaleidoscope-canvas {
     -webkit-overflow-scrolling: touch;
     touch-action: pan-y !important;
     height: 100dvh !important;
-    padding-top: calc(var(--header-height, 108px) + 68px) !important;
+    padding-top: 24px !important;
     padding-bottom: 140px !important;
     box-sizing: border-box !important;
   }
@@ -2929,19 +2964,9 @@ html[data-view="direct"] .kaleidoscope-canvas {
     object-fit: contain !important;
   }
 
-  /* Botão Dentro da íris com espaçamento real */
+  /* Interface Dentro da íris desativada na simplificação */
   .optics-interface {
-    top: calc(var(--header-height, 108px) + 12px) !important;
-    left: 14px !important;
-    bottom: auto !important;
-    z-index: 80 !important;
-  }
-
-  .optics-view-toggle {
-    min-height: 38px !important;
-    padding: 6px 12px !important;
-    font-size: 11.5px !important;
-    gap: 8px !important;
+    display: none !important;
   }
 
   /* Dock persistente com alvos de toque acessíveis e padding seguro */
@@ -2957,6 +2982,20 @@ html[data-view="direct"] .kaleidoscope-canvas {
     width: 100%;
     flex-direction: column;
     gap: 4px;
+  }
+
+  .dock-actions-group,
+  .dock-zoom-controls {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .dock-actions-group .dock-tool-btn,
+  .dock-zoom-controls .dock-tool-btn {
+    min-height: 32px;
+    padding: 4px 10px;
+    font-size: 11px;
   }
 
   .dock-projects-group {
@@ -2997,7 +3036,7 @@ html[data-view="direct"] .kaleidoscope-canvas {
 /* Breakpoint 360px: densidade extrema sem colisões */
 @media (max-width: 360px) {
   :root {
-    --header-height: 120px;
+    --header-height: 0px;
   }
 
   .direct-reading-view {
@@ -3123,26 +3162,13 @@ html[data-view="atlas"][data-optics="immersive"] .atlas-mobile-hint {
   }
 }
 
-/* Banner Editorial de Relações Conceituais (Curatorial) */
-.atlas-relation-banner {
-  position: absolute;
-  bottom: 106px;
-  left: 50%;
-  transform: translate(-50%, -8px);
-  width: calc(100% - 48px);
-  max-width: 860px;
-  z-index: 250;
-  pointer-events: none;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.26s cubic-bezier(0.16, 1, 0.3, 1), transform 0.26s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.26s ease;
-}
-
+/* Banner Editorial de Relações Conceituais (Desativado na Simplificação) */
+.atlas-relation-banner,
 .atlas-relation-banner.is-visible {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-  transform: translate(-50%, 0);
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
 
 .relation-banner-inner {
