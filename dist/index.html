@@ -16,8 +16,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20261101-cosmos-reading-v1">
-  <link rel="stylesheet" href="optics-interface.css?v=20261101-cosmos-reading-v1">
+  <link rel="stylesheet" href="styles.css?v=20261101-iris-zoom-v1">
+  <link rel="stylesheet" href="optics-interface.css?v=20261101-iris-zoom-v1">
 </head>
 <body class="mode-atlas">
   <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
@@ -87,7 +87,7 @@
   <main id="main-content">
 
     <!-- 1. VIEWPORT ESPACIAL (ATLAS 2D + PROFUNDIDADE ARQUITETURAL) -->
-    <div id="spatial-viewport" class="spatial-viewport" tabindex="0" role="region" aria-label="Mundo espacial navegável. Use arrastar ou teclado para navegar, roda do mouse para zoom.">
+    <div id="spatial-viewport" class="spatial-viewport" tabindex="0" role="region" aria-label="Atlas Espacial de Sistemas. Projetos em posições fixas com íris central interativa. Use a roda do mouse ou controles para aproximar a íris.">
 
       <!-- Fundo gerativo em Canvas 2D -->
       <canvas id="kaleidoscope-canvas" class="kaleidoscope-canvas" aria-hidden="true"></canvas>
@@ -106,7 +106,7 @@
             <p class="meridian-lead">Entre sistemas, dados e possibilidades.<br><span class="meridian-career">Busco estágio em Análise de Dados &amp; Finanças.</span></p>
             <div class="meridian-hint" aria-hidden="true">
               <span class="hint-pulse"></span>
-              <span>Arraste para explorar &middot; Roda do mouse zoom &middot; Clique em um objeto</span>
+              <span>Atlas de Sistemas &middot; Roda do mouse ou controles para zoom na íris &middot; Selecione um projeto</span>
             </div>
           </div>
           <!-- Vetores de orientação conectando aos 6 objetos -->
@@ -529,7 +529,7 @@
           <span class="optics-toggle-arrow" aria-hidden="true">↗</span>
         </button>
         <div class="optics-adjustments" id="optics-adjustments" hidden>
-          <label for="optics-depth">Profundidade <input id="optics-depth" type="range" min="80" max="125" value="100" step="1"></label>
+          <label for="optics-depth">Profundidade <input id="optics-depth" type="range" min="100" max="125" value="100" step="1"></label>
           <button type="button" id="optics-reset">Centralizar</button>
           <button type="button" id="optics-motion" aria-pressed="false">Pausar movimento</button>
         </div>
@@ -1581,14 +1581,14 @@
 
         <!-- Controles de Zoom & Visão Geral (Acessíveis em Mobile & Desktop) -->
         <div class="dock-zoom-controls">
-          <button type="button" class="dock-tool-btn zoom-btn" id="btn-dock-zoom-out" title="Reduzir zoom" aria-label="Reduzir zoom">
+          <button type="button" class="dock-tool-btn zoom-btn" id="btn-dock-zoom-out" title="Recuar íris ao enquadramento padrão" aria-label="Recuar íris ao enquadramento padrão">
             <span aria-hidden="true">&minus;</span>
           </button>
-          <button type="button" class="dock-tool-btn" id="btn-dock-overview" title="Restaurar enquadramento geral do Atlas">
+          <button type="button" class="dock-tool-btn" id="btn-dock-overview" title="Restaurar enquadramento padrão da íris e do Atlas" aria-label="Restaurar enquadramento padrão da íris e do Atlas">
             <span class="tool-glyph" aria-hidden="true">&odot;</span>
             <span class="tool-text">Geral</span>
           </button>
-          <button type="button" class="dock-tool-btn zoom-btn" id="btn-dock-zoom-in" title="Aumentar zoom" aria-label="Aumentar zoom">
+          <button type="button" class="dock-tool-btn zoom-btn" id="btn-dock-zoom-in" title="Aproximar íris com profundidade 3D" aria-label="Aproximar íris com profundidade 3D">
             <span aria-hidden="true">&plus;</span>
           </button>
         </div>
@@ -1596,37 +1596,37 @@
     </div>
 
 
-    <p class="atlas-mobile-hint">Arraste para explorar. Toque num objeto ou escolha um projeto abaixo.</p>
+    <p class="atlas-mobile-hint">Toque num objeto ou escolha um projeto abaixo. Use os controles para aproximar a íris.</p>
 
     <!-- 5. MINIMAPA INTERATIVO DO ATLAS -->
-    <div id="atlas-minimap-container" class="atlas-minimap-container" aria-label="Minimapa de navegação do Atlas" role="region">
+    <div id="atlas-minimap-container" class="atlas-minimap-container" aria-label="Radar cartográfico dos projetos" role="region">
       <div class="minimap-header">
         <span class="minimap-title">RADAR / MINIMAPA</span>
         <span class="minimap-coords" id="minimap-coord-readout">0, 0</span>
       </div>
-      <div class="minimap-radar-box" id="minimap-radar" tabindex="0" role="button" aria-label="Clique no minimapa para deslocar a câmera">
+      <div class="minimap-radar-box" id="minimap-radar" tabindex="0" role="button" aria-label="Radar do Atlas. Clique em uma estação para abrir o projeto">
         <svg id="minimap-svg" viewBox="-1000 -800 2000 1600" width="100%" height="100%">
           <rect x="-990" y="-790" width="1980" height="1580" fill="#f8fafc" stroke="#0e1218" stroke-width="12" stroke-opacity="0.15" />
           <line x1="-990" y1="0" x2="990" y2="0" stroke="#0e1218" stroke-width="6" stroke-dasharray="20 20" stroke-opacity="0.2" />
           <line x1="0" y1="-790" x2="0" y2="790" stroke="#0e1218" stroke-width="6" stroke-dasharray="20 20" stroke-opacity="0.2" />
 
           <!-- Pontos dos 6 objetos no minimapa nas coordenadas atualizadas -->
-          <circle cx="-440" cy="-220" r="45" fill="#0e1218" />
+          <circle cx="-440" cy="-220" r="45" fill="#0e1218" class="minimap-node" data-project="yahcw" />
           <text x="-420" y="-250" font-family="'JetBrains Mono', monospace" font-size="64" font-weight="700" fill="#0e1218">01</text>
 
-          <circle cx="440" cy="-220" r="45" fill="#0e1218" />
+          <circle cx="440" cy="-220" r="45" fill="#0e1218" class="minimap-node" data-project="tuya" />
           <text x="460" y="-250" font-family="'JetBrains Mono', monospace" font-size="64" font-weight="700" fill="#0e1218">02</text>
 
-          <circle cx="-450" cy="220" r="45" fill="#0e1218" />
+          <circle cx="-450" cy="220" r="45" fill="#0e1218" class="minimap-node" data-project="gaming" />
           <text x="-430" y="290" font-family="'JetBrains Mono', monospace" font-size="64" font-weight="700" fill="#0e1218">03</text>
 
-          <circle cx="450" cy="220" r="45" fill="#0e1218" />
+          <circle cx="450" cy="220" r="45" fill="#0e1218" class="minimap-node" data-project="python" />
           <text x="470" y="290" font-family="'JetBrains Mono', monospace" font-size="64" font-weight="700" fill="#0e1218">04</text>
 
-          <circle cx="0" cy="-350" r="45" fill="#0e1218" />
+          <circle cx="0" cy="-350" r="45" fill="#0e1218" class="minimap-node" data-project="spotifast" />
           <text x="20" y="-380" font-family="'JetBrains Mono', monospace" font-size="64" font-weight="700" fill="#0e1218">05</text>
 
-          <circle cx="0" cy="350" r="45" fill="#d9432e" />
+          <circle cx="0" cy="350" r="45" fill="#d9432e" class="minimap-node" data-project="financeiro" />
           <text x="20" y="420" font-family="'JetBrains Mono', monospace" font-size="64" font-weight="700" fill="#d9432e">06</text>
 
           <!-- Retângulo de Visão / Frustum da Câmera -->
@@ -1821,10 +1821,10 @@
   </noscript>
 
   <!-- SCRIPTS DO SISTEMA -->
-  <script src="kaleidoscope.js?v=20261101-cosmos-reading-v1"></script>
+  <script src="kaleidoscope.js?v=20261101-iris-zoom-v1"></script>
   <script src="finance-lab.js"></script>
   <script src="cloud-morph.js"></script>
-  <script src="script.js?v=20261101-cosmos-reading-v1"></script>
-  <script src="optics-interface.js?v=20261030-iris-v1"></script>
+  <script src="script.js?v=20261101-iris-zoom-v1"></script>
+  <script src="optics-interface.js?v=20261101-iris-zoom-v1"></script>
 </body>
 </html>

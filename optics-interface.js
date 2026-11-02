@@ -31,8 +31,10 @@
   }
 
   function dispatchOptics(reset) {
+    const depthVal = Number(depth.value);
+    const normalizedZoom = reset ? 0.0 : Math.max(0.0, Math.min(1.0, (depthVal - 100) / 25));
     window.dispatchEvent(new CustomEvent('portfolio:opticsinput', {
-      detail: { x: gazeX, y: gazeY, zoom: Number(depth.value) / 100, reset: Boolean(reset) }
+      detail: { x: gazeX, y: gazeY, zoom: depthVal / 100, irisZoom: normalizedZoom, reset: Boolean(reset) }
     }));
   }
 
@@ -142,7 +144,7 @@
     wheelEvent.preventDefault();
     wheelEvent.stopImmediatePropagation();
     if (!motionAllowed()) return;
-    depth.value = String(Math.round(Math.max(80, Math.min(125, Number(depth.value) - wheelEvent.deltaY * 0.025))));
+    depth.value = String(Math.round(Math.max(100, Math.min(125, Number(depth.value) - wheelEvent.deltaY * 0.025))));
     dispatchOptics(false);
   }, { capture: true, passive: false });
 
@@ -183,7 +185,7 @@
         dispatchOptics(true);
         updateMaterialPerspective();
       } else {
-        depth.value = String(Math.max(80, Math.min(125, Number(depth.value) + (keyboardEvent.key === '-' ? -5 : 5))));
+        depth.value = String(Math.max(100, Math.min(125, Number(depth.value) + (keyboardEvent.key === '-' ? -5 : 5))));
         dispatchOptics(false);
       }
     }

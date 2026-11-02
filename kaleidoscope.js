@@ -118,7 +118,7 @@
       '  float cosmicRotation = uniformRotation * 0.015;',
       '  mat2 cosmicRotationMatrix = mat2(cos(cosmicRotation), -sin(cosmicRotation), sin(cosmicRotation), cos(cosmicRotation));',
       '  centeredCoordinates = cosmicRotationMatrix * centeredCoordinates;',
-      '  float zoomScaleFactor = 1.0 - uniformZoom * 0.035;',
+      '  float zoomScaleFactor = 1.0 - uniformZoom * 0.08;',
       '  centeredCoordinates *= zoomScaleFactor;',
       '  vec2 cosmicDriftVector = vec2(uniformActiveTime * 0.0016, uniformActiveTime * 0.0008);',
       '  vec2 deepLayerCoordinates = centeredCoordinates + uniformPointer * 0.032 + cosmicDriftVector * 0.45;',
@@ -201,8 +201,10 @@
       '  varyingWorldPosition = localVertexPosition;',
       '  varyingNormal = normalize(localNormal);',
       '  varyingTexCoord = attributeTexCoord;',
-      '  vec3 cameraOrigin = vec3(0.24 + uniformPointer.x * 0.82, -0.28 + uniformPointer.y * 0.68, 2.68 - uniformZoom * 0.10);',
-      '  vec3 cameraForward = normalize(vec3(0.0, 0.0, -0.24) - cameraOrigin);',
+      '  vec3 cameraTarget = vec3(0.0, 0.0, -0.24);',
+      '  vec3 defaultCamPos = vec3(0.24 + uniformPointer.x * 0.82, -0.28 + uniformPointer.y * 0.68, 2.68);',
+      '  vec3 cameraOrigin = defaultCamPos - (defaultCamPos - cameraTarget) * (uniformZoom * 0.58);',
+      '  vec3 cameraForward = normalize(cameraTarget - cameraOrigin);',
       '  vec3 cameraRight = normalize(cross(cameraForward, vec3(0.0, 1.0, 0.0)));',
       '  vec3 cameraUp = cross(cameraRight, cameraForward);',
       '  varyingViewDirection = normalize(cameraOrigin - localVertexPosition);',
@@ -1128,15 +1130,41 @@
     }
 
     function handleOpticsInput(inputEvent) {
-      if (!checkAtlasViewActive() || checkDocumentHidden() || !checkMotionPermitted()) {
+      if (!checkAtlasViewActive() || checkDocumentHidden()) {
         return;
       }
-      const inputDetail = inputEvent.detail || {};
-      const nextPointerX = inputDetail.reset ? 0.0 : (Number.isFinite(inputDetail.x) ? Math.max(-1.0, Math.min(1.0, inputDetail.x)) : targetPointerX);
-      const nextPointerY = inputDetail.reset ? 0.0 : (Number.isFinite(inputDetail.y) ? Math.max(-1.0, Math.min(1.0, inputDetail.y)) : targetPointerY);
-      const nextZoom = inputDetail.reset ? 0.0 : (Number.isFinite(inputDetail.zoom) ? Math.max(-1.0, Math.min(1.0, (inputDetail.zoom - 1.0) / 0.25)) : targetZoom);
-      const nextRotation = inputDetail.reset ? 0.0 : targetRotationAngle;
-      const nextProject = inputDetail.reset ? 0.0 : (inputDetail.project ? 1.0 : 0.0);
+      const inputDetail = (inputEvent && inputEvent.detail) || {};
+      let nextPointerX = targetPointerX;
+      let nextPointerY = targetPointerY;
+      let nextZoom = targetZoom;
+      let nextRotation = targetRotationAngle;
+      let nextProject = targetProject;
+
+      if (inputDetail.reset) {
+        nextPointerX = 0.0;
+        nextPointerY = 0.0;
+        nextZoom = 0.0;
+        nextRotation = 0.0;
+        nextProject = 0.0;
+      } else {
+        if (Number.isFinite(inputDetail.x)) {
+          nextPointerX = Math.max(-1.0, Math.min(1.0, inputDetail.x));
+        }
+        if (Number.isFinite(inputDetail.y)) {
+          nextPointerY = Math.max(-1.0, Math.min(1.0, inputDetail.y));
+        }
+        if (Number.isFinite(inputDetail.irisZoom)) {
+          nextZoom = Math.max(0.0, Math.min(1.0, inputDetail.irisZoom));
+        } else if (Number.isFinite(inputDetail.zoom)) {
+          nextZoom = Math.max(0.0, Math.min(1.0, (inputDetail.zoom - 1.0) / 0.25));
+        }
+        if (Number.isFinite(inputDetail.rotation)) {
+          nextRotation = inputDetail.rotation;
+        }
+        if (typeof inputDetail.project !== 'undefined') {
+          nextProject = inputDetail.project ? 1.0 : 0.0;
+        }
+      }
 
       if (Math.abs(nextPointerX - targetPointerX) + Math.abs(nextPointerY - targetPointerY) + Math.abs(nextZoom - targetZoom) + Math.abs(nextProject - targetProject) + Math.abs(nextRotation - targetRotationAngle) < 0.0001) {
         return;
@@ -1147,6 +1175,16 @@
       targetZoom = nextZoom;
       targetProject = nextProject;
       targetRotationAngle = nextRotation;
+
+      if (!checkMotionPermitted()) {
+        currentPointerX = targetPointerX;
+        currentPointerY = targetPointerY;
+        currentRotationAngle = targetRotationAngle;
+        currentZoom = targetZoom;
+        currentProject = targetProject;
+        renderSingleFrame();
+        return;
+      }
 
       triggerInteractiveSettling();
     }
@@ -1228,6 +1266,21 @@
     window.addEventListener('hashchange', syncDocumentState, { passive: true });
     window.addEventListener('popstate', syncDocumentState, { passive: true });
     document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    window.__portfolioOptics = {
+      getZoom: function () { return currentZoom; },
+      getTargetZoom: function () { return targetZoom; },
+      setIrisZoom: function (val, immediate) {
+        handleOpticsInput({ detail: { irisZoom: val, reset: val === 0.0 } });
+        if (immediate) {
+          currentZoom = targetZoom;
+          renderSingleFrame();
+        }
+      },
+      reset: function () {
+        handleOpticsInput({ detail: { reset: true } });
+      }
+    };
 
     canvasElement.addEventListener('webglcontextlost', function (eventObject) {
       eventObject.preventDefault();

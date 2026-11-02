@@ -140,14 +140,25 @@
     targetPanX: 0,
     targetPanY: 0,
     targetZoom: 0.85,
-    isSettled: false,
+    isSettled: true,
     minZoom: 0.35,
     maxZoom: 1.85,
-    minPanX: -900,
-    maxPanX: 900,
-    minPanY: -800,
-    maxPanY: 800
+    minPanX: 0,
+    maxPanX: 0,
+    minPanY: 0,
+    maxPanY: 0
   };
+
+  let currentIrisZoom = 0.0;
+  let targetIrisZoom = 0.0;
+
+  function dispatchIrisZoom(zoomVal, isReset) {
+    targetIrisZoom = isReset ? 0.0 : Math.max(0.0, Math.min(1.0, zoomVal));
+    currentIrisZoom = targetIrisZoom;
+    window.dispatchEvent(new CustomEvent('portfolio:opticsinput', {
+      detail: { irisZoom: targetIrisZoom, reset: Boolean(isReset) }
+    }));
+  }
 
   const pointerState = {
     isPointerDown: false,
@@ -220,18 +231,17 @@
     cameraState.targetPanY = 0;
     cameraState.targetZoom = calculatedFitZoom;
 
-    if (isMotionReduced || snap) {
-      cameraState.currentPanX = 0;
-      cameraState.currentPanY = 0;
-      cameraState.currentZoom = calculatedFitZoom;
-      cameraState.isSettled = true;
-      applyWorldTransform();
-      drawAtlasCanvas();
-    } else {
-      cameraState.isSettled = false;
+    cameraState.currentPanX = 0;
+    cameraState.currentPanY = 0;
+    cameraState.currentZoom = calculatedFitZoom;
+    cameraState.isSettled = true;
+    applyWorldTransform();
+    drawAtlasCanvas();
+
+    if (snap || targetIrisZoom !== 0.0) {
+      dispatchIrisZoom(0.0, true);
     }
 
-    requestCameraWakeup();
     announceLiveStatus('Enquadramento geral do Atlas restaurado.');
   }
 
@@ -541,8 +551,7 @@
     }
   }
 
-  // Captura de ponteiro: NUNCA capturar em pointerdown para não sequestrar cliques!
-  // Somente capturar após ultrapassar limiar de 6px (arrasto confirmado)
+  // Ponteiro no Atlas: geometria e câmera permanecem fixas/estacionárias
   function handlePointerDown(pointerEvent) {
     if (pointerEvent.button !== 0 && pointerEvent.pointerType === 'mouse') {
       return;
@@ -562,8 +571,6 @@
     if (!pointerState.isPointerDown) {
       return;
     }
-    const movementX = pointerEvent.clientX - pointerState.previousPointerX;
-    const movementY = pointerEvent.clientY - pointerState.previousPointerY;
     pointerState.previousPointerX = pointerEvent.clientX;
     pointerState.previousPointerY = pointerEvent.clientY;
 
@@ -572,33 +579,7 @@
       pointerEvent.clientY - pointerState.startPointerY
     );
     pointerState.totalDragDistance = distanceFromStart;
-
-    if (distanceFromStart > 6 && !pointerState.isDragging) {
-      pointerState.isDragging = true;
-      pointerState.wasDragged = true;
-      if (spatialViewport) {
-        spatialViewport.classList.add('is-dragging');
-        if (typeof spatialViewport.setPointerCapture === 'function' && pointerState.activePointerId !== null) {
-          try {
-            spatialViewport.setPointerCapture(pointerState.activePointerId);
-          } catch (_) {}
-        }
-      }
-    }
-
-    if (pointerState.isDragging) {
-      cameraState.targetPanX = clampValue(
-        cameraState.targetPanX + movementX,
-        cameraState.minPanX,
-        cameraState.maxPanX
-      );
-      cameraState.targetPanY = clampValue(
-        cameraState.targetPanY + movementY,
-        cameraState.minPanY,
-        cameraState.maxPanY
-      );
-      requestCameraWakeup();
-    }
+    // O Atlas permanece estacionário após o ajuste inicial; nenhum arrasto desloca o mundo
   }
 
   function handlePointerUp(pointerEvent) {
@@ -606,18 +587,8 @@
       return;
     }
     pointerState.isPointerDown = false;
-
-    if (spatialViewport) {
-      spatialViewport.classList.remove('is-dragging');
-      if (typeof spatialViewport.releasePointerCapture === 'function' && pointerState.activePointerId !== null) {
-        try {
-          spatialViewport.releasePointerCapture(pointerState.activePointerId);
-        } catch (_) {}
-      }
-    }
     pointerState.activePointerId = null;
 
-    // Mantém flag wasDragged por breve instante para prevenir evento de clique concorrente após drag
     setTimeout(function () {
       pointerState.totalDragDistance = 0;
       pointerState.isDragging = false;
@@ -625,43 +596,30 @@
     }, 60);
   }
 
-  // Zoom ancorado na posição do cursor
+  // Roda do mouse no Atlas: age EXCLUSIVAMENTE na profundidade da íris
   function handleWheelZoom(wheelEvent) {
-    // Se leitura direta ou modal estiver aberta, não captura wheel
-    if (isDirectReadingActive || document.querySelector('.atlas-overlay-modal[open]')) {
+    // Permite Ctrl+wheel para zoom nativo do navegador
+    if (wheelEvent.ctrlKey) {
+      return;
+    }
+
+    // Permite rolagem nativa em leitura direta, salas de projetos, modais ou controles
+    if (isDirectReadingActive || currentActiveRoom || document.querySelector('.atlas-overlay-modal[open]')) {
+      return;
+    }
+    if (wheelEvent.target && (wheelEvent.target.closest('.project-room') || wheelEvent.target.closest('#direct-reading-view') || wheelEvent.target.closest('.atlas-overlay-modal') || wheelEvent.target.closest('.optics-interface'))) {
       return;
     }
 
     wheelEvent.preventDefault();
-    const zoomMultiplier = Math.exp(-wheelEvent.deltaY * 0.0015);
-    const newTargetZoom = clampValue(
-      cameraState.targetZoom * zoomMultiplier,
-      cameraState.minZoom,
-      cameraState.maxZoom
-    );
-
-    const windowHalfWidth = (window.innerWidth || 1200) / 2;
-    const windowHalfHeight = (window.innerHeight || 800) / 2;
-    const cursorOffsetX = wheelEvent.clientX - windowHalfWidth - cameraState.targetPanX;
-    const cursorOffsetY = wheelEvent.clientY - windowHalfHeight - cameraState.targetPanY;
-
-    const zoomScaleRatio = newTargetZoom / cameraState.targetZoom;
-    const adjustedPanX = cameraState.targetPanX - cursorOffsetX * (zoomScaleRatio - 1);
-    const adjustedPanY = cameraState.targetPanY - cursorOffsetY * (zoomScaleRatio - 1);
-
-    cameraState.targetZoom = newTargetZoom;
-    cameraState.targetPanX = clampValue(adjustedPanX, cameraState.minPanX, cameraState.maxPanX);
-    cameraState.targetPanY = clampValue(adjustedPanY, cameraState.minPanY, cameraState.maxPanY);
-
-    if (isMotionReduced) {
-      cameraState.currentZoom = cameraState.targetZoom;
-      cameraState.currentPanX = cameraState.targetPanX;
-      cameraState.currentPanY = cameraState.targetPanY;
+    const zoomStep = -wheelEvent.deltaY * 0.0016;
+    const nextZoom = Math.max(0.0, Math.min(1.0, targetIrisZoom + zoomStep));
+    if (Math.abs(nextZoom - targetIrisZoom) > 0.0001) {
+      dispatchIrisZoom(nextZoom, nextZoom === 0.0 && targetIrisZoom === 0.0);
     }
-    requestCameraWakeup();
   }
 
-  // Minimap: Frustum divide pan pelo zoom; Teleporte multiplica coordenadas pelo zoom
+  // Minimapa: Frustum reflete enquadramento responsivo estacionário
   function updateMinimapFrustum() {
     const frustumRectangle = document.getElementById('minimap-frustum');
     const coordReadout = document.getElementById('minimap-coord-readout');
@@ -671,16 +629,12 @@
     const viewportHeight = window.innerHeight || 800;
     const scaleFactor = cameraState.currentZoom || 1;
 
-    // Dimensões do frustum no espaço do mundo (unidades mundiais)
+    // Dimensões do frustum no espaço do mundo (origem 0,0 centralizada)
     const visibleWidthWorld = viewportWidth / scaleFactor;
     const visibleHeightWorld = viewportHeight / scaleFactor;
 
-    // Coordenada do centro da tela em unidades do mundo: pan dividido pelo zoom!
-    const worldCenterX = -cameraState.currentPanX / scaleFactor;
-    const worldCenterY = -cameraState.currentPanY / scaleFactor;
-
-    const visibleLeftWorld = worldCenterX - visibleWidthWorld / 2;
-    const visibleTopWorld = worldCenterY - visibleHeightWorld / 2;
+    const visibleLeftWorld = -visibleWidthWorld / 2;
+    const visibleTopWorld = -visibleHeightWorld / 2;
 
     frustumRectangle.setAttribute('x', Math.round(visibleLeftWorld));
     frustumRectangle.setAttribute('y', Math.round(visibleTopWorld));
@@ -688,13 +642,22 @@
     frustumRectangle.setAttribute('height', Math.round(visibleHeightWorld));
 
     if (coordReadout) {
-      coordReadout.textContent = Math.round(worldCenterX) + ', ' + Math.round(worldCenterY);
+      coordReadout.textContent = '0, 0';
     }
   }
 
   function handleMinimapClick(mouseEvent) {
     const minimapRadar = document.getElementById('minimap-radar');
     if (!minimapRadar) return;
+
+    // Se clicou diretamente num nó ou elemento com data-project
+    const targetElement = mouseEvent.target;
+    const directProjectId = targetElement && (targetElement.getAttribute('data-project') || (targetElement.closest && targetElement.closest('[data-project]') && targetElement.closest('[data-project]').getAttribute('data-project')));
+    if (directProjectId && (PROJECT_COORDINATES[directProjectId] || directProjectId === 'cota')) {
+      navigateToRoute(directProjectId, true);
+      return;
+    }
+
     const boundingBox = minimapRadar.getBoundingClientRect();
     const clickRatioX = (mouseEvent.clientX - boundingBox.left) / boundingBox.width;
     const clickRatioY = (mouseEvent.clientY - boundingBox.top) / boundingBox.height;
@@ -703,16 +666,23 @@
     const targetWorldX = -1000 + clickRatioX * 2000;
     const targetWorldY = -800 + clickRatioY * 1600;
 
-    // Teleporte: multiplica unidades mundiais pelo zoom para converter em pan screen-px!
-    const currentScale = cameraState.targetZoom;
-    cameraState.targetPanX = clampValue(-targetWorldX * currentScale, cameraState.minPanX, cameraState.maxPanX);
-    cameraState.targetPanY = clampValue(-targetWorldY * currentScale, cameraState.minPanY, cameraState.maxPanY);
-
-    if (isMotionReduced) {
-      cameraState.currentPanX = cameraState.targetPanX;
-      cameraState.currentPanY = cameraState.targetPanY;
+    // Encontra a estação de projeto mais próxima do clique
+    let closestProject = null;
+    let minDistance = Infinity;
+    const pKeys = Object.keys(PROJECT_COORDINATES);
+    for (let i = 0; i < pKeys.length; i += 1) {
+      const pKey = pKeys[i];
+      const pLoc = PROJECT_COORDINATES[pKey];
+      const dist = Math.hypot(pLoc.coordX - targetWorldX, pLoc.coordY - targetWorldY);
+      if (dist < minDistance) {
+        minDistance = dist;
+        closestProject = pKey;
+      }
     }
-    requestCameraWakeup();
+
+    if (closestProject && minDistance < 500) {
+      navigateToRoute(closestProject, true);
+    }
   }
 
   // Centralização de rotas sem criação espúria de entradas no histórico
@@ -740,25 +710,8 @@
       setSpatialViewportInert(false);
       clearConceptualRelation();
 
-      if (savedAtlasCamera) {
-        cameraState.targetPanX = savedAtlasCamera.panX;
-        cameraState.targetPanY = savedAtlasCamera.panY;
-        cameraState.targetZoom = savedAtlasCamera.zoom;
-        if (isMotionReduced) {
-          cameraState.currentPanX = savedAtlasCamera.panX;
-          cameraState.currentPanY = savedAtlasCamera.panY;
-          cameraState.currentZoom = savedAtlasCamera.zoom;
-          cameraState.isSettled = true;
-          applyWorldTransform();
-          drawAtlasCanvas();
-        } else {
-          cameraState.isSettled = false;
-          requestCameraWakeup();
-        }
-        savedAtlasCamera = null;
-      } else {
-        resetCameraToOverview(true);
-      }
+      resetCameraToOverview(true);
+      savedAtlasCamera = null;
 
       if (lastFocusedRoomId) {
         const trigger = savedAtlasFocus && savedAtlasFocus.isConnected && savedAtlasFocus.getClientRects().length > 0 && !savedAtlasFocus.closest('[inert]') && savedAtlasFocus !== document.body ? savedAtlasFocus : document.querySelector('[data-enter-room="' + (lastFocusedRoomId === 'cota' ? 'financeiro' : lastFocusedRoomId) + '"]');
@@ -1099,34 +1052,21 @@
         return;
       }
 
-      // 4. No Atlas: setas deslocam câmera, +/- alteram zoom, 0 restaura enquadramento geral
-      const panStep = keyboardEvent.shiftKey ? 140 : 50;
-      if (keyboardEvent.key === 'ArrowRight') {
-        cameraState.targetPanX = clampValue(cameraState.targetPanX - panStep, cameraState.minPanX, cameraState.maxPanX);
-        requestCameraWakeup();
-        keyboardEvent.preventDefault();
-      } else if (keyboardEvent.key === 'ArrowLeft') {
-        cameraState.targetPanX = clampValue(cameraState.targetPanX + panStep, cameraState.minPanX, cameraState.maxPanX);
-        requestCameraWakeup();
-        keyboardEvent.preventDefault();
-      } else if (keyboardEvent.key === 'ArrowDown') {
-        cameraState.targetPanY = clampValue(cameraState.targetPanY - panStep, cameraState.minPanY, cameraState.maxPanY);
-        requestCameraWakeup();
-        keyboardEvent.preventDefault();
-      } else if (keyboardEvent.key === 'ArrowUp') {
-        cameraState.targetPanY = clampValue(cameraState.targetPanY + panStep, cameraState.minPanY, cameraState.maxPanY);
-        requestCameraWakeup();
-        keyboardEvent.preventDefault();
-      } else if (keyboardEvent.key === '+' || keyboardEvent.key === '=') {
-        cameraState.targetZoom = clampValue(cameraState.targetZoom * 1.15, cameraState.minZoom, cameraState.maxZoom);
-        requestCameraWakeup();
+      // 4. No Atlas: a geometria é estacionária; +/- ajustam profundidade da íris, 0 restaura enquadramento
+      if (keyboardEvent.key === '+' || keyboardEvent.key === '=') {
+        const nextZoom = Math.min(1.0, targetIrisZoom + 0.20);
+        dispatchIrisZoom(nextZoom, false);
+        announceLiveStatus('Íris aproximada.');
         keyboardEvent.preventDefault();
       } else if (keyboardEvent.key === '-' || keyboardEvent.key === '_') {
-        cameraState.targetZoom = clampValue(cameraState.targetZoom / 1.15, cameraState.minZoom, cameraState.maxZoom);
-        requestCameraWakeup();
+        const nextZoom = Math.max(0.0, targetIrisZoom - 0.20);
+        dispatchIrisZoom(nextZoom, nextZoom === 0.0);
+        announceLiveStatus(nextZoom === 0.0 ? 'Íris no enquadramento padrão.' : 'Íris recuada.');
         keyboardEvent.preventDefault();
       } else if (keyboardEvent.key === '0') {
-        resetCameraToOverview();
+        dispatchIrisZoom(0.0, true);
+        resetCameraToOverview(true);
+        announceLiveStatus('Enquadramento padrão restaurado.');
         keyboardEvent.preventDefault();
       }
     });
@@ -1740,28 +1680,32 @@
       relationBanner.addEventListener('focusout', scheduleRelationDismissal);
     }
 
-    // Controles de Zoom do Dock
+    // Controles de Zoom da Íris no Dock
     const dockOverview = document.getElementById('btn-dock-overview');
     if (dockOverview) {
       dockOverview.addEventListener('click', function () {
+        dispatchIrisZoom(0.0, true);
         navigateToRoute('atlas', true);
         resetCameraToOverview(true);
+        announceLiveStatus('Enquadramento padrão do Atlas e da íris restaurado.');
       });
     }
 
     const dockZoomIn = document.getElementById('btn-dock-zoom-in');
     if (dockZoomIn) {
       dockZoomIn.addEventListener('click', function () {
-        cameraState.targetZoom = clampValue(cameraState.targetZoom * 1.25, cameraState.minZoom, cameraState.maxZoom);
-        requestCameraWakeup();
+        const nextZoom = Math.min(1.0, targetIrisZoom + 0.25);
+        dispatchIrisZoom(nextZoom, false);
+        announceLiveStatus('Íris aproximada.');
       });
     }
 
     const dockZoomOut = document.getElementById('btn-dock-zoom-out');
     if (dockZoomOut) {
       dockZoomOut.addEventListener('click', function () {
-        cameraState.targetZoom = clampValue(cameraState.targetZoom / 1.25, cameraState.minZoom, cameraState.maxZoom);
-        requestCameraWakeup();
+        const nextZoom = Math.max(0.0, targetIrisZoom - 0.25);
+        dispatchIrisZoom(nextZoom, nextZoom === 0.0);
+        announceLiveStatus(nextZoom === 0.0 ? 'Íris no enquadramento padrão.' : 'Íris recuada.');
       });
     }
 

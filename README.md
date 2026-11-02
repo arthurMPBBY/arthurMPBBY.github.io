@@ -25,10 +25,10 @@ A atualização ambiente em desktop tem cadência-alvo de 60 desenhos por segund
 
 O espaço sideral é desenhado antes da íris, no mesmo contexto WebGL e agendador. Três camadas de estrelas possuem paralaxe distinta, com poeira difusa discreta ao fundo. A borda externa da malha revela o espaço por cobertura suave; a pupila permanece opaca. O tamanho das estrelas considera a área de cada pixel para reduzir cintilação em movimento, sem depender do MSAA para suavizar detalhes procedurais. Não há vídeo, textura remota ou segundo ciclo de animação.
 
-- **Atlas:** projetos e tipografia permanecem em HTML acessível sobre a cena; as esculturas acompanham discretamente o ponto de vista.
+- **Atlas:** projetos e tipografia permanecem em HTML acessível sobre a cena com enquadramento estável; o zoom age unicamente na profundidade 3D da íris central, aproximando a visão sem deslocar a camada de projetos.
 - **Dentro da íris:** abre uma visão dedicada à arte, com arrasto, controle de profundidade e botão de retorno. O modo guarda a câmera do atlas e isola seus controles do teclado enquanto estiver aberto.
 - **Celular:** o arrasto envia coordenadas normalizadas à cena, sem sensores, permissões de orientação ou movimento automático permanente.
-- **Teclado:** setas alteram o ponto de vista; `+`/`-` ajustam profundidade; `0` centraliza; `Esc` retorna aos projetos com restauração de foco.
+- **Teclado:** `+`/`-` ajustam profundidade da íris; `0` centraliza no enquadramento padrão; `Esc` retorna aos projetos com restauração de foco.
 - **Movimento:** a respiração continua enquanto o atlas estiver visível e o movimento permitido, inclusive em telas de toque. Pausa manual, movimento reduzido, aba oculta, leitura direta e salas de projetos interrompem a animação. O relógio de tempo ativo fica congelado durante a suspensão e retoma sem compensar o intervalo ausente.
 - **Falhas gráficas:** o portfólio continua disponível sem WebGL. Se o contexto for perdido dentro da experiência, os controles do atlas são restaurados.
 - **Separação de módulos:** `kaleidoscope.js` renderiza a cena; `optics-interface.js` controla exploração e gestos; `optics-interface.css` define a interface. A comunicação usa `portfolio:opticsinput` com coordenadas, profundidade e reset.
@@ -55,15 +55,15 @@ Na comparação posterior com a camada sideral (`outputs/cosmos-sol-bench-review
 
 O projeto oferece duas formas complementares de navegação e uma experiência óptica opcional:
 
-1. **Atlas Espacial (Navegação Não Linear):**
-   - Sistema de coordenadas mundiais contínuo com origem centralizada em `(0, 0)`.
-   - Âncora tipográfica central e 6 objetos arquiteturais livres dispostos em constelação espacial.
-   - Navegação por arrasto de ponteiro/touch, zoom ancorado no cursor do mouse e radar/minimapa de orientação (acessível via teclado com `Enter` ou `Espaço` para restauração de visão geral).
+1. **Atlas Espacial (Enquadramento Estacionário e Zoom Exclusivo na Íris):**
+   - Sistema de coordenadas mundiais com enquadramento estável e responsivo após o ajuste inicial (`calculateOverviewFit()`), mantendo posições de objetos, tipografia, linhas cartográficas e dock imóveis em tela.
+   - O zoom (acionado por roda do mouse, trackpad, botões `+`/`-` do dock e teclas equivalentes) atua **exclusivamente na profundidade da íris central**, aproximando a câmera 3D com perspectiva real e recuando suavemente até o enquadramento padrão (sem encolher abaixo do padrão).
+   - Radar/minimapa como bússola interativa: exibe as estações cartográficas e permite salto imediato ao clicar nos nós dos projetos.
+   - Total usabilidade em mobile mantida via dock e índice acessíveis, com suporte completo a preferências de movimento reduzido.
    - **Link Descoberta da Versão Clara:** Acesso direto à versão anterior preservada (`/2/`) disponível no menu de pílulas do cabeçalho ("Versão clara").
-   - **Memória Espacial e Entrada Coesa:** Ao entrar em uma sala a partir do mapa, a câmera (pan e zoom) e o foco são preservados. Ao sair via `Esc` ou botão "Voltar", a visão retorna exatamente ao enquadramento anterior com micro-indicação visual no objeto de retorno.
+   - **Memória Espacial e Entrada Coesa:** Ao entrar em uma sala a partir do mapa, o foco é preservado. Ao sair via `Esc` ou botão "Voltar", a visão retorna de forma coesa com micro-indicação visual no objeto de retorno.
    - **Atlas de Relações Conceituais (Curatorial):** Ao passar o mouse ou focar via teclado em qualquer objeto, são destacadas conexões conceituais curatoriais ("Em comum" / "Conexões de ideias") acompanhadas de legenda editorial e botões de salto rápido, com arcos projetados na periferia sem interceptar títulos centrais.
    - **Comportamento Material Derivado da Forma:** Cada escultura interage conforme sua própria natureza (YAHCW desliza lâminas de janelas Win32 DWM; Tuya expande órbitas e aquece o filamento; Gaming move o caliper de telemetria sobre a fita de pacing; Python tenciona treliças e nós de coleções; Spotifast rotaciona o vinil e posiciona o braço de leitura mecânico; Financeiro revela o arco da curva exponencial de juros compostos).
-   - Detecção estrita de intenção: deslocamentos de ponteiro superiores a 6 pixels são classificados como arrasto e não ativam abertura indesejada de salas.
 
 2. **Modo Leitura Direta (Linear):**
    - Acessível pelo cabeçalho ("Leitura direta") ou via hash `#leitura`.

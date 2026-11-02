@@ -340,14 +340,14 @@ select:focus-visible,
   width: 100vw;
   height: 100vh;
   overflow: hidden;
-  cursor: grab;
+  cursor: default;
   user-select: none;
   -webkit-user-select: none;
   touch-action: none;
 }
 
 .spatial-viewport.is-dragging {
-  cursor: grabbing;
+  cursor: default;
 }
 
 .kaleidoscope-canvas {
@@ -2337,7 +2337,16 @@ html[data-view="direct"] .kaleidoscope-canvas {
 
 .minimap-radar-box {
   flex: 1;
-  cursor: crosshair;
+  cursor: pointer;
+}
+
+.minimap-node {
+  cursor: pointer;
+  transition: fill 0.2s ease, transform 0.2s ease;
+}
+
+.minimap-node:hover {
+  fill: #d9432e !important;
 }
 
 /* ==========================================================================
