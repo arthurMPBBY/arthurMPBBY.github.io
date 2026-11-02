@@ -367,7 +367,12 @@ html.has-kaleidoscope .kaleidoscope-canvas {
   opacity: 1;
 }
 
-html[data-view="room"] .kaleidoscope-canvas,
+html[data-view="room"] .kaleidoscope-canvas {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.35s ease, visibility 0.35s ease;
+}
+
 html[data-view="direct"] .kaleidoscope-canvas {
   opacity: 0;
   visibility: hidden;
@@ -537,6 +542,13 @@ html[data-view="direct"] .kaleidoscope-canvas {
    ARTEFATOS ESPACIAIS (OBJETOS LIVRES ARQUITETURAIS)
    ========================================================================== */
 
+.artifact-yahcw { --coord-x: -440px; --coord-y: -220px; }
+.artifact-tuya { --coord-x: 440px; --coord-y: -220px; }
+.artifact-gaming { --coord-x: -450px; --coord-y: 220px; }
+.artifact-python { --coord-x: 450px; --coord-y: 220px; }
+.artifact-spotifast { --coord-x: 0px; --coord-y: -350px; }
+.artifact-financeiro { --coord-x: 0px; --coord-y: 350px; }
+
 .spatial-artifact {
   position: absolute;
   touch-action: none;
@@ -569,8 +581,8 @@ html[data-view="direct"] .kaleidoscope-canvas {
 }
 
 .artifact-trigger:focus-visible {
-  outline: 2px solid var(--color-vermilion);
-  outline-offset: 8px;
+  outline: 2px solid #deb87b;
+  outline-offset: 6px;
 }
 
 .spatial-artifact:hover .artifact-trigger,
@@ -604,6 +616,13 @@ html[data-view="direct"] .kaleidoscope-canvas {
   opacity: 0.35;
   filter: grayscale(0.2);
   transition: opacity 0.28s ease, filter 0.28s ease;
+}
+
+.spatial-artifact.is-dismissing {
+  opacity: 0.25;
+  filter: grayscale(0.2);
+  transition: opacity 0.32s ease-out;
+  pointer-events: none;
 }
 
 .spatial-artifact.returned-pulse {
@@ -691,15 +710,18 @@ html[data-view="direct"] .kaleidoscope-canvas {
   text-align: center;
   margin-bottom: 12px;
   pointer-events: none;
+  background: radial-gradient(ellipse at center, rgba(7, 11, 14, 0.70) 0%, rgba(7, 11, 14, 0.35) 65%, rgba(7, 11, 14, 0) 100%);
+  padding: 6px 14px;
+  border-radius: 12px;
 }
 
 .label-pre {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: calc(11px / var(--atlas-scale, 0.727));
 }
 
 .label-index {
@@ -713,16 +735,47 @@ html[data-view="direct"] .kaleidoscope-canvas {
   color: var(--color-ink-muted);
   letter-spacing: 0.5px;
   text-transform: uppercase;
+  font-size: calc(11px / var(--atlas-scale, 0.727));
 }
 
-.label-title {
+.label-title,
+.label-human-title {
   font-family: var(--font-heading);
-  font-size: 20px;
+  font-size: calc(17px / var(--atlas-scale, 0.727));
   font-weight: 800;
-  letter-spacing: -0.5px;
+  letter-spacing: -0.4px;
   color: var(--color-ink-primary);
-  margin-bottom: 4px;
-  line-height: 1.2;
+  margin-bottom: 2px;
+  line-height: 1.22;
+}
+
+.label-tech-subtitle {
+  font-family: var(--font-mono);
+  font-size: calc(13px / var(--atlas-scale, 0.727));
+  color: var(--color-ink-muted);
+  line-height: 1.3;
+  margin-bottom: 2px;
+  font-weight: 500;
+}
+
+.label-discovery-phrase {
+  font-family: var(--font-body, system-ui, -apple-system, sans-serif);
+  font-size: calc(11px / var(--atlas-scale, 0.727));
+  color: var(--color-ink-secondary);
+  line-height: 1.35;
+  min-height: calc(15px / var(--atlas-scale, 0.727));
+  margin-top: 3px;
+  opacity: 0;
+  transform: translateY(2px);
+  transition: opacity 0.22s ease, transform 0.22s ease;
+  pointer-events: none;
+}
+
+.spatial-artifact:hover .label-discovery-phrase,
+.spatial-artifact:focus-within .label-discovery-phrase,
+.spatial-artifact.is-highlighted .label-discovery-phrase {
+  opacity: 0.95;
+  transform: translateY(0);
 }
 
 .label-cta {
@@ -730,7 +783,7 @@ html[data-view="direct"] .kaleidoscope-canvas {
   align-items: center;
   gap: 6px;
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: calc(11px / var(--atlas-scale, 0.727));
   font-weight: 700;
   color: var(--color-vermilion);
   opacity: 0.85;
@@ -792,7 +845,7 @@ html[data-view="direct"] .kaleidoscope-canvas {
 }
 
 .project-room.room-enter-expand.is-active {
-  animation: roomOriginExpand 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: roomOriginExpand 0.35s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
 }
 
 @keyframes roomOriginExpand {
@@ -2631,30 +2684,12 @@ html[data-view="direct"] .kaleidoscope-canvas {
   }
 }
 
-@media (max-width: 360px) {
+@media (max-width: 600px) {
   :root {
-    --header-height: 120px;
+    --atlas-scale: 1;
+    --header-height: 108px;
   }
 
-  .direct-reading-view {
-    padding: calc(var(--header-height) + 12px) 10px 70px 10px;
-  }
-
-  .direct-return-btn {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .dossier-name {
-    font-size: 24px;
-  }
-
-  .dossier-project-item {
-    padding: 14px;
-  }
-}
-
-@media (max-width: 480px) {
   .header-inner {
     padding: 0 12px;
   }
@@ -2678,57 +2713,250 @@ html[data-view="direct"] .kaleidoscope-canvas {
     font-size: 11px;
   }
 
+  /* Viewport com rolagem vertical nativa fluida */
+  .spatial-viewport {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y !important;
+    height: 100dvh !important;
+    padding-top: calc(var(--header-height, 108px) + 68px) !important;
+    padding-bottom: 140px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Fundo gráfico WebGL fixo no viewport sem esticar drawing buffer */
+  .kaleidoscope-canvas {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    pointer-events: none !important;
+    z-index: 0 !important;
+  }
+
+  /* Oculta atlas-canvas cartográfico no modo galeria móvel */
+  .atlas-canvas {
+    display: none !important;
+  }
+
+  /* Oculta minimapa no mobile */
+  .atlas-minimap-container {
+    display: none !important;
+  }
+
+  /* #spatial-world passa a fluxo normal / grid de 2 colunas */
+  .spatial-world {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    width: 100% !important;
+    height: auto !important;
+    max-width: 100% !important;
+    transform: none !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 14px 10px !important;
+    padding: 0 12px !important;
+    box-sizing: border-box !important;
+    z-index: 2 !important;
+  }
+
+  /* .spatial-meridian ocupa as duas colunas no topo */
   .spatial-meridian {
-    width: 290px;
+    position: relative !important;
+    left: auto !important;
+    top: auto !important;
+    transform: none !important;
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-bottom: 8px !important;
+    pointer-events: auto !important;
+    text-align: center !important;
+  }
+
+  .meridian-crosshair,
+  .meridian-rings,
+  .meridian-vectors,
+  .meridian-hint {
+    display: none !important;
+  }
+
+  .meridian-typography {
+    padding: 0 8px 12px 8px !important;
   }
 
   .meridian-academic-tag {
-    font-size: 15px;
-    letter-spacing: 1px;
+    font-size: 10px !important;
+    letter-spacing: 1.5px !important;
+    margin-bottom: 6px !important;
   }
 
   .meridian-title {
-    font-size: 64px;
+    font-size: 32px !important;
+    letter-spacing: -1px !important;
+    line-height: 1.1 !important;
+    margin-bottom: 6px !important;
+    color: #ffffff !important;
   }
 
   .meridian-lead {
-    font-size: 24px;
+    font-size: 13px !important;
+    line-height: 1.45 !important;
+    max-width: 100% !important;
+    margin-bottom: 0 !important;
   }
 
+  /* Cada .spatial-artifact fica position:relative, left/top:auto, transform:none, width:auto, min-width:0 */
   .spatial-artifact {
-    width: 280px;
+    position: relative !important;
+    left: auto !important;
+    top: auto !important;
+    transform: none !important;
+    width: auto !important;
+    min-width: 0 !important;
+    touch-action: manipulation !important;
+    user-select: auto !important;
+    -webkit-user-select: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 12px 10px !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    border: 1px solid transparent !important;
+    border-bottom-color: rgba(255, 255, 255, 0.16) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-sizing: border-box !important;
+    transition: border-color 0.2s ease, background-color 0.2s ease !important;
   }
 
+  .spatial-artifact:hover,
+  .spatial-artifact:focus-within,
+  .spatial-artifact.is-highlighted {
+    border-color: transparent !important;
+    border-bottom-color: rgba(222, 184, 123, 0.65) !important;
+    background: transparent !important;
+  }
+
+  .artifact-trigger {
+    touch-action: manipulation !important;
+    user-select: auto !important;
+    -webkit-user-select: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    cursor: pointer !important;
+    outline: none !important;
+  }
+
+  .object-editorial-label {
+    width: 100% !important;
+    min-width: 0 !important;
+    text-align: left !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  .label-pre {
+    justify-content: flex-start !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    gap: 6px !important;
+    font-size: 10px !important;
+    margin-bottom: 4px !important;
+  }
+
+  .label-index {
+    font-size: 10px !important;
+  }
+
+  .label-category {
+    font-size: 9.5px !important;
+    min-width: 0 !important;
+    flex: 1 1 0 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .label-title,
+  .label-human-title {
+    font-size: 15px !important;
+    line-height: 1.25 !important;
+    letter-spacing: -0.3px !important;
+    margin-bottom: 4px !important;
+    word-break: break-word !important;
+  }
+
+  .label-tech-subtitle {
+    font-size: 11.5px !important;
+    line-height: 1.3 !important;
+    margin-bottom: 4px !important;
+    word-break: break-word !important;
+  }
+
+  /* Ocultar frase de descoberta no layout de toque */
+  .label-discovery-phrase {
+    display: none !important;
+  }
+
+  .label-cta {
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    margin-top: 4px !important;
+    gap: 4px !important;
+  }
+
+  /* Esculturas móveis: miniaturas contidas no próprio item, altura no máximo ~65-80px */
   .object-sculpture {
-    height: 160px;
+    height: 70px !important;
+    max-height: 75px !important;
+    margin-top: 8px !important;
+    width: 100% !important;
+    overflow: hidden !important;
   }
 
-  .label-title {
-    font-size: 17px;
+  .sculpture-svg {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
   }
 
-  .dock-projects-group .dock-name {
-    display: block;
-    font-size: 8px;
+  /* Botão Dentro da íris com espaçamento real */
+  .optics-interface {
+    top: calc(var(--header-height, 108px) + 12px) !important;
+    left: 14px !important;
+    bottom: auto !important;
+    z-index: 80 !important;
   }
 
-  .dock-projects-group .dock-item-btn {
-    padding: 6px 8px;
-    font-size: 11px;
+  .optics-view-toggle {
+    min-height: 38px !important;
+    padding: 6px 12px !important;
+    font-size: 11.5px !important;
+    gap: 8px !important;
   }
 
+  /* Dock persistente com alvos de toque acessíveis e padding seguro */
   .atlas-dock {
-    bottom: 12px;
-    padding: 8px;
-    width: calc(100% - 24px);
-    height: auto;
-    border-radius: 20px;
+    bottom: 12px !important;
+    padding: 6px 8px !important;
+    width: calc(100% - 24px) !important;
+    height: auto !important;
+    border-radius: 20px !important;
   }
 
   .dock-inner {
     width: 100%;
     flex-direction: column;
-    gap: 6px;
+    gap: 4px;
   }
 
   .dock-projects-group {
@@ -2738,11 +2966,18 @@ html[data-view="direct"] .kaleidoscope-canvas {
   }
 
   .dock-projects-group .dock-item-btn {
-    min-width: 40px;
-    min-height: 40px;
+    min-width: 36px;
+    min-height: 38px;
+    padding: 4px 6px;
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 1px;
+    font-size: 10px;
+  }
+
+  .dock-projects-group .dock-name {
+    display: block;
+    font-size: 7.5px;
   }
 
   .dock-separator {
@@ -2757,6 +2992,58 @@ html[data-view="direct"] .kaleidoscope-canvas {
   .room-heading {
     font-size: 24px;
   }
+}
+
+/* Breakpoint 360px: densidade extrema sem colisões */
+@media (max-width: 360px) {
+  :root {
+    --header-height: 120px;
+  }
+
+  .direct-reading-view {
+    padding: calc(var(--header-height) + 12px) 10px 70px 10px;
+  }
+
+  .direct-return-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .dossier-name {
+    font-size: 24px;
+  }
+
+  .dossier-project-item {
+    padding: 14px;
+  }
+
+  .meridian-title {
+    font-size: 28px !important;
+  }
+
+  /* Oculta miniaturas em 320px para garantir máxima legibilidade e alvos de toque */
+  .object-sculpture {
+    display: none !important;
+  }
+
+  .label-title,
+  .label-human-title {
+    font-size: 14px !important;
+  }
+
+  .label-tech-subtitle {
+    font-size: 11px !important;
+  }
+}
+
+/* Quando no modo imersivo (Dentro da íris), o viewport não rola e foca na arte */
+html[data-optics="immersive"] .spatial-viewport {
+  overflow: hidden !important;
+  touch-action: none !important;
+}
+
+html[data-optics="immersive"] .spatial-world {
+  display: none !important;
 }
 
 /* ==========================================================================
@@ -2778,6 +3065,19 @@ html[data-motion="paused"] *::after {
   animation-duration: 0.01ms !important;
   animation-iteration-count: 1 !important;
   transition-duration: 0.01ms !important;
+}
+
+html[data-motion="paused"] .project-room.room-enter-expand.is-active,
+@media (prefers-reduced-motion: reduce) {
+  .project-room.room-enter-expand.is-active {
+    clip-path: none !important;
+    animation: none !important;
+    opacity: 1 !important;
+  }
+  .spatial-artifact.is-dismissing {
+    opacity: 1 !important;
+    transition: none !important;
+  }
 }
 
 .atlas-overlay-modal {
@@ -3135,4 +3435,22 @@ html[data-page-hidden] .spatial-artifact * {
 #minimap-frustum {
   stroke: #f59e0b !important;
   fill: rgba(245, 158, 11, 0.15) !important;
+}
+
+/* The compact gallery keeps every item readable while one project has focus. */
+@media (max-width: 600px) {
+  .atlas-relation-banner,
+  .atlas-mobile-hint {
+    display: none !important;
+  }
+
+  .spatial-artifact.is-concept-dimmed {
+    opacity: 1 !important;
+    filter: none !important;
+  }
+
+  .spatial-artifact .artifact-trigger:focus-visible {
+    outline: 2px solid var(--color-vermilion) !important;
+    outline-offset: 4px;
+  }
 }

@@ -70,6 +70,8 @@
       'uniform float uniformZoom;',
       'uniform float uniformRotation;',
       'uniform float uniformActiveTime;',
+      'uniform vec2 uniformFocusCoords;',
+      'uniform float uniformFocusStrength;',
       'varying vec2 varyingScreenCoord;',
       'vec4 computeCosmicHash(vec2 gridCell) {',
       '  vec4 hashVector = fract(sin(vec4(',
@@ -137,6 +139,8 @@
       '  vec3 interstellarDustColor = mix(vec3(0.012, 0.026, 0.032), vec3(0.022, 0.045, 0.054), wavePatternTwo * 0.5 + 0.5) * dustDensityValue * (0.42 + 0.58 * perimeterDistanceFactor) * 0.42;',
       '  vec3 voidBaseColor = vec3(0.003, 0.005, 0.008);',
       '  vec3 spaceSceneComposition = voidBaseColor + interstellarDustColor + deepStarsAccumulation * 0.65 + midStarsAccumulation * 0.85 + foreStarsAccumulation * 1.10;',
+      '  float distToFocusSpace = length(centeredCoordinates - uniformFocusCoords);',
+      '  spaceSceneComposition *= 1.0 - 0.20 * uniformFocusStrength * exp(-pow(distToFocusSpace / 0.38, 2.0));',
       '  gl_FragColor = vec4(spaceSceneComposition, 1.0);',
       '}'
     ].join('\n');
@@ -153,20 +157,113 @@
     const textureFragmentShaderSource = precisionHeader + [
       'varying vec2 varyingUv;',
       '#define PI 3.141592653589793',
+      'float hash3(vec3 p) {',
+      '  p = fract(p * vec3(0.1031, 0.1030, 0.0973));',
+      '  p += dot(p, p.yzx + 33.33);',
+      '  return fract((p.x + p.y) * p.z);',
+      '}',
+      'float noise3(vec3 p) {',
+      '  vec3 i = floor(p);',
+      '  vec3 f = fract(p);',
+      '  vec3 u = f * f * (3.0 - 2.0 * f);',
+      '  return mix(',
+      '    mix(',
+      '      mix(hash3(i + vec3(0.0, 0.0, 0.0)), hash3(i + vec3(1.0, 0.0, 0.0)), u.x),',
+      '      mix(hash3(i + vec3(0.0, 1.0, 0.0)), hash3(i + vec3(1.0, 1.0, 0.0)), u.x),',
+      '      u.y',
+      '    ),',
+      '    mix(',
+      '      mix(hash3(i + vec3(0.0, 0.0, 1.0)), hash3(i + vec3(1.0, 0.0, 1.0)), u.x),',
+      '      mix(hash3(i + vec3(0.0, 1.0, 1.0)), hash3(i + vec3(1.0, 1.0, 1.0)), u.x),',
+      '      u.y',
+      '    ),',
+      '    u.z',
+      '  );',
+      '}',
+      'float hash2(vec2 p) {',
+      '  vec3 p3 = fract(vec3(p.xyx) * 0.1031);',
+      '  p3 += dot(p3, p3.yzx + 33.33);',
+      '  return fract((p3.x + p3.y) * p3.z);',
+      '}',
+      'vec2 hash22(vec2 p) {',
+      '  return vec2(hash2(p), hash2(p + vec2(17.1, 31.7)));',
+      '}',
+      'float computeCellularCrypts(float u, float v, float C, float S) {',
+      '  float warpAngle = (noise3(vec3(C * 4.0, S * 4.0, v * 3.0)) - 0.5) * 0.35;',
+      '  float warpV = (noise3(vec3(C * 3.0 + 5.1, S * 3.0 + 2.4, v * 4.0)) - 0.5) * 0.04;',
+      '  float wu = fract(u + warpAngle / (2.0 * PI) + 1.0);',
+      '  float wv = v + warpV;',
+      '  float cellCols = 24.0;',
+      '  float cellRows = 10.0;',
+      '  vec2 p = vec2(wu * cellCols, wv * cellRows);',
+      '  vec2 ip = floor(p);',
+      '  vec2 fp = fract(p);',
+      '  float minDist = 10.0;',
+      '  for (int dy = -1; dy <= 1; dy++) {',
+      '    for (int dx = -1; dx <= 1; dx++) {',
+      '      float cx = mod(ip.x + float(dx) + cellCols, cellCols);',
+      '      float cy = ip.y + float(dy);',
+      '      if (cy >= 0.0 && cy < cellRows) {',
+      '        float seed = hash2(vec2(cx, cy));',
+      '        float threshold = (cy >= 1.0 && cy <= 2.0) ? 0.48 : ((cy >= 4.0 && cy <= 6.0) ? 0.76 : 0.99);',
+      '        if (seed > threshold) {',
+      '          vec2 offset = hash22(vec2(cx + 12.3, cy + 45.6));',
+      '          vec2 r = vec2(float(dx), float(dy)) + offset * 0.6 + 0.2 - fp;',
+      '          float dist = sqrt(r.x * r.x + r.y * r.y * 1.6);',
+      '          minDist = min(minDist, dist);',
+      '        }',
+      '      }',
+      '    }',
+      '  }',
+      '  float radius = 0.46;',
+      '  float rawCavity = max(0.0, 1.0 - minDist / radius);',
+      '  float smoothCavity = rawCavity * rawCavity * (3.0 - 2.0 * rawCavity);',
+      '  float collaretteEnv = exp(-pow((v - 0.18) / 0.075, 2.0));',
+      '  float ciliaryEnv = exp(-pow((v - 0.52) / 0.16, 2.0)) * 0.40;',
+      '  float pupilCutoff = smoothstep(0.04, 0.09, v);',
+      '  return smoothCavity * (collaretteEnv + ciliaryEnv) * pupilCutoff;',
+      '}',
       'void main(void) {',
-      '  float angleRadian = varyingUv.x * 2.0 * PI;',
-      '  float radialDistance = 0.50 + varyingUv.y * 1.62;',
-      '  float waveTension = sin(angleRadian * 9.0 + radialDistance * 6.5) * 0.85;',
-      '  float waveRelief = sin(angleRadian * 5.0 - radialDistance * 7.2) * 0.65;',
-      '  float perturbationOne = sin(angleRadian * 13.0 + radialDistance * 5.2 + waveTension) * 2.1;',
-      '  float perturbationTwo = sin(angleRadian * 7.0 - radialDistance * 8.0 + waveRelief) * 1.25;',
-      '  float fiberPhase = angleRadian * 113.0 + perturbationOne + perturbationTwo + radialDistance * 7.0;',
-      '  float ridgeValue = 0.5 + 0.5 * sin(fiberPhase);',
-      '  float microFiber = pow(0.5 + 0.5 * sin(fiberPhase * 4.0 + sin(radialDistance * 24.0 + angleRadian * 19.0)), 5.0);',
-      '  float branchingPattern = 0.5 + 0.5 * sin(angleRadian * 47.0 + sin(angleRadian * 11.0) * 2.0 + radialDistance * 18.0);',
-      '  float mineralPattern = smoothstep(0.15, 0.85, sin(angleRadian * 9.0 + radialDistance * 4.0) * 0.32 + sin(angleRadian * 23.0 - radialDistance * 3.0) * 0.24 + 0.42);',
-      '  float fiberRelief = ridgeValue * 0.72 + microFiber * 0.28;',
-      '  gl_FragColor = vec4(clamp(fiberRelief, 0.0, 1.0), branchingPattern, mineralPattern, 1.0);',
+      '  float u = varyingUv.x;',
+      '  float v = varyingUv.y;',
+      '  float angleRadian = u * 2.0 * PI;',
+      '  float C = cos(angleRadian);',
+      '  float S = sin(angleRadian);',
+      '  float nLow = noise3(vec3(C * 3.5, S * 3.5, v * 2.5));',
+      '  float nMid = noise3(vec3(C * 9.0 + 3.1, S * 9.0 + 2.7, v * 7.0));',
+      '  float warpedAngle = angleRadian + (nLow - 0.5) * 0.42 + (nMid - 0.5) * 0.18 * v;',
+      '  float collaretteWarp = (noise3(vec3(C * 4.0, S * 4.0, 1.5)) - 0.5) * 0.05;',
+      '  float collaretteV = 0.175 + collaretteWarp;',
+      '  float collaretteAmp = smoothstep(0.25, 0.75, noise3(vec3(C * 5.0 + 2.0, S * 5.0 + 1.0, 3.2)));',
+      '  float collaretteWidth = 0.038 + 0.015 * noise3(vec3(C * 6.0, S * 6.0, 4.0));',
+      '  float collaretteDist = (v - collaretteV) / collaretteWidth;',
+      '  float collaretteElevation = exp(-collaretteDist * collaretteDist) * collaretteAmp;',
+      '  float phase1 = warpedAngle * 36.0 + (noise3(vec3(C * 6.0, S * 6.0, v * 6.0)) - 0.5) * 5.0;',
+      '  float beam1 = pow(0.5 + 0.5 * cos(phase1), 2.5);',
+      '  float mask1 = smoothstep(0.06, 0.20, v) * (0.6 + 0.4 * noise3(vec3(C * 3.0, S * 3.0, 2.0)));',
+      '  float phase2 = warpedAngle * 72.0 + (noise3(vec3(C * 12.0 + 1.0, S * 12.0 + 3.0, v * 10.0)) - 0.5) * 6.0;',
+      '  float beam2 = pow(0.5 + 0.5 * cos(phase2), 3.0);',
+      '  float mask2 = smoothstep(0.14, 0.35, v + (noise3(vec3(C * 4.0, S * 4.0, 1.0)) - 0.5) * 0.15);',
+      '  float phase3 = warpedAngle * 144.0 + (noise3(vec3(C * 20.0 + 2.0, S * 20.0 + 5.0, v * 18.0)) - 0.5) * 8.0;',
+      '  float beam3 = pow(0.5 + 0.5 * cos(phase3), 3.5);',
+      '  float mask3 = smoothstep(0.25, 0.55, v);',
+      '  float fiberRelief = beam1 * mask1 * 0.48 + beam2 * mask2 * 0.36 + beam3 * mask3 * 0.26;',
+      '  float restingZone = smoothstep(0.18, 0.65, noise3(vec3(C * 2.5, S * 2.5, v * 2.0)));',
+      '  fiberRelief *= 0.55 + 0.45 * restingZone;',
+      '  float cryptCavity = computeCellularCrypts(u, v, C, S);',
+      '  float furrowNoise = noise3(vec3(C * 6.0, S * 6.0, v * 15.0));',
+      '  float furrowPhase = v * 32.0 + (furrowNoise - 0.5) * 3.0;',
+      '  float furrowEnv = smoothstep(0.42, 0.57, v) * (1.0 - smoothstep(0.88, 0.98, v));',
+      '  float furrowGroove = sin(furrowPhase) * furrowEnv * (0.5 + 0.5 * cos(warpedAngle * 6.0)) * 0.08;',
+      '  float microGrain = noise3(vec3(C * 32.0, S * 32.0, v * 40.0));',
+      '  float composedRelief = clamp(fiberRelief * 0.65 + collaretteElevation * 0.30 - cryptCavity * 0.60 - furrowGroove + (microGrain - 0.5) * 0.05, 0.0, 1.0);',
+      '  float branchingPattern = clamp(beam2 * mask2 * 0.50 + beam3 * mask3 * 0.35 + beam1 * mask1 * 0.25 - cryptCavity * 0.45, 0.0, 1.0);',
+      '  float amberNoise = noise3(vec3(C * 7.0 + 4.1, S * 7.0 + 2.3, v * 12.0));',
+      '  float warmClusters = smoothstep(0.35, 0.70, amberNoise) * (1.0 - smoothstep(0.06, 0.28, v));',
+      '  float cryptRim = smoothstep(0.10, 0.35, cryptCavity) * (1.0 - smoothstep(0.55, 0.85, cryptCavity)) * 0.60;',
+      '  float ciliaryTone = (1.0 - smoothstep(0.25, 0.95, v)) * 0.25;',
+      '  float mineralPattern = clamp(warmClusters * 0.65 + cryptRim + ciliaryTone + (microGrain - 0.5) * 0.08, 0.0, 1.0);',
+      '  gl_FragColor = vec4(composedRelief, branchingPattern, mineralPattern, 1.0);',
       '}'
     ].join('\n');
 
@@ -183,6 +280,7 @@
       'varying vec3 varyingNormal;',
       'varying vec2 varyingTexCoord;',
       'varying vec3 varyingViewDirection;',
+      'varying vec2 varyingIrisCenter;',
       'void main(void) {',
       '  float respirationWave = sin(uniformActiveTime * 0.641) * 0.72 + sin(uniformActiveTime * 0.306 + 1.15) * 0.28;',
       '  float tidalWave = sin(uniformActiveTime * 0.306) * 0.68 + sin(uniformActiveTime * 0.462 + 2.05) * 0.32;',
@@ -214,6 +312,9 @@
       '  float cameraCoordY = dot(relativePosition, cameraUp);',
       '  float minimumResolution = min(uniformResolution.x, uniformResolution.y);',
       '  float fovScale = 1.54 / 1.70;',
+      '  vec3 pupilRelative = vec3(0.0, 0.0, -1.08) - cameraOrigin;',
+      '  float pupilDepth = dot(pupilRelative, cameraForward);',
+      '  varyingIrisCenter = vec2(dot(pupilRelative, cameraRight), dot(pupilRelative, cameraUp)) * fovScale / pupilDepth;',
       '  gl_Position = vec4(',
       '    cameraCoordX * fovScale * (2.0 * minimumResolution / uniformResolution.x),',
       '    cameraCoordY * fovScale * (2.0 * minimumResolution / uniformResolution.y),',
@@ -228,86 +329,138 @@
       'uniform float uniformIntensity;',
       'uniform float uniformProject;',
       'uniform float uniformActiveTime;',
+      'uniform vec2 uniformFocusCoords;',
+      'uniform float uniformFocusStrength;',
+      'uniform float uniformFocusPulseTime;',
       'uniform sampler2D uniformFiberTexture;',
       'varying vec3 varyingWorldPosition;',
       'varying vec3 varyingNormal;',
       'varying vec2 varyingTexCoord;',
       'varying vec3 varyingViewDirection;',
+      'varying vec2 varyingIrisCenter;',
+      'vec3 srgbToLinear(vec3 c) {',
+      '  vec3 lower = c / 12.92;',
+      '  vec3 higher = pow((c + 0.055) / 1.055, vec3(2.4));',
+      '  return mix(lower, higher, step(vec3(0.04045), c));',
+      '}',
+      'vec3 linearToSRGB(vec3 c) {',
+      '  vec3 higher = 1.055 * pow(max(c, vec3(0.0)), vec3(1.0 / 2.4)) - 0.055;',
+      '  vec3 lower = c * 12.92;',
+      '  return mix(lower, higher, step(vec3(0.0031308), c));',
+      '}',
       'void main(void) {',
       '  float radialDistance = length(varyingWorldPosition.xy);',
       '  float angleRadian = atan(varyingWorldPosition.y, varyingWorldPosition.x);',
-      '  float travelingTension = sin(angleRadian * 9.0 + radialDistance * 6.5 - uniformActiveTime * 0.462) * 0.85;',
-      '  float travelingRelief = sin(angleRadian * 5.0 - radialDistance * 7.2 + uniformActiveTime * 0.306) * 0.65;',
-      '  vec2 dynamicUv = vec2(varyingTexCoord.x + (travelingTension + travelingRelief) * 0.0018, varyingTexCoord.y);',
+      '  float travelingTension = sin(angleRadian * 8.0 + radialDistance * 6.0 - uniformActiveTime * 0.462) * 0.65;',
+      '  float travelingRelief = cos(angleRadian * 6.0 - radialDistance * 7.0 + uniformActiveTime * 0.306) * 0.45;',
+      '  vec2 dynamicUv = vec2(varyingTexCoord.x + (travelingTension + travelingRelief) * 0.0012, varyingTexCoord.y);',
       '  vec4 fiberSample = texture2D(uniformFiberTexture, dynamicUv);',
       '  float ridgeIntensity = fiberSample.r;',
       '  float branchingFactor = fiberSample.g;',
       '  float mineralFactor = fiberSample.b;',
-      '  float microFiberGleam = pow(ridgeIntensity, 2.5);',
-      '  vec2 reliefOffset = vec2(0.0006, 0.0020);',
+      '  float microFiberGleam = pow(ridgeIntensity, 3.5);',
+      '  vec2 reliefOffset = vec2(0.0006, 0.0018);',
       '  float heightRight = texture2D(uniformFiberTexture, dynamicUv + vec2(reliefOffset.x, 0.0)).r;',
       '  float heightUp = texture2D(uniformFiberTexture, dynamicUv + vec2(0.0, reliefOffset.y)).r;',
-      '  float gradientU = (heightRight - ridgeIntensity) * 0.40;',
-      '  float gradientV = (heightUp - ridgeIntensity) * 0.40;',
+      '  float gradientU = clamp((heightRight - ridgeIntensity) / reliefOffset.x * 0.018 / max(6.2831853 * radialDistance, 0.5), -0.30, 0.30);',
+      '  float gradientV = clamp((heightUp - ridgeIntensity) / reliefOffset.y * 0.018 / 1.60, -0.30, 0.30);',
       '  vec3 surfaceNormalVector = normalize(varyingNormal);',
       '  vec3 tangentAngular = normalize(vec3(-sin(angleRadian), cos(angleRadian), 0.0));',
-      '  vec3 tangentRadial = normalize(cross(surfaceNormalVector, tangentAngular));',
+      '  vec3 tangentRadial = normalize(cross(tangentAngular, surfaceNormalVector));',
       '  vec3 sculptedNormal = normalize(surfaceNormalVector - tangentAngular * gradientU - tangentRadial * gradientV);',
-      '  float innerGoldShimmer = (1.0 - smoothstep(0.67, 1.12, radialDistance)) * 0.55;',
-      '  vec3 petrolHue = mix(vec3(0.013, 0.066, 0.068), vec3(0.055, 0.23, 0.20), branchingFactor * 0.65 + ridgeIntensity * 0.35);',
-      '  vec3 bronzeHue = mix(vec3(0.17, 0.076, 0.022), vec3(0.46, 0.30, 0.11), ridgeIntensity);',
-      '  vec3 materialHue = mix(petrolHue, bronzeHue, clamp(mineralFactor * 0.78 + innerGoldShimmer, 0.0, 0.94));',
-      '  materialHue *= 0.62 + ridgeIntensity * 0.48 + microFiberGleam * 0.25;',
+      '  vec3 colAbyssal   = srgbToLinear(vec3(3.0, 9.0, 12.0) / 255.0);',
+      '  vec3 colPetrol    = srgbToLinear(vec3(11.0, 37.0, 41.0) / 255.0);',
+      '  vec3 colJade      = srgbToLinear(vec3(40.0, 97.0, 90.0) / 255.0);',
+      '  vec3 colCeladon   = srgbToLinear(vec3(100.0, 142.0, 123.0) / 255.0);',
+      '  vec3 colSlate     = srgbToLinear(vec3(60.0, 88.0, 102.0) / 255.0);',
+      '  vec3 colCopper    = srgbToLinear(vec3(149.0, 99.0, 65.0) / 255.0);',
+      '  vec3 colAmber     = srgbToLinear(vec3(190.0, 146.0, 89.0) / 255.0);',
+      '  vec3 colChampagne = srgbToLinear(vec3(221.0, 207.0, 171.0) / 255.0);',
+      '  float ciliaryEdgeFraction = smoothstep(1.05, 2.05, radialDistance);',
+      '  vec3 baseColdStroma = mix(colPetrol, colSlate, ciliaryEdgeFraction * 0.60);',
+      '  vec3 fiberColor = mix(colJade, colCeladon, smoothstep(0.30, 0.85, ridgeIntensity));',
+      '  float fiberPresence = clamp(branchingFactor * 0.50 + ridgeIntensity * 0.50, 0.0, 1.0);',
+      '  vec3 stromalComposition = mix(baseColdStroma, fiberColor, fiberPresence * 0.65);',
+      '  float innerZoneWeight = 1.0 - smoothstep(0.54, 0.98, radialDistance);',
+      '  vec3 warmPigment = mix(colCopper, colAmber, mineralFactor);',
+      '  float warmPresence = clamp(innerZoneWeight * (0.25 + mineralFactor * 0.75), 0.0, 0.85);',
+      '  vec3 materialAlbedo = mix(stromalComposition, warmPigment, warmPresence);',
+      '  float cryptDepthOcclusion = smoothstep(0.06, 0.48, ridgeIntensity);',
+      '  materialAlbedo = mix(colAbyssal, materialAlbedo, 0.45 + 0.55 * cryptDepthOcclusion);',
       '  vec3 keyLightVector = normalize(vec3(-0.65 + 0.04 * sin(uniformActiveTime * 0.35), 0.85 + 0.03 * cos(uniformActiveTime * 0.41), 1.25));',
       '  vec3 fillLightVector = normalize(vec3(0.75 - 0.03 * cos(uniformActiveTime * 0.29), -0.50 + 0.03 * sin(uniformActiveTime * 0.37), 0.35));',
       '  vec3 normalizedViewVector = normalize(varyingViewDirection);',
       '  vec3 specularHalfVector = normalize(keyLightVector + normalizedViewVector);',
-      '  float diffuseIllumination = max(dot(sculptedNormal, keyLightVector), 0.0);',
-      '  float fillIllumination = max(dot(sculptedNormal, fillLightVector), 0.0);',
+      '  float diffuseKey = max(dot(sculptedNormal, keyLightVector), 0.0);',
+      '  float diffuseFill = max(dot(sculptedNormal, fillLightVector), 0.0);',
       '  float throatOcclusion = smoothstep(-1.07, -0.38, varyingWorldPosition.z);',
-      '  float valleyOcclusion = 0.58 + ridgeIntensity * 0.42;',
+      '  float creviceOcclusion = 0.60 + 0.40 * smoothstep(0.08, 0.65, ridgeIntensity);',
       '  float limbalShading = 1.0 - smoothstep(1.42, 2.08, radialDistance);',
-      '  float specularHighlight = pow(max(dot(sculptedNormal, specularHalfVector), 0.0), 34.0) * (0.18 + microFiberGleam * 0.28);',
-      '  float wetReflectiveGleam = pow(max(dot(sculptedNormal, specularHalfVector), 0.0), 130.0) * 0.35;',
-      '  vec3 sceneComposition = materialHue * (0.20 + diffuseIllumination * 1.7 + fillIllumination * 0.32) * valleyOcclusion;',
-      '  sceneComposition += vec3(0.74, 0.51, 0.24) * specularHighlight;',
-      '  sceneComposition += vec3(0.26, 0.49, 0.44) * wetReflectiveGleam;',
-      '  sceneComposition *= (0.09 + 0.91 * throatOcclusion) * (0.18 + 0.82 * limbalShading);',
-      '  sceneComposition += vec3(0.018, 0.060, 0.050) * fillIllumination * pow(1.0 - max(dot(surfaceNormalVector, normalizedViewVector), 0.0), 3.0) * throatOcclusion;',
+      '  float specularPower = pow(max(dot(sculptedNormal, specularHalfVector), 0.0), 55.0);',
+      '  float microSpecular = specularPower * microFiberGleam * 0.18;',
+      '  float wetReflectiveGleam = pow(max(dot(sculptedNormal, specularHalfVector), 0.0), 120.0) * 0.14;',
+      '  float diffuseLighting = (0.85 * diffuseKey + 0.24 * diffuseFill) * creviceOcclusion;',
+      '  vec3 linearSceneComposition = materialAlbedo * (0.34 + diffuseLighting);',
+      '  linearSceneComposition += colChampagne * microSpecular;',
+      '  linearSceneComposition += colCeladon * wetReflectiveGleam;',
+      '  linearSceneComposition *= (0.09 + 0.91 * throatOcclusion) * (0.18 + 0.82 * limbalShading);',
+      '  float rimFresnel = pow(1.0 - max(dot(surfaceNormalVector, normalizedViewVector), 0.0), 3.0);',
+      '  linearSceneComposition += colSlate * (diffuseFill * 0.10 * rimFresnel * throatOcclusion);',
       '  float respirationWave = sin(uniformActiveTime * 0.641) * 0.72 + sin(uniformActiveTime * 0.306 + 1.15) * 0.28;',
       '  float tidalWave = sin(uniformActiveTime * 0.306) * 0.68 + sin(uniformActiveTime * 0.462 + 2.05) * 0.32;',
       '  float pupilDilation = 0.038 * respirationWave + 0.012 * tidalWave;',
-      '  float currentPupilLipRadius = (0.57 + 0.012 * sin(angleRadian * 17.0)) * (1.0 + pupilDilation);',
-      '  float pupillaryLipGlow = exp(-pow(abs(radialDistance - currentPupilLipRadius) / 0.032, 2.0));',
-      '  sceneComposition += vec3(0.13, 0.074, 0.025) * pupillaryLipGlow * diffuseIllumination * throatOcclusion;',
+      '  float currentPupilLipRadius = (0.57 + 0.010 * sin(angleRadian * 16.0)) * (1.0 + pupilDilation);',
+      '  float pupillaryLipGlow = exp(-pow(abs(radialDistance - currentPupilLipRadius) / 0.028, 2.0));',
+      '  float lipPigmentVariation = 0.25 + 0.75 * smoothstep(0.12, 0.65, branchingFactor);',
+      '  linearSceneComposition += colCopper * (pupillaryLipGlow * diffuseKey * throatOcclusion * lipPigmentVariation * 0.20);',
       '  float pupilEdgeCoverage = smoothstep(0.485, 0.525, radialDistance);',
-      '  sceneComposition = mix(vec3(0.003, 0.005, 0.007), sceneComposition, pupilEdgeCoverage);',
+      '  linearSceneComposition = mix(colAbyssal * 0.4, linearSceneComposition, pupilEdgeCoverage);',
       '  float limbusCoverage = 1.0 - smoothstep(2.04, 2.18, radialDistance);',
       '  if (limbusCoverage <= 0.001) {',
       '    discard;',
       '  }',
       '  float atmosphericSeparation = smoothstep(1.86, 2.06, radialDistance) * (1.0 - smoothstep(2.06, 2.18, radialDistance));',
-      '  vec3 atmosphericColor = vec3(0.024, 0.052, 0.068);',
-      '  sceneComposition += atmosphericColor * atmosphericSeparation * 0.85;',
+      '  linearSceneComposition += colPetrol * (atmosphericSeparation * 0.45);',
       '  vec2 screenCoordinates = (gl_FragCoord.xy - 0.5 * uniformResolution) / min(uniformResolution.x, uniformResolution.y);',
       '  vec3 cornealNormal = normalize(vec3(screenCoordinates * 0.35, 1.0));',
       '  vec3 cornealReflectedRay = reflect(-normalizedViewVector, cornealNormal);',
       '  vec2 upperSoftboxPosition = vec2(-0.43 + 0.032 * sin(uniformActiveTime * 0.38 + 0.5), 0.62 + 0.024 * cos(uniformActiveTime * 0.27));',
       '  vec2 sideSoftboxPosition = vec2(0.74 + 0.026 * cos(uniformActiveTime * 0.33), -0.12 + 0.036 * sin(uniformActiveTime * 0.25 + 1.2));',
-      '  float upperSoftboxIntensity = exp(-pow(abs(cornealReflectedRay.x - upperSoftboxPosition.x) / 0.34, 4.0) - pow(abs(cornealReflectedRay.y - upperSoftboxPosition.y) / 0.055, 2.0));',
-      '  float sideSoftboxIntensity = exp(-pow(abs(cornealReflectedRay.x - sideSoftboxPosition.x) / 0.030, 2.0) - pow(abs(cornealReflectedRay.y - sideSoftboxPosition.y) / 0.32, 4.0));',
+      '  float upperSoftboxIntensity = exp(-pow(abs(cornealReflectedRay.x - upperSoftboxPosition.x) / 0.14, 4.0) - pow(abs(cornealReflectedRay.y - upperSoftboxPosition.y) / 0.040, 2.0));',
+      '  float sideSoftboxIntensity = exp(-pow(abs(cornealReflectedRay.x - sideSoftboxPosition.x) / 0.025, 2.0) - pow(abs(cornealReflectedRay.y - sideSoftboxPosition.y) / 0.22, 4.0));',
       '  vec3 broadLightDirection = normalize(vec3(-0.50 + 0.07 * sin(uniformActiveTime * 0.31), 0.70 + 0.05 * cos(uniformActiveTime * 0.23), 0.90));',
-      '  float broadSurfaceReflection = pow(max(dot(cornealReflectedRay, broadLightDirection), 0.0), 18.0);',
-      '  float cornealFresnel = 0.025 + 0.65 * pow(1.0 - max(dot(normalizedViewVector, cornealNormal), 0.0), 5.0);',
+      '  float broadSurfaceReflection = pow(max(dot(cornealReflectedRay, broadLightDirection), 0.0), 24.0);',
+      '  float cornealFresnel = 0.015 + 0.25 * pow(1.0 - max(dot(normalizedViewVector, cornealNormal), 0.0), 5.0);',
       '  float clearTitleCorridor = smoothstep(0.17, 0.36, length(screenCoordinates));',
       '  float corneaEnvelope = 1.0 - smoothstep(2.00, 2.16, radialDistance);',
-      '  sceneComposition += ((vec3(0.63, 0.80, 0.73) * upperSoftboxIntensity * 0.23 + vec3(0.66, 0.43, 0.20) * sideSoftboxIntensity * 0.17 + vec3(0.16, 0.27, 0.23) * broadSurfaceReflection * 0.10) * clearTitleCorridor + vec3(0.09, 0.19, 0.17) * cornealFresnel * 0.55) * corneaEnvelope;',
-      '  sceneComposition *= 0.66 + 0.34 * smoothstep(0.10, 0.27, length(screenCoordinates));',
-      '  sceneComposition *= 1.0 - smoothstep(0.70, 1.35, length(screenCoordinates)) * 0.40;',
-      '  sceneComposition *= uniformIntensity * (1.0 + uniformProject * 0.07);',
-      '  sceneComposition = vec3(1.0) - exp(-sceneComposition * 1.30);',
-      '  sceneComposition = pow(max(sceneComposition, vec3(0.0)), vec3(0.88));',
-      '  gl_FragColor = vec4(sceneComposition, limbusCoverage);',
+      '  linearSceneComposition += ((colCeladon * upperSoftboxIntensity * 0.06 + colCopper * sideSoftboxIntensity * 0.05 + colChampagne * broadSurfaceReflection * 0.04) * clearTitleCorridor + colPetrol * cornealFresnel * 0.08) * corneaEnvelope;',
+      '  linearSceneComposition *= 0.68 + 0.32 * smoothstep(0.10, 0.28, length(screenCoordinates));',
+      '  linearSceneComposition *= 1.0 - smoothstep(0.70, 1.35, length(screenCoordinates)) * 0.35;',
+      '  vec2 irisScreenCenter = varyingIrisCenter;',
+      '  vec2 dirToFocus = uniformFocusCoords - irisScreenCenter;',
+      '  float angleToFocus = atan(dirToFocus.y, dirToFocus.x);',
+      '  vec2 dirFrag = screenCoordinates - irisScreenCenter;',
+      '  float angleFrag = atan(dirFrag.y, dirFrag.x);',
+      '  float angleDiff = abs(mod(angleFrag - angleToFocus + 3.14159265, 6.2831853) - 3.14159265);',
+      '  float sectorHalo = exp(-pow(angleDiff / 0.72, 2.0));',
+      '  float pulseBeam = 0.0;',
+      '  if (uniformFocusPulseTime >= 0.0 && uniformFocusPulseTime <= 1.0) {',
+      '    float p = uniformFocusPulseTime;',
+      '    float waveRadius = 0.52 + p * 1.55;',
+      '    float waveDist = abs(radialDistance - waveRadius);',
+      '    pulseBeam = exp(-pow(waveDist / 0.14, 2.0)) * (1.0 - p) * sectorHalo * uniformFocusStrength;',
+      '  }',
+      '  float staticSectorHalo = sectorHalo * uniformFocusStrength * (0.30 + 0.70 * smoothstep(0.55, 1.85, radialDistance));',
+      '  vec3 focusLightColor = mix(colCeladon, colChampagne, 0.40);',
+      '  vec3 contextualFocusLight = focusLightColor * (staticSectorHalo * 0.20 + pulseBeam * 0.45);',
+      '  float distToLabel = length(screenCoordinates - uniformFocusCoords);',
+      '  float underLabelAttenuation = 1.0 - 0.20 * uniformFocusStrength * exp(-pow(distToLabel / 0.35, 2.0));',
+      '  linearSceneComposition *= underLabelAttenuation;',
+      '  linearSceneComposition += contextualFocusLight;',
+      '  linearSceneComposition *= uniformIntensity * (1.0 + uniformProject * 0.07);',
+      '  vec3 mappedColor = vec3(1.0) - exp(-linearSceneComposition * 1.30);',
+      '  vec3 finalSrgbColor = linearToSRGB(mappedColor);',
+      '  gl_FragColor = vec4(finalSrgbColor, limbusCoverage);',
       '}'
     ].join('\n');
 
@@ -327,6 +480,9 @@
     let uniformZoomLocation = null;
     let uniformProjectLocation = null;
     let uniformActiveTimeLocation = null;
+    let uniformFocusCoordsLocation = null;
+    let uniformFocusStrengthLocation = null;
+    let uniformFocusPulseTimeLocation = null;
     let fiberTextureUniformLocation = null;
 
     let spaceShaderProgram = null;
@@ -337,6 +493,8 @@
     let spaceZoomUniformLocation = null;
     let spaceRotationUniformLocation = null;
     let spaceActiveTimeUniformLocation = null;
+    let spaceFocusCoordsUniformLocation = null;
+    let spaceFocusStrengthUniformLocation = null;
 
     function cleanupPartialResources(targetShaderOne, targetShaderTwo, targetProgramInstance, targetBufferInstance, targetTextureInstance, spaceShaderOne, spaceShaderTwo, spaceProgramInstance, spaceBufferInstance) {
       try {
@@ -489,30 +647,141 @@
         const fallbackHeight = computedTextureHeight;
         const fallbackBytes = new Uint8Array(fallbackWidth * fallbackHeight * 4);
 
+        function fract(x) { return x - Math.floor(x); }
+        function hash3(x, y, z) {
+          let px = fract(x * 0.1031);
+          let py = fract(y * 0.1030);
+          let pz = fract(z * 0.0973);
+          const d = px * (py + 33.33) + py * (pz + 33.33) + pz * (px + 33.33);
+          px += d; py += d; pz += d;
+          return fract((px + py) * pz);
+        }
+        function noise3(x, y, z) {
+          const ix = Math.floor(x), iy = Math.floor(y), iz = Math.floor(z);
+          const fx = x - ix, fy = y - iy, fz = z - iz;
+          const ux = fx * fx * (3.0 - 2.0 * fx);
+          const uy = fy * fy * (3.0 - 2.0 * fy);
+          const uz = fz * fz * (3.0 - 2.0 * fz);
+          const h000 = hash3(ix, iy, iz), h100 = hash3(ix + 1, iy, iz);
+          const h010 = hash3(ix, iy + 1, iz), h110 = hash3(ix + 1, iy + 1, iz);
+          const h001 = hash3(ix, iy, iz + 1), h101 = hash3(ix + 1, iy, iz + 1);
+          const h011 = hash3(ix, iy + 1, iz + 1), h111 = hash3(ix + 1, iy + 1, iz + 1);
+          const x00 = h000 + ux * (h100 - h000), x10 = h010 + ux * (h110 - h010);
+          const x01 = h001 + ux * (h101 - h001), x11 = h011 + ux * (h111 - h011);
+          const y0 = x00 + uy * (x10 - x00), y1 = x01 + uy * (x11 - x01);
+          return y0 + uz * (y1 - y0);
+        }
+        function hash2(x, y) {
+          let px = fract(x * 0.1031), py = fract(y * 0.1030);
+          const d = px * (py + 33.33) + py * (px + 33.33);
+          px += d; py += d;
+          return fract((px + py) * px);
+        }
+        function hash22(x, y) {
+          return [hash2(x, y), hash2(x + 17.1, y + 31.7)];
+        }
+        function computeCellularCrypts(u, v, C, S) {
+          const warpAngle = (noise3(C * 4.0, S * 4.0, v * 3.0) - 0.5) * 0.35;
+          const warpV = (noise3(C * 3.0 + 5.1, S * 3.0 + 2.4, v * 4.0) - 0.5) * 0.04;
+          const wu = fract(u + warpAngle / (2.0 * Math.PI) + 1.0);
+          const wv = v + warpV;
+          const cellCols = 24.0, cellRows = 10.0;
+          const px = wu * cellCols, py = wv * cellRows;
+          const ix = Math.floor(px), iy = Math.floor(py);
+          const fx = px - ix, fy = py - iy;
+          let minDist = 10.0;
+          for (let dy = -1; dy <= 1; dy += 1) {
+            for (let dx = -1; dx <= 1; dx += 1) {
+              const cx = (ix + dx + cellCols) % cellCols;
+              const cy = iy + dy;
+              if (cy >= 0.0 && cy < cellRows) {
+                const seed = hash2(cx, cy);
+                const threshold = (cy >= 1.0 && cy <= 2.0) ? 0.48 : ((cy >= 4.0 && cy <= 6.0) ? 0.76 : 0.99);
+                if (seed > threshold) {
+                  const offset = hash22(cx + 12.3, cy + 45.6);
+                  const rx = dx + offset[0] * 0.6 + 0.2 - fx;
+                  const ry = dy + offset[1] * 0.6 + 0.2 - fy;
+                  const dist = Math.sqrt(rx * rx + ry * ry * 1.6);
+                  if (dist < minDist) minDist = dist;
+                }
+              }
+            }
+          }
+          const radius = 0.46;
+          const rawCavity = Math.max(0.0, 1.0 - minDist / radius);
+          const smoothCavity = rawCavity * rawCavity * (3.0 - 2.0 * rawCavity);
+          const collaretteEnv = Math.exp(-Math.pow((v - 0.18) / 0.075, 2.0));
+          const ciliaryEnv = Math.exp(-Math.pow((v - 0.52) / 0.16, 2.0)) * 0.40;
+          const pupilCutoff = Math.min(1.0, Math.max(0.0, (v - 0.04) / 0.05));
+          return smoothCavity * (collaretteEnv + ciliaryEnv) * pupilCutoff;
+        }
+
         for (let pixelRow = 0; pixelRow < fallbackHeight; pixelRow += 1) {
-          const rowFraction = pixelRow / fallbackHeight;
-          const radialPosition = 0.50 + rowFraction * 1.62;
+          const v = pixelRow / fallbackHeight;
 
           for (let pixelColumn = 0; pixelColumn < fallbackWidth; pixelColumn += 1) {
-            const columnFraction = pixelColumn / fallbackWidth;
-            const angleRadian = columnFraction * Math.PI * 2.0;
+            const u = pixelColumn / fallbackWidth;
+            const angleRadian = u * Math.PI * 2.0;
 
-            const waveTension = Math.sin(angleRadian * 9.0 + radialPosition * 6.5) * 0.85;
-            const waveRelief = Math.sin(angleRadian * 5.0 - radialPosition * 7.2) * 0.65;
-            const perturbationOne = Math.sin(angleRadian * 13.0 + radialPosition * 5.2 + waveTension) * 2.1;
-            const perturbationTwo = Math.sin(angleRadian * 7.0 - radialPosition * 8.0 + waveRelief) * 1.25;
-            const fiberPhase = angleRadian * 113.0 + perturbationOne + perturbationTwo + radialPosition * 7.0;
+            const C = Math.cos(angleRadian);
+            const S = Math.sin(angleRadian);
 
-            const ridgeValue = 0.5 + 0.5 * Math.sin(fiberPhase);
-            const microFiberGleam = Math.pow(0.5 + 0.5 * Math.sin(fiberPhase * 4.0 + Math.sin(radialPosition * 24.0 + angleRadian * 19.0)), 5.0);
-            const branchingFactor = 0.5 + 0.5 * Math.sin(angleRadian * 47.0 + Math.sin(angleRadian * 11.0) * 2.0 + radialPosition * 18.0);
-            const mineralFactor = Math.min(1.0, Math.max(0.0, (Math.sin(angleRadian * 9.0 + radialPosition * 4.0) * 0.32 + Math.sin(angleRadian * 23.0 - radialPosition * 3.0) * 0.24 + 0.42 - 0.15) / 0.70));
-            const fiberRelief = ridgeValue * 0.72 + microFiberGleam * 0.28;
+            const nLow = noise3(C * 3.5, S * 3.5, v * 2.5);
+            const nMid = noise3(C * 9.0 + 3.1, S * 9.0 + 2.7, v * 7.0);
+            const warpedAngle = angleRadian + (nLow - 0.5) * 0.42 + (nMid - 0.5) * 0.18 * v;
+
+            const collaretteWarp = (noise3(C * 4.0, S * 4.0, 1.5) - 0.5) * 0.05;
+            const collaretteV = 0.175 + collaretteWarp;
+            const collaretteAmp = Math.min(1.0, Math.max(0.0, (noise3(C * 5.0 + 2.0, S * 5.0 + 1.0, 3.2) - 0.25) / 0.50));
+            const collaretteWidth = 0.038 + 0.015 * noise3(C * 6.0, S * 6.0, 4.0);
+            const collaretteDist = (v - collaretteV) / collaretteWidth;
+            const collaretteElevation = Math.exp(-collaretteDist * collaretteDist) * collaretteAmp;
+
+            const phase1 = warpedAngle * 36.0 + (noise3(C * 6.0, S * 6.0, v * 6.0) - 0.5) * 5.0;
+            const beam1 = Math.pow(0.5 + 0.5 * Math.cos(phase1), 2.5);
+            const mask1 = Math.min(1.0, Math.max(0.0, (v - 0.06) / 0.14)) * (0.6 + 0.4 * noise3(C * 3.0, S * 3.0, 2.0));
+
+            const phase2 = warpedAngle * 72.0 + (noise3(C * 12.0 + 1.0, S * 12.0 + 3.0, v * 10.0) - 0.5) * 6.0;
+            const beam2 = Math.pow(0.5 + 0.5 * Math.cos(phase2), 3.0);
+            const mask2 = Math.min(1.0, Math.max(0.0, (v + (noise3(C * 4.0, S * 4.0, 1.0) - 0.5) * 0.15 - 0.14) / 0.21));
+
+            const phase3 = warpedAngle * 144.0 + (noise3(C * 20.0 + 2.0, S * 20.0 + 5.0, v * 18.0) - 0.5) * 8.0;
+            const beam3 = Math.pow(0.5 + 0.5 * Math.cos(phase3), 3.5);
+            const mask3 = Math.min(1.0, Math.max(0.0, (v - 0.25) / 0.30));
+
+            let fiberRelief = beam1 * mask1 * 0.48 + beam2 * mask2 * 0.36 + beam3 * mask3 * 0.26;
+            const restingZone = Math.min(1.0, Math.max(0.0, (noise3(C * 2.5, S * 2.5, v * 2.0) - 0.18) / 0.47));
+            fiberRelief *= 0.55 + 0.45 * restingZone;
+
+            const cryptCavity = computeCellularCrypts(u, v, C, S);
+
+            const furrowNoise = noise3(C * 6.0, S * 6.0, v * 15.0);
+            const furrowPhase = v * 32.0 + (furrowNoise - 0.5) * 3.0;
+            const furrowEnv = Math.min(1.0, Math.max(0.0, (v - 0.42) / 0.15)) * (1.0 - Math.min(1.0, Math.max(0.0, (v - 0.88) / 0.10)));
+            const furrowGroove = Math.sin(furrowPhase) * furrowEnv * (0.5 + 0.5 * Math.cos(warpedAngle * 6.0)) * 0.08;
+
+            const microGrain = noise3(C * 32.0, S * 32.0, v * 40.0);
+
+            const composedRelief = Math.min(1.0, Math.max(0.0,
+              fiberRelief * 0.65 + collaretteElevation * 0.30 - cryptCavity * 0.60 - furrowGroove + (microGrain - 0.5) * 0.05
+            ));
+
+            const branchingPattern = Math.min(1.0, Math.max(0.0,
+              beam2 * mask2 * 0.50 + beam3 * mask3 * 0.35 + beam1 * mask1 * 0.25 - cryptCavity * 0.45
+            ));
+
+            const amberNoise = noise3(C * 7.0 + 4.1, S * 7.0 + 2.3, v * 12.0);
+            const warmClusters = Math.min(1.0, Math.max(0.0, (amberNoise - 0.35) / 0.35)) * (1.0 - Math.min(1.0, Math.max(0.0, (v - 0.06) / 0.22)));
+            const cryptRim = Math.min(1.0, Math.max(0.0, (cryptCavity - 0.10) / 0.25)) * (1.0 - Math.min(1.0, Math.max(0.0, (cryptCavity - 0.55) / 0.30))) * 0.60;
+            const ciliaryTone = (1.0 - Math.min(1.0, Math.max(0.0, (v - 0.25) / 0.70))) * 0.25;
+            const mineralPattern = Math.min(1.0, Math.max(0.0,
+              warmClusters * 0.65 + cryptRim + ciliaryTone + (microGrain - 0.5) * 0.08
+            ));
 
             const byteOffset = (pixelRow * fallbackWidth + pixelColumn) * 4;
-            fallbackBytes[byteOffset] = Math.min(255, Math.max(0, Math.round(fiberRelief * 255)));
-            fallbackBytes[byteOffset + 1] = Math.min(255, Math.max(0, Math.round(branchingFactor * 255)));
-            fallbackBytes[byteOffset + 2] = Math.min(255, Math.max(0, Math.round(mineralFactor * 255)));
+            fallbackBytes[byteOffset] = Math.min(255, Math.max(0, Math.round(composedRelief * 255)));
+            fallbackBytes[byteOffset + 1] = Math.min(255, Math.max(0, Math.round(branchingPattern * 255)));
+            fallbackBytes[byteOffset + 2] = Math.min(255, Math.max(0, Math.round(mineralPattern * 255)));
             fallbackBytes[byteOffset + 3] = 255;
           }
         }
@@ -610,6 +879,8 @@
         const spaceZoomLoc = glContext.getUniformLocation(constructedSpaceProg, 'uniformZoom');
         const spaceRotationLoc = glContext.getUniformLocation(constructedSpaceProg, 'uniformRotation');
         const spaceActiveTimeLoc = glContext.getUniformLocation(constructedSpaceProg, 'uniformActiveTime');
+        const spaceFocusCoordsLoc = glContext.getUniformLocation(constructedSpaceProg, 'uniformFocusCoords');
+        const spaceFocusStrengthLoc = glContext.getUniformLocation(constructedSpaceProg, 'uniformFocusStrength');
 
         glContext.deleteShader(compiledSpaceVs);
         glContext.deleteShader(compiledSpaceFs);
@@ -775,6 +1046,9 @@
         uniformZoomLocation = glContext.getUniformLocation(constructedMainProg, 'uniformZoom');
         uniformProjectLocation = glContext.getUniformLocation(constructedMainProg, 'uniformProject');
         uniformActiveTimeLocation = glContext.getUniformLocation(constructedMainProg, 'uniformActiveTime');
+        uniformFocusCoordsLocation = glContext.getUniformLocation(constructedMainProg, 'uniformFocusCoords');
+        uniformFocusStrengthLocation = glContext.getUniformLocation(constructedMainProg, 'uniformFocusStrength');
+        uniformFocusPulseTimeLocation = glContext.getUniformLocation(constructedMainProg, 'uniformFocusPulseTime');
         fiberTextureUniformLocation = glContext.getUniformLocation(constructedMainProg, 'uniformFiberTexture');
 
         glContext.deleteShader(compiledMainVs);
@@ -791,6 +1065,8 @@
         spaceZoomUniformLocation = spaceZoomLoc;
         spaceRotationUniformLocation = spaceRotationLoc;
         spaceActiveTimeUniformLocation = spaceActiveTimeLoc;
+        spaceFocusCoordsUniformLocation = spaceFocusCoordsLoc;
+        spaceFocusStrengthUniformLocation = spaceFocusStrengthLoc;
         return true;
       } catch (pipelineError) {
         cleanupPartialResources(compiledMainVs, compiledMainFs, constructedMainProg, allocatedMeshBuffer, allocatedFiberTexture, compiledSpaceVs, compiledSpaceFs, constructedSpaceProg, allocatedSpaceBuffer);
@@ -824,6 +1100,19 @@
     let currentRotationAngle = 0.0;
     let lastEventClientX = window.innerWidth * 0.5;
     let lastEventClientY = window.innerHeight * 0.5;
+
+    let targetFocusX = 0.5;
+    let targetFocusY = 0.5;
+    let targetFocusStrength = 0.0;
+    let targetFocusPulseId = 0;
+
+    let currentFocusX = 0.5;
+    let currentFocusY = 0.5;
+    let currentFocusStrength = 0.0;
+
+    let pulseStartActiveTime = -100.0;
+    let lastActivePulseId = 0;
+    const PULSE_DURATION_SECONDS = 0.55;
 
     let isSettlingActive = false;
     const smoothingTimeConstant = 0.040;
@@ -922,6 +1211,18 @@
       glContext.clearColor(0.003, 0.005, 0.008, 1.0);
       glContext.clear(glContext.COLOR_BUFFER_BIT | glContext.DEPTH_BUFFER_BIT);
 
+      const aspectMin = Math.min(canvasElement.width, canvasElement.height);
+      const screenFocusX = (currentFocusX - 0.5) * (canvasElement.width / aspectMin);
+      const screenFocusY = ((1.0 - currentFocusY) - 0.5) * (canvasElement.height / aspectMin);
+
+      let pulseProgress = -1.0;
+      if (pulseStartActiveTime > 0.0 && currentFocusStrength > 0.0) {
+        const elapsedPulse = activeElapsedSeconds - pulseStartActiveTime;
+        if (elapsedPulse >= 0.0 && elapsedPulse <= PULSE_DURATION_SECONDS) {
+          pulseProgress = elapsedPulse / PULSE_DURATION_SECONDS;
+        }
+      }
+
       glContext.disable(glContext.DEPTH_TEST);
       glContext.disable(glContext.BLEND);
       glContext.useProgram(spaceShaderProgram);
@@ -933,6 +1234,12 @@
       glContext.uniform1f(spaceZoomUniformLocation, 0.0);
       glContext.uniform1f(spaceRotationUniformLocation, currentRotationAngle);
       glContext.uniform1f(spaceActiveTimeUniformLocation, activeElapsedSeconds);
+      if (spaceFocusCoordsUniformLocation) {
+        glContext.uniform2f(spaceFocusCoordsUniformLocation, screenFocusX, screenFocusY);
+      }
+      if (spaceFocusStrengthUniformLocation) {
+        glContext.uniform1f(spaceFocusStrengthUniformLocation, currentFocusStrength);
+      }
       glContext.drawArrays(glContext.TRIANGLES, 0, 6);
       glContext.disableVertexAttribArray(spacePositionAttributeLocation);
 
@@ -964,6 +1271,15 @@
       glContext.uniform1f(uniformZoomLocation, currentZoom);
       glContext.uniform1f(uniformProjectLocation, currentProject);
       glContext.uniform1f(uniformActiveTimeLocation, activeElapsedSeconds);
+      if (uniformFocusCoordsLocation) {
+        glContext.uniform2f(uniformFocusCoordsLocation, screenFocusX, screenFocusY);
+      }
+      if (uniformFocusStrengthLocation) {
+        glContext.uniform1f(uniformFocusStrengthLocation, currentFocusStrength);
+      }
+      if (uniformFocusPulseTimeLocation) {
+        glContext.uniform1f(uniformFocusPulseTimeLocation, pulseProgress);
+      }
 
       glContext.drawArrays(glContext.TRIANGLES, 0, totalVertexCount);
 
@@ -1042,17 +1358,27 @@
         currentRotationAngle += (targetRotationAngle - currentRotationAngle) * smoothingAlpha;
         currentZoom += (targetZoom - currentZoom) * smoothingAlpha;
         currentProject += (targetProject - currentProject) * smoothingAlpha;
+        currentFocusX += (targetFocusX - currentFocusX) * smoothingAlpha;
+        currentFocusY += (targetFocusY - currentFocusY) * smoothingAlpha;
+        currentFocusStrength += (targetFocusStrength - currentFocusStrength) * smoothingAlpha;
+
+        const pulseActive = (activeElapsedSeconds - pulseStartActiveTime) < PULSE_DURATION_SECONDS && (activeElapsedSeconds >= pulseStartActiveTime);
 
         const distanceRemaining = Math.hypot(targetPointerX - currentPointerX, targetPointerY - currentPointerY) +
                                   Math.abs(targetRotationAngle - currentRotationAngle) +
                                   Math.abs(targetZoom - currentZoom) +
-                                  Math.abs(targetProject - currentProject);
-        if (distanceRemaining < 0.0004) {
+                                  Math.abs(targetProject - currentProject) +
+                                  Math.hypot(targetFocusX - currentFocusX, targetFocusY - currentFocusY) +
+                                  Math.abs(targetFocusStrength - currentFocusStrength);
+        if (distanceRemaining < 0.0004 && !pulseActive) {
           currentPointerX = targetPointerX;
           currentPointerY = targetPointerY;
           currentRotationAngle = targetRotationAngle;
           currentZoom = targetZoom;
           currentProject = targetProject;
+          currentFocusX = targetFocusX;
+          currentFocusY = targetFocusY;
+          currentFocusStrength = targetFocusStrength;
           isSettlingActive = false;
         }
       }
@@ -1140,12 +1466,21 @@
       let nextRotation = targetRotationAngle;
       let nextProject = targetProject;
 
+      let nextFocusX = targetFocusX;
+      let nextFocusY = targetFocusY;
+      let nextFocusStrength = targetFocusStrength;
+      let nextFocusPulseId = targetFocusPulseId;
+      let focusUpdated = false;
+
       if (inputDetail.reset) {
         nextPointerX = 0.0;
         nextPointerY = 0.0;
         nextZoom = 0.0;
         nextRotation = 0.0;
         nextProject = 0.0;
+        nextFocusStrength = 0.0;
+        nextFocusPulseId = 0;
+        focusUpdated = true;
       } else {
         if (Number.isFinite(inputDetail.x)) {
           nextPointerX = Math.max(-1.0, Math.min(1.0, inputDetail.x));
@@ -1164,9 +1499,40 @@
         if (typeof inputDetail.project !== 'undefined') {
           nextProject = inputDetail.project ? 1.0 : 0.0;
         }
+        if (inputDetail.focus && typeof inputDetail.focus === 'object') {
+          const f = inputDetail.focus;
+          if (Number.isFinite(f.x)) {
+            nextFocusX = Math.max(0.0, Math.min(1.0, f.x));
+          }
+          if (Number.isFinite(f.y)) {
+            nextFocusY = Math.max(0.0, Math.min(1.0, f.y));
+          }
+          if (Number.isFinite(f.strength)) {
+            nextFocusStrength = Math.max(0.0, Math.min(1.0, f.strength));
+          }
+          if (Number.isInteger(f.pulseId) && f.pulseId > 0) {
+            nextFocusPulseId = f.pulseId;
+          }
+          focusUpdated = true;
+        }
       }
 
-      if (Math.abs(nextPointerX - targetPointerX) + Math.abs(nextPointerY - targetPointerY) + Math.abs(nextZoom - targetZoom) + Math.abs(nextProject - targetProject) + Math.abs(nextRotation - targetRotationAngle) < 0.0001) {
+      const cameraChanged = (
+        Math.abs(nextPointerX - targetPointerX) +
+        Math.abs(nextPointerY - targetPointerY) +
+        Math.abs(nextZoom - targetZoom) +
+        Math.abs(nextProject - targetProject) +
+        Math.abs(nextRotation - targetRotationAngle) >= 0.0001
+      );
+
+      const focusChanged = focusUpdated && (
+        Math.abs(nextFocusStrength - targetFocusStrength) > 0.001 ||
+        Math.abs(nextFocusX - targetFocusX) > 0.001 ||
+        Math.abs(nextFocusY - targetFocusY) > 0.001 ||
+        nextFocusPulseId !== targetFocusPulseId
+      );
+
+      if (!cameraChanged && !focusChanged) {
         return;
       }
 
@@ -1176,12 +1542,28 @@
       targetProject = nextProject;
       targetRotationAngle = nextRotation;
 
+      if (focusChanged) {
+        if (nextFocusPulseId !== targetFocusPulseId && nextFocusStrength > 0.0) {
+          pulseStartActiveTime = activeElapsedSeconds;
+          lastActivePulseId = nextFocusPulseId;
+        } else if (nextFocusStrength <= 0.0) {
+          pulseStartActiveTime = -100.0;
+        }
+        targetFocusX = nextFocusX;
+        targetFocusY = nextFocusY;
+        targetFocusStrength = nextFocusStrength;
+        targetFocusPulseId = nextFocusPulseId;
+      }
+
       if (!checkMotionPermitted()) {
         currentPointerX = targetPointerX;
         currentPointerY = targetPointerY;
         currentRotationAngle = targetRotationAngle;
         currentZoom = targetZoom;
         currentProject = targetProject;
+        currentFocusX = targetFocusX;
+        currentFocusY = targetFocusY;
+        currentFocusStrength = targetFocusStrength;
         renderSingleFrame();
         return;
       }
@@ -1202,6 +1584,9 @@
         cancelScheduledFrame();
         isSettlingActive = false;
         lastFrameWallTimestamp = 0.0;
+        targetFocusStrength = 0.0;
+        currentFocusStrength = 0.0;
+        pulseStartActiveTime = -100.0;
       } else {
         if (checkAtlasViewActive()) {
           syncDocumentState();
@@ -1217,6 +1602,9 @@
         cancelScheduledFrame();
         isSettlingActive = false;
         lastFrameWallTimestamp = 0.0;
+        targetFocusStrength = 0.0;
+        currentFocusStrength = 0.0;
+        pulseStartActiveTime = -100.0;
         canvasElement.style.opacity = '0';
         canvasElement.style.visibility = 'hidden';
         return;
@@ -1234,6 +1622,10 @@
         currentRotationAngle = targetRotationAngle;
         currentZoom = targetZoom;
         currentProject = targetProject;
+        currentFocusX = targetFocusX;
+        currentFocusY = targetFocusY;
+        currentFocusStrength = targetFocusStrength;
+        pulseStartActiveTime = -100.0;
         renderSingleFrame();
         return;
       }
@@ -1288,12 +1680,20 @@
       cancelScheduledFrame();
       isSettlingActive = false;
       lastFrameWallTimestamp = 0.0;
+      targetFocusStrength = 0.0;
+      currentFocusStrength = 0.0;
+      pulseStartActiveTime = -100.0;
       shaderProgram = null;
       vertexBuffer = null;
       fiberTexture = null;
       spaceShaderProgram = null;
       spaceQuadBuffer = null;
       totalVertexCount = 0;
+      uniformFocusCoordsLocation = null;
+      uniformFocusStrengthLocation = null;
+      uniformFocusPulseTimeLocation = null;
+      spaceFocusCoordsUniformLocation = null;
+      spaceFocusStrengthUniformLocation = null;
       canvasElement.style.display = 'none';
       documentRoot.classList.remove('has-kaleidoscope');
     });

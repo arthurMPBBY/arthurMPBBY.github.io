@@ -25,6 +25,7 @@
   let dragGazeX = 0;
   let dragGazeY = 0;
   let previousFocus = null;
+  let savedScrollTop = 0;
 
   function motionAllowed() {
     return root.dataset.motion !== 'paused' && !reducedMotion.matches && !document.hidden;
@@ -47,14 +48,21 @@
     if (immersive === nextState) return;
     immersive = nextState;
     if (immersive) {
+      savedScrollTop = viewport.scrollTop;
       previousFocus = document.activeElement;
       previousInertStates = isolatedElements.map(element => element.inert);
       isolatedElements.forEach(element => { element.inert = true; });
       root.dataset.optics = 'immersive';
+      window.dispatchEvent(new CustomEvent('portfolio:opticsinput', {
+        detail: { focus: { strength: 0.0, pulseId: 0 } }
+      }));
     } else {
       isolatedElements.forEach((element, index) => { element.inert = previousInertStates[index]; });
       delete root.dataset.optics;
       dragPointer = null;
+      if (savedScrollTop && typeof viewport.scrollTo === 'function') {
+        viewport.scrollTop = savedScrollTop;
+      }
     }
     caption.hidden = !immersive;
     adjustments.hidden = !immersive;

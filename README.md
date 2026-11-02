@@ -76,6 +76,31 @@ O Cota Aberta tem sala própria em `#cota`, descoberta pelo índice, pela leitur
 
 ---
 
+## Interações e Hierarquia Visual (Etapa 01 — Verificada)
+
+1. **Luz Contextual na Íris (Foco Aditivo via Shaders):**
+   - Disparo aditivo `{ focus: { x, y, strength, pulseId } }` em `portfolio:opticsinput`, normalizado em relação ao canvas e corrigido com aspect ratio.
+   - Pulso temporal finito (~550ms) no setor angular e halo suave na superfície da íris, com atenuação linear sob o rótulo do artefato ativo (15–25%) sem filtros sobre elementos HTML.
+   - Foco via teclado tem precedência sobre hover do mouse (`pointerleave` não apaga foco com seleção ativa); redimensionamento de janela recalcula coordenadas-alvo sem reiniciar o pulso.
+   - Cancelamento automático e limpeza de estado em suspensão, pausa, modo leitura, salas e perda de contexto WebGL.
+
+2. **Coreografia Atlas-Sala (Transição Coordenada de 350ms):**
+   - Captura precisa da origem visual (`--room-origin-x`, `--room-origin-y`) a partir da posição do artefato antes da troca de vista.
+   - Navegação funcional imediata (foco direto no botão de retorno `.room-back-btn` e viewport inativo com `inert`) em paralelo com a fase decorativa (`.room-enter-expand` e atenuação dos vizinhos via `.is-dismissing`).
+   - Token de navegação cancelável instantaneamente em Escape, cliques rápidos, histórico (`popstate`), redimensionamento ou movimento reduzido.
+   - Usabilidade e navegação funcional 100% preservadas mesmo sem suporte a WebGL.
+
+3. **Hierarquia Tipográfica e Responsividade Editorial:**
+   - Títulos humanos expressivos e subtítulos técnicos objetivos com tecnologia terciária, preservando todos os IDs, rotas e `aria-labelledby`.
+   - Frase breve de descoberta no foco/hover com espaço reservado na grade editorial (`min-height`), garantindo reflow zero (layout shift nulo verificado).
+   - Tamanhos de fonte efetivos calibrados via `--atlas-scale` (títulos entre 16–18px e subtítulos entre 12–14px efetivos em desktop 1440×900).
+   - **Galeria Editorial Compacta Móvel (<= 600px):** Em telas móveis (390×844 e 320×640), `#spatial-world` adota fluxo normal em grid de 2 colunas com `transform: none !important;` e `--atlas-scale: 1`. Rolagem vertical nativa fluida (`overflow-y: auto`, `touch-action: pan-y`), com padding superior e inferior seguros contra cabeçalho e dock. Título central com 32px, títulos de projetos com 15px, subtítulos com 11.5px e CTA com 11px (nunca maior que o título).
+   - **Zero Interseção e Densidade Acurada:** Esculturas móveis em miniaturas contidas de 70px em 390px e ocultadas em 320px para garantir alvos de toque e legibilidade máxima, com 0 colisões entre cartões ou contra o título central.
+   - **Fundo Fixo & Imersão:** Canvas WebGL da íris permanece como fundo fixo (`position: fixed; 100vw/100dvh`) sem aumentar buffer. Ao entrar no modo arte ("Dentro da íris"), a galeria fica isolada/inerte e o viewport trava a rolagem, restaurando posição de leitura e foco ao sair.
+   - Contraste WCAG 2.2 AA ($\ge 4.5:1$) assegurado por backplates sutis sob qualquer estado de fundo.
+
+---
+
 ## Projetos em Destaque
 
 ### Cota Aberta — análise de dados de fundos

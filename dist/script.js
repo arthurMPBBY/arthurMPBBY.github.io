@@ -18,6 +18,22 @@
     financeiro: { coordX: 0, coordY: 350, zoom: 1.15 }
   };
 
+  const MOBILE_PROJECT_COORDINATES = {
+    yahcw: { coordX: -125, coordY: -140, zoom: 1.15 },
+    tuya: { coordX: 125, coordY: -140, zoom: 1.15 },
+    gaming: { coordX: -125, coordY: 140, zoom: 1.15 },
+    python: { coordX: 125, coordY: 140, zoom: 1.15 },
+    spotifast: { coordX: 0, coordY: -290, zoom: 1.15 },
+    financeiro: { coordX: 0, coordY: 280, zoom: 1.15 }
+  };
+
+  function getProjectCoordinates(pKey) {
+    if ((window.innerWidth || 1200) < 500 && MOBILE_PROJECT_COORDINATES[pKey]) {
+      return MOBILE_PROJECT_COORDINATES[pKey];
+    }
+    return PROJECT_COORDINATES[pKey] || { coordX: 0, coordY: 0, zoom: 1.0 };
+  }
+
   const PROJECT_SEQUENCE = ['yahcw', 'tuya', 'gaming', 'python', 'spotifast', 'financeiro', 'cota'];
 
   const CONCEPTUAL_RELATIONS = {
@@ -160,6 +176,54 @@
     }));
   }
 
+  let focusPulseId = 0;
+  let activeFocusProjectId = null;
+  let lastFocusNormX = 0.5;
+  let lastFocusNormY = 0.5;
+
+  function dispatchArtifactFocus(artifact, projId, isEnter) {
+    const canvasElement = document.getElementById('kaleidoscope-canvas');
+    if (!canvasElement) return;
+    const canvasRect = canvasElement.getBoundingClientRect();
+    if (canvasRect.width <= 0 || canvasRect.height <= 0) return;
+
+    if (isEnter && artifact) {
+      if (activeFocusProjectId !== projId) {
+        focusPulseId++;
+        activeFocusProjectId = projId;
+      }
+      const artRect = artifact.getBoundingClientRect();
+      const centerX = artRect.left + artRect.width * 0.5;
+      const centerY = artRect.top + artRect.height * 0.5;
+      lastFocusNormX = Math.max(0.0, Math.min(1.0, (centerX - canvasRect.left) / canvasRect.width));
+      lastFocusNormY = Math.max(0.0, Math.min(1.0, (centerY - canvasRect.top) / canvasRect.height));
+      window.dispatchEvent(new CustomEvent('portfolio:opticsinput', {
+        detail: {
+          focus: {
+            x: lastFocusNormX,
+            y: lastFocusNormY,
+            strength: 1.0,
+            pulseId: focusPulseId
+          }
+        }
+      }));
+    } else {
+      if (activeFocusProjectId === projId || !projId) {
+        activeFocusProjectId = null;
+      }
+      window.dispatchEvent(new CustomEvent('portfolio:opticsinput', {
+        detail: {
+          focus: {
+            x: lastFocusNormX,
+            y: lastFocusNormY,
+            strength: 0.0,
+            pulseId: focusPulseId
+          }
+        }
+      }));
+    }
+  }
+
   const pointerState = {
     isPointerDown: false,
     isDragging: false,
@@ -196,24 +260,23 @@
   function calculateOverviewFit() {
     const viewportWidth = window.innerWidth || 1440;
     const viewportHeight = window.innerHeight || 900;
+    const isMobile = viewportWidth < 500;
 
     // Dimensões do envelope mundial (inclui raio dos objetos e margens de respiração)
-    // Coordenadas: X [-450 a +450] + meio-objeto 190px = 1280px span
-    // Coordenadas: Y [-350 a +350] + meio-objeto 135px = 970px span
-    const worldEnvelopeWidth = 1280;
-    const worldEnvelopeHeight = 970;
+    const worldEnvelopeWidth = isMobile ? 620 : 1280;
+    const worldEnvelopeHeight = isMobile ? 900 : 970;
 
-    // Safe areas: Header (~84px), Dock (~96px), Margens laterais (~72px)
-    const availableWidth = Math.max(viewportWidth - 72, 280);
-    const availableHeight = Math.max(viewportHeight - 180, 260);
+    // Safe areas: Header (~84px), Dock (~96px), Margens laterais (~72px / mobile 24px)
+    const availableWidth = Math.max(viewportWidth - (isMobile ? 24 : 72), 260);
+    const availableHeight = Math.max(viewportHeight - (isMobile ? 150 : 180), 260);
 
     const fitScaleX = availableWidth / worldEnvelopeWidth;
     const fitScaleY = availableHeight / worldEnvelopeHeight;
-    let idealZoom = Math.min(fitScaleX, fitScaleY) * 0.98;
+    let idealZoom = Math.min(fitScaleX, fitScaleY) * (isMobile ? 0.94 : 0.98);
 
-    // Em telas mobile, garante zoom legível e composição apropriada
-    if (viewportWidth < 500) {
-      idealZoom = Math.max(0.42, Math.min(idealZoom, 0.58));
+    // Em telas mobile, garante zoom legível e composição apropriada sem corte lateral
+    if (isMobile) {
+      idealZoom = Math.max(0.40, Math.min(idealZoom, 0.60));
     } else {
       idealZoom = Math.max(cameraState.minZoom, Math.min(idealZoom, 1.05));
     }
@@ -257,12 +320,18 @@
   // Aplicação da transformação espacial (origem 0,0 do mundo no centro da tela)
   function applyWorldTransform() {
     if (!spatialWorld) return;
+    if (window.innerWidth <= 600) {
+      spatialWorld.style.transform = 'none';
+      document.documentElement.style.setProperty('--atlas-scale', '1');
+      return;
+    }
     const windowHalfWidth = (window.innerWidth || 1200) / 2;
     const windowHalfHeight = (window.innerHeight || 800) / 2;
     const translateX = windowHalfWidth + cameraState.currentPanX;
     const translateY = windowHalfHeight + cameraState.currentPanY;
 
     spatialWorld.style.transform = 'translate3d(' + translateX.toFixed(1) + 'px, ' + translateY.toFixed(1) + 'px, 0) scale(' + cameraState.currentZoom.toFixed(4) + ')';
+    document.documentElement.style.setProperty('--atlas-scale', cameraState.currentZoom.toFixed(4));
     updateMinimapFrustum();
   }
 
@@ -337,6 +406,7 @@
 
   function clearConceptualRelation() {
     setConceptualRelation(null);
+    dispatchArtifactFocus(null, null, false);
   }
 
   function indicateReturnOnArtifact(projectId) {
@@ -350,6 +420,7 @@
 
   function drawAtlasCanvas() {
     if (!atlasCanvas || !atlasCanvasContext) return;
+    if (window.innerWidth <= 600) return;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     const viewportWidth = window.innerWidth || 1200;
     const viewportHeight = window.innerHeight || 800;
@@ -420,7 +491,7 @@
 
     for (let i = 0; i < projectKeys.length; i += 1) {
       const pKey = projectKeys[i];
-      const pLoc = PROJECT_COORDINATES[pKey];
+      const pLoc = getProjectCoordinates(pKey);
       const pScreenX = worldCenterX + pLoc.coordX * currentScale;
       const pScreenY = worldCenterY + pLoc.coordY * currentScale;
       const labelClearance = 1 / Math.hypot(pLoc.coordX / 300, pLoc.coordY / 100);
@@ -463,14 +534,14 @@
     atlasCanvasContext.setLineDash([]);
 
     if (activeRelationProject && CONCEPTUAL_RELATIONS[activeRelationProject]) {
-      const sourceCoords = PROJECT_COORDINATES[activeRelationProject];
+      const sourceCoords = getProjectCoordinates(activeRelationProject);
       const sScreenX = worldCenterX + sourceCoords.coordX * currentScale;
       const sScreenY = worldCenterY + sourceCoords.coordY * currentScale;
       const relList = CONCEPTUAL_RELATIONS[activeRelationProject].related;
 
       for (let rIdx = 0; rIdx < relList.length; rIdx += 1) {
         const targetId = relList[rIdx].id;
-        const targetCoords = PROJECT_COORDINATES[targetId];
+        const targetCoords = getProjectCoordinates(targetId);
         if (!targetCoords) continue;
 
         const tScreenX = worldCenterX + targetCoords.coordX * currentScale;
@@ -553,6 +624,7 @@
 
   // Ponteiro no Atlas: geometria e câmera permanecem fixas/estacionárias
   function handlePointerDown(pointerEvent) {
+    if (window.innerWidth <= 600) return;
     if (pointerEvent.button !== 0 && pointerEvent.pointerType === 'mouse') {
       return;
     }
@@ -598,6 +670,9 @@
 
   // Roda do mouse no Atlas: age EXCLUSIVAMENTE na profundidade da íris
   function handleWheelZoom(wheelEvent) {
+    if (window.innerWidth <= 600) {
+      return; // Permite rolagem nativa da galeria no layout móvel
+    }
     // Permite Ctrl+wheel e Cmd+wheel para zoom nativo do navegador
     if (wheelEvent.ctrlKey || wheelEvent.metaKey) {
       return;
@@ -816,6 +891,23 @@
     });
   }
 
+  let activeNavigationToken = 0;
+  let activeTransitionTimeoutId = null;
+
+  function cancelActiveRoomTransition() {
+    activeNavigationToken++;
+    if (activeTransitionTimeoutId) {
+      clearTimeout(activeTransitionTimeoutId);
+      activeTransitionTimeoutId = null;
+    }
+    document.querySelectorAll('.spatial-artifact.is-dismissing').forEach(function (art) {
+      art.classList.remove('is-dismissing');
+    });
+    document.querySelectorAll('.room-enter-expand').forEach(function (room) {
+      room.classList.remove('room-enter-expand');
+    });
+  }
+
   function openRoomInternal(projectId) {
     const targetRoomElement = document.getElementById('room-' + projectId);
     if (!targetRoomElement) return;
@@ -824,6 +916,12 @@
       cancelAnimationFrame(animationFrameHandle);
       animationFrameHandle = null;
     }
+
+    cancelActiveRoomTransition();
+    const currentToken = activeNavigationToken;
+
+    // Limpa luz contextual ao entrar na sala
+    dispatchArtifactFocus(null, null, false);
 
     const artElement = document.getElementById('artifact-' + projectId);
     let hasVisualOrigin = false;
@@ -846,6 +944,22 @@
       targetRoomElement.classList.remove('room-enter-expand');
     }
 
+    if (hasVisualOrigin && document.documentElement.getAttribute('data-motion') !== 'paused') {
+      document.querySelectorAll('.spatial-artifact').forEach(function (art) {
+        if (art !== artElement) {
+          art.classList.add('is-dismissing');
+        }
+      });
+      activeTransitionTimeoutId = setTimeout(function () {
+        if (activeNavigationToken !== currentToken) return;
+        document.querySelectorAll('.spatial-artifact.is-dismissing').forEach(function (art) {
+          art.classList.remove('is-dismissing');
+        });
+        targetRoomElement.classList.remove('room-enter-expand');
+        activeTransitionTimeoutId = null;
+      }, 350);
+    }
+
     document.querySelectorAll('.project-room').forEach(function (room) {
       if (room !== targetRoomElement) {
         room.classList.remove('is-active', 'room-enter-expand');
@@ -863,6 +977,7 @@
   }
 
   function closeAllRoomsInternal() {
+    cancelActiveRoomTransition();
     document.querySelectorAll('.project-room').forEach(function (room) {
       room.classList.remove('is-active', 'room-enter-expand');
       room.hidden = true;
@@ -1107,6 +1222,7 @@
     const motionStatusLabel = document.getElementById('motion-status-label');
 
     if (isMotionReduced) {
+      cancelActiveRoomTransition();
       document.documentElement.setAttribute('data-motion', 'paused');
       document.querySelectorAll('.room-enter-expand').forEach(function (room) {
         room.classList.remove('room-enter-expand');
@@ -1613,6 +1729,14 @@
       spatialViewport.addEventListener('dblclick', function () {
         resetCameraToOverview();
       });
+      spatialViewport.addEventListener('scroll', function () {
+        if (activeFocusProjectId) {
+          const activeArt = document.getElementById('artifact-' + activeFocusProjectId);
+          if (activeArt) {
+            dispatchArtifactFocus(activeArt, activeFocusProjectId, true);
+          }
+        }
+      }, { passive: true });
     }
 
     // Minimapa
@@ -1635,6 +1759,7 @@
       function onEnter() {
         if (!currentActiveRoom && !isDirectReadingActive) {
           setConceptualRelation(projId);
+          dispatchArtifactFocus(artifact, projId, true);
         }
       }
 
@@ -1643,14 +1768,17 @@
           return;
         }
         if (!currentActiveRoom && !isDirectReadingActive) {
-          if (!artifact.contains(document.activeElement)) {
+          // O teclado tem precedência sobre o mouse: pointerleave não apaga foco se elemento retém seleção
+          if (!artifact.matches(':focus-within') && !artifact.contains(document.activeElement)) {
             scheduleRelationDismissal();
+            dispatchArtifactFocus(artifact, projId, false);
           }
         }
       }
 
       artifact.addEventListener('pointerenter', onEnter);
       artifact.addEventListener('pointerleave', onLeave);
+      artifact.addEventListener('focusin', onEnter);
 
       if (trigger) {
         trigger.addEventListener('focus', onEnter);
@@ -1665,6 +1793,7 @@
               if (activeRelationProject === projId) {
                 clearConceptualRelation();
               }
+              dispatchArtifactFocus(artifact, projId, false);
             }, 15);
           }
         });
@@ -1844,6 +1973,7 @@
 
     // Histórico Back/Forward do navegador
     window.addEventListener('popstate', function () {
+      cancelActiveRoomTransition();
       applyRouteState(window.location.hash.replace('#', ''));
     });
 
@@ -1851,10 +1981,25 @@
     window.addEventListener('resize', function () {
       updateHeaderHeightVar();
       if (!currentActiveRoom && !isDirectReadingActive) {
-        const fitZoom = calculateOverviewFit();
-        cameraState.targetZoom = fitZoom;
-        if (isMotionReduced) {
-          cameraState.currentZoom = fitZoom;
+        if (window.innerWidth > 600) {
+          const fitZoom = calculateOverviewFit();
+          cameraState.targetZoom = fitZoom;
+          if (isMotionReduced) {
+            cameraState.currentZoom = fitZoom;
+          }
+          applyWorldTransform();
+          drawAtlasCanvas();
+        } else {
+          if (spatialWorld) {
+            spatialWorld.style.transform = 'none';
+          }
+          document.documentElement.style.setProperty('--atlas-scale', '1');
+        }
+        if (activeFocusProjectId) {
+          const activeArt = document.getElementById('artifact-' + activeFocusProjectId);
+          if (activeArt) {
+            dispatchArtifactFocus(activeArt, activeFocusProjectId, true);
+          }
         }
       }
       requestCameraWakeup();
@@ -1864,7 +2009,9 @@
     document.addEventListener('visibilitychange', function () {
       isPageVisible = !document.hidden;
       document.documentElement.toggleAttribute('data-page-hidden', !isPageVisible);
+      cancelActiveRoomTransition();
       if (!isPageVisible) {
+        dispatchArtifactFocus(null, null, false);
         document.querySelectorAll('.room-enter-expand').forEach(function (room) {
           room.classList.remove('room-enter-expand');
         });
