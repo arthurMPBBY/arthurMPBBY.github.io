@@ -1,124 +1,35 @@
+/**
+ * Arthur Kadri — Portfólio de Dados, Finanças & Sistemas
+ * Arquitetura de Navegação Editorial com Rolagem Nativa & Íris Monumental
+ */
 (function () {
   'use strict';
 
-  if (typeof window === 'undefined' || typeof document === 'undefined') {
-    return;
-  }
-
+  // Constantes e Metadados
   const EMAIL_ADDRESS = 'arthurkadri968@gmail.com';
   const STORAGE_MOTION_KEY = 'arthur_portfolio_motion';
+  const PROJECT_SEQUENCE = ['cota', 'financeiro', 'yahcw', 'tuya', 'gaming', 'python', 'spotifast'];
 
-  // Coordenadas espaciais dos 6 objetos livres (origem 0,0 centralizada)
-  const PROJECT_COORDINATES = {
-    yahcw: { coordX: -440, coordY: -220, zoom: 1.15 },
-    tuya: { coordX: 440, coordY: -220, zoom: 1.15 },
-    gaming: { coordX: -450, coordY: 220, zoom: 1.15 },
-    python: { coordX: 450, coordY: 220, zoom: 1.15 },
-    spotifast: { coordX: 0, coordY: -350, zoom: 1.15 },
-    financeiro: { coordX: 0, coordY: 350, zoom: 1.15 }
-  };
+  // Estados de Interface e Histórico
+  let currentActiveRoom = null;
+  let isDirectReadingActive = false;
+  let isMotionReduced = false;
+  let returnTargetRoute = 'atlas';
+  let returnTargetScroll = 0;
+  let returnTargetFocus = null;
+  const roomTriggers = new Map();
+  const roomScrolls = new Map();
+  let savedModalPreviousRoute = null;
+  let savedModalTrigger = null;
 
-  const MOBILE_PROJECT_COORDINATES = {
-    yahcw: { coordX: -125, coordY: -140, zoom: 1.15 },
-    tuya: { coordX: 125, coordY: -140, zoom: 1.15 },
-    gaming: { coordX: -125, coordY: 140, zoom: 1.15 },
-    python: { coordX: 125, coordY: 140, zoom: 1.15 },
-    spotifast: { coordX: 0, coordY: -290, zoom: 1.15 },
-    financeiro: { coordX: 0, coordY: 280, zoom: 1.15 }
-  };
+  // Elementos DOM Principais
+  const spatialViewport = document.getElementById('spatial-viewport');
+  const liveAnnouncer = document.getElementById('live-announcer');
 
-  function getProjectCoordinates(pKey) {
-    if ((window.innerWidth || 1200) < 500 && MOBILE_PROJECT_COORDINATES[pKey]) {
-      return MOBILE_PROJECT_COORDINATES[pKey];
+  function announceLiveStatus(message) {
+    if (liveAnnouncer) {
+      liveAnnouncer.textContent = message;
     }
-    return PROJECT_COORDINATES[pKey] || { coordX: 0, coordY: 0, zoom: 1.0 };
-  }
-
-  const PROJECT_SEQUENCE = ['yahcw', 'tuya', 'gaming', 'python', 'spotifast', 'financeiro', 'cota'];
-
-  const CONCEPTUAL_RELATIONS = {
-    yahcw: {
-      title: 'YAHCW',
-      category: 'Win32 · DWM · C#',
-      related: [
-        { id: 'tuya', label: 'tuya-smart-lamps', relTag: 'Interfaces de controle' },
-        { id: 'spotifast', label: 'spotifast-neon-theme', relTag: 'Ergonomia Desktop' }
-      ],
-      editorial: 'Controle e interface direta: do gerenciamento de janelas DWM e luminância física aos comandos de iluminação residencial e ergonomia visual no desktop.',
-      connectionTags: 'Controle de ambiente & interfaces de desktop'
-    },
-    tuya: {
-      title: 'tuya-smart-lamps',
-      category: 'Redes · TCP / OpenAPI',
-      related: [
-        { id: 'yahcw', label: 'YAHCW', relTag: 'Software & Hardware' },
-        { id: 'python', label: 'python-curso', relTag: 'Automação & Lógica' }
-      ],
-      editorial: 'Automação e protocolos determinísticos: orquestração de rede e contingência inteligente aliadas a estruturas de dados e comunicação com periféricos.',
-      connectionTags: 'Protocolos de rede, sockets e automação'
-    },
-    gaming: {
-      title: 'gaming-fps-hud',
-      category: 'C++17 · Vulkan · Wayland',
-      related: [
-        { id: 'financeiro', label: 'Laboratório Financeiro', relTag: 'Séries Temporais' },
-        { id: 'python', label: 'python-curso', relTag: 'Métricas & Amostragem' }
-      ],
-      editorial: 'Observabilidade quantitativa e telemetria: leitura contínua de latências e 1% lows dialoga com modelagem temporal e simulações analíticas de capitalização.',
-      connectionTags: 'Observação, amostragem e séries temporais'
-    },
-    python: {
-      title: 'python-curso',
-      category: 'Python 3 · Algoritmos UFABC',
-      related: [
-        { id: 'financeiro', label: 'Laboratório Financeiro', relTag: 'Cálculo Rigoroso' },
-        { id: 'tuya', label: 'tuya-smart-lamps', relTag: 'Estruturas de Dados' }
-      ],
-      editorial: 'Estruturas de dados e rigor lógico: fundamentos de coleções e precisão determinística aplicados diretamente a modelos matemáticos e protocolos de rede.',
-      connectionTags: 'Estrutura lógica, coleções e algoritmos'
-    },
-    spotifast: {
-      title: 'spotifast-neon-theme',
-      category: 'Design Tokens · JSON',
-      related: [
-        { id: 'yahcw', label: 'YAHCW', relTag: 'Ergonomia de Tela' },
-        { id: 'gaming', label: 'gaming-fps-hud', relTag: 'Performance & HUD' }
-      ],
-      editorial: 'Aparência, tokens e design de interação: interfaces utilitárias que priorizam contraste, baixo overhead de renderização e conforto visual operacional.',
-      connectionTags: 'Design de tokens e ergonomia operacional'
-    },
-    financeiro: {
-      title: 'Laboratório Financeiro',
-      category: 'Finanças · Taxa Efetiva',
-      related: [
-        { id: 'gaming', label: 'gaming-fps-hud', relTag: 'Modelagem Contínua' },
-        { id: 'python', label: 'python-curso', relTag: 'Matemática Aplicada' }
-      ],
-      editorial: 'Modelagem quantitativa e matemática aplicada: simulação rigorosa de juros compostos compartilhando princípios de medição contínua e algoritmos determinísticos.',
-      connectionTags: 'Matemática aplicada e simulação quantitativa'
-    }
-  };
-
-  let activeRelationProject = null;
-  let savedAtlasCamera = null;
-  let savedAtlasFocus = null;
-  let relationDismissTimer = null;
-
-  function cancelRelationDismissal() {
-    clearTimeout(relationDismissTimer);
-    relationDismissTimer = null;
-  }
-
-  function scheduleRelationDismissal() {
-    cancelRelationDismissal();
-    relationDismissTimer = setTimeout(function () {
-      const banner = document.getElementById('atlas-relation-banner');
-      const artifact = document.getElementById('artifact-' + activeRelationProject);
-      const activeElement = document.activeElement;
-      if ((banner && (banner.matches(':hover') || banner.contains(activeElement))) ||
-          (artifact && (artifact.matches(':hover') || artifact.contains(activeElement)))) return;
-      clearConceptualRelation();
-    }, 1200);
   }
 
   function safeStorageGet(storageKey) {
@@ -138,975 +49,429 @@
     }
   }
 
-  function announceLiveStatus(statusMessage) {
-    const liveElement = document.getElementById('live-announcer');
-    if (!liveElement) return;
-    liveElement.textContent = statusMessage;
-    setTimeout(function () {
-      if (liveElement.textContent === statusMessage) {
-        liveElement.textContent = '';
-      }
-    }, 3500);
+  function formatBRL(amount) {
+    return 'R$ ' + Number(amount).toLocaleString('pt-BR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
   }
 
-  const cameraState = {
-    currentPanX: 0,
-    currentPanY: 0,
-    currentZoom: 0.85,
-    targetPanX: 0,
-    targetPanY: 0,
-    targetZoom: 0.85,
-    isSettled: true,
-    minZoom: 0.35,
-    maxZoom: 1.85,
-    minPanX: 0,
-    maxPanX: 0,
-    minPanY: 0,
-    maxPanY: 0
-  };
+  // =========================================================================
+  // 1. HERO FRAMING & ZOOM ÓPTICO COM ROLAGEM NATIVA
+  // =========================================================================
 
-  let currentIrisZoom = 0.0;
-  let targetIrisZoom = 0.0;
+  function dispatchHeroFraming() {
+    const isMobile = window.innerWidth <= 768;
+    // Desktop: íris monumental à direita (0.73, 0.50, scale 1.20)
+    // Mobile: íris centralizada no subcontainer de 42svh (0.50, 0.58, scale 1.05)
+    const framing = isMobile
+      ? { centerX: 0.50, centerY: 0.58, scale: 1.05 }
+      : { centerX: 0.73, centerY: 0.50, scale: 1.20 };
 
-  function dispatchIrisZoom(zoomVal, isReset) {
-    targetIrisZoom = isReset ? 0.0 : Math.max(0.0, Math.min(1.0, zoomVal));
-    currentIrisZoom = targetIrisZoom;
     window.dispatchEvent(new CustomEvent('portfolio:opticsinput', {
-      detail: { irisZoom: targetIrisZoom, reset: Boolean(isReset) }
+      detail: { framing: framing }
     }));
   }
 
-  let focusPulseId = 0;
-  let activeFocusProjectId = null;
-  let lastFocusNormX = 0.5;
-  let lastFocusNormY = 0.5;
+  function handleHeroScroll() {
+    if (isMotionReduced) return;
+    if (!spatialViewport) return;
+    const heroRect = spatialViewport.getBoundingClientRect();
+    const heroHeight = spatialViewport.offsetHeight || window.innerHeight;
+    // Progresso suave quando o hero rola para cima (0 no topo, 1 ao sair)
+    const scrollRatio = Math.max(0, Math.min(1, -heroRect.top / heroHeight));
+    // Aproximação curta (0.0 até 0.10) sem captura de wheel
+    const nextZoom = scrollRatio * 0.10;
 
-  function dispatchArtifactFocus(artifact, projId, isEnter) {
-    const canvasElement = document.getElementById('kaleidoscope-canvas');
-    if (!canvasElement) return;
-    const canvasRect = canvasElement.getBoundingClientRect();
-    if (canvasRect.width <= 0 || canvasRect.height <= 0) return;
-
-    if (isEnter && artifact) {
-      if (activeFocusProjectId !== projId) {
-        focusPulseId++;
-        activeFocusProjectId = projId;
-      }
-      const artRect = artifact.getBoundingClientRect();
-      const centerX = artRect.left + artRect.width * 0.5;
-      const centerY = artRect.top + artRect.height * 0.5;
-      lastFocusNormX = Math.max(0.0, Math.min(1.0, (centerX - canvasRect.left) / canvasRect.width));
-      lastFocusNormY = Math.max(0.0, Math.min(1.0, (centerY - canvasRect.top) / canvasRect.height));
-      window.dispatchEvent(new CustomEvent('portfolio:opticsinput', {
-        detail: {
-          focus: {
-            x: lastFocusNormX,
-            y: lastFocusNormY,
-            strength: 1.0,
-            pulseId: focusPulseId
-          }
-        }
-      }));
-    } else {
-      if (activeFocusProjectId === projId || !projId) {
-        activeFocusProjectId = null;
-      }
-      window.dispatchEvent(new CustomEvent('portfolio:opticsinput', {
-        detail: {
-          focus: {
-            x: lastFocusNormX,
-            y: lastFocusNormY,
-            strength: 0.0,
-            pulseId: focusPulseId
-          }
-        }
-      }));
-    }
+    window.dispatchEvent(new CustomEvent('portfolio:opticsinput', {
+      detail: { irisZoom: nextZoom }
+    }));
   }
 
-  const pointerState = {
-    isPointerDown: false,
-    isDragging: false,
-    wasDragged: false,
-    startPointerX: 0,
-    startPointerY: 0,
-    previousPointerX: 0,
-    previousPointerY: 0,
-    totalDragDistance: 0,
-    activePointerId: null
-  };
+  // =========================================================================
+  // 2. PRÉVIA FINANCEIRA NO CAPÍTULO 2 (VIA finance-lab.js API)
+  // =========================================================================
 
-  let animationFrameHandle = null;
-  let isPageVisible = true;
-  let isMotionReduced = false;
-  let currentActiveRoom = null;
-  let isDirectReadingActive = false;
-  let lastFocusedRoomId = null;
-
-  const spatialViewport = document.getElementById('spatial-viewport');
-  const spatialWorld = document.getElementById('spatial-world');
-  const atlasCanvas = document.getElementById('atlas-canvas');
-  let atlasCanvasContext = null;
-
-  try {
-    if (atlasCanvas && typeof atlasCanvas.getContext === 'function') {
-      atlasCanvasContext = atlasCanvas.getContext('2d');
-    }
-  } catch (_) {
-    atlasCanvasContext = null;
-  }
-
-  // Cálculo real de FIT com bounding boxes dos objetos + safe area de header e dock
-  function calculateOverviewFit() {
-    const viewportWidth = window.innerWidth || 1440;
-    const viewportHeight = window.innerHeight || 900;
-    const isMobile = viewportWidth < 500;
-
-    // Dimensões do envelope mundial (inclui raio dos objetos e margens de respiração)
-    const worldEnvelopeWidth = isMobile ? 620 : 1280;
-    const worldEnvelopeHeight = isMobile ? 900 : 970;
-
-    // Safe areas: Header (~84px), Dock (~96px), Margens laterais (~72px / mobile 24px)
-    const availableWidth = Math.max(viewportWidth - (isMobile ? 24 : 72), 260);
-    const availableHeight = Math.max(viewportHeight - (isMobile ? 150 : 180), 260);
-
-    const fitScaleX = availableWidth / worldEnvelopeWidth;
-    const fitScaleY = availableHeight / worldEnvelopeHeight;
-    let idealZoom = Math.min(fitScaleX, fitScaleY) * (isMobile ? 0.94 : 0.98);
-
-    // Em telas mobile, garante zoom legível e composição apropriada sem corte lateral
-    if (isMobile) {
-      idealZoom = Math.max(0.40, Math.min(idealZoom, 0.60));
-    } else {
-      idealZoom = Math.max(cameraState.minZoom, Math.min(idealZoom, 1.05));
-    }
-
-    return idealZoom;
-  }
-
-  function clampValue(unclampedValue, minimumAllowed, maximumAllowed) {
-    return Math.max(minimumAllowed, Math.min(maximumAllowed, unclampedValue));
-  }
-
-  function resetCameraToOverview(snap) {
-    const calculatedFitZoom = calculateOverviewFit();
-    cameraState.targetPanX = 0;
-    cameraState.targetPanY = 0;
-    cameraState.targetZoom = calculatedFitZoom;
-
-    cameraState.currentPanX = 0;
-    cameraState.currentPanY = 0;
-    cameraState.currentZoom = calculatedFitZoom;
-    cameraState.isSettled = true;
-    applyWorldTransform();
-    drawAtlasCanvas();
-
-    if (snap || targetIrisZoom !== 0.0) {
-      dispatchIrisZoom(0.0, true);
-    }
-
-    announceLiveStatus('Enquadramento geral do Atlas restaurado.');
-  }
-
-  function requestCameraWakeup() {
-    if (!isPageVisible || currentActiveRoom || isDirectReadingActive) {
-      return;
-    }
-    if (animationFrameHandle === null) {
-      animationFrameHandle = window.requestAnimationFrame(runSpatialRenderLoop);
-    }
-  }
-
-  // Aplicação da transformação espacial (origem 0,0 do mundo no centro da tela)
-  function applyWorldTransform() {
-    if (!spatialWorld) return;
-    if (window.innerWidth <= 600) {
-      spatialWorld.style.transform = 'none';
-      document.documentElement.style.setProperty('--atlas-scale', '1');
-      return;
-    }
-    const windowHalfWidth = (window.innerWidth || 1200) / 2;
-    const windowHalfHeight = (window.innerHeight || 800) / 2;
-    const translateX = windowHalfWidth + cameraState.currentPanX;
-    const translateY = windowHalfHeight + cameraState.currentPanY;
-
-    spatialWorld.style.transform = 'translate3d(' + translateX.toFixed(1) + 'px, ' + translateY.toFixed(1) + 'px, 0) scale(' + cameraState.currentZoom.toFixed(4) + ')';
-    document.documentElement.style.setProperty('--atlas-scale', cameraState.currentZoom.toFixed(4));
-    updateMinimapFrustum();
-  }
-
-  function setConceptualRelation(projectId) {
-    cancelRelationDismissal();
-    if (activeRelationProject === projectId) return;
-    activeRelationProject = projectId;
-
-    const banner = document.getElementById('atlas-relation-banner');
-    const pairLabel = document.getElementById('relation-pair-label');
-    const editorialText = document.getElementById('relation-editorial-text');
-    const jumpActions = document.getElementById('relation-jump-actions');
-
-    const allArtifacts = document.querySelectorAll('.spatial-artifact');
-    if (!projectId || !CONCEPTUAL_RELATIONS[projectId]) {
-      allArtifacts.forEach(function (art) {
-        art.classList.remove('is-highlighted', 'is-concept-connected', 'is-concept-dimmed');
-      });
-      if (banner) {
-        banner.setAttribute('inert', '');
-        banner.classList.remove('is-visible');
-        banner.setAttribute('aria-hidden', 'true');
-      }
-      drawAtlasCanvas();
+  function initializeFinancePreview() {
+    if (!window.PortfolioFinance || typeof window.PortfolioFinance.calculate !== 'function') {
       return;
     }
 
-    const relData = CONCEPTUAL_RELATIONS[projectId];
-    const relatedIds = relData.related.map(function (relation) { return relation.id; });
+    try {
+      // Caso canônico de validação da simulação
+      const params = {
+        initialAmount: 1000,
+        monthlyContribution: 100,
+        annualRatePercent: 12,
+        months: 12
+      };
+      const result = window.PortfolioFinance.calculate(params);
 
-    allArtifacts.forEach(function (art) {
-      const artId = art.getAttribute('data-project');
-      if (artId === projectId) {
-        art.classList.add('is-highlighted');
-        art.classList.remove('is-concept-connected', 'is-concept-dimmed');
-      } else if (relatedIds.indexOf(artId) !== -1) {
-        art.classList.add('is-concept-connected');
-        art.classList.remove('is-highlighted', 'is-concept-dimmed');
-      } else {
-        art.classList.add('is-concept-dimmed');
-        art.classList.remove('is-highlighted', 'is-concept-connected');
-      }
-    });
+      const elFinal = document.getElementById('fp-final-balance');
+      const elContrib = document.getElementById('fp-total-contributed');
+      const elInterest = document.getElementById('fp-total-interest');
+      if (elFinal) elFinal.textContent = formatBRL(result.finalBalance);
+      if (elContrib) elContrib.textContent = formatBRL(result.totalContributed);
+      if (elInterest) elInterest.textContent = formatBRL(result.interest);
 
-    if (banner && pairLabel && editorialText && jumpActions) {
-      const firstRel = relData.related[0];
-      const secondRel = relData.related[1];
-      pairLabel.textContent = relData.title + ' · Em comum com ' + firstRel.label + ' e ' + secondRel.label;
-      editorialText.textContent = relData.editorial;
-
-      jumpActions.innerHTML = '';
-      relData.related.forEach(function (item) {
-        const jumpBtn = document.createElement('button');
-        jumpBtn.type = 'button';
-        jumpBtn.className = 'relation-jump-btn';
-        jumpBtn.setAttribute('data-jump-room', item.id);
-        jumpBtn.textContent = 'Saltar para ' + item.label + ' →';
-        jumpBtn.addEventListener('click', function (clickEvent) {
-          clickEvent.stopPropagation();
-          navigateToRoute(item.id, true);
+      const barsTrack = document.getElementById('fp-bars-track');
+      if (barsTrack && result.points && result.points.length > 0) {
+        barsTrack.innerHTML = '';
+        const maxVal = result.finalBalance;
+        result.points.forEach(function (pt) {
+          const heightPercent = Math.max(6, (pt.balance / maxVal) * 100);
+          const bar = document.createElement('div');
+          bar.className = 'chart-bar';
+          bar.style.height = heightPercent.toFixed(1) + '%';
+          bar.setAttribute('title', 'Mês ' + pt.month + ': Saldo ' + formatBRL(pt.balance) + ' (Aportado ' + formatBRL(pt.contributed) + ')');
+          barsTrack.appendChild(bar);
         });
-        jumpActions.appendChild(jumpBtn);
+      }
+    } catch (err) {
+      console.warn('Erro ao inicializar prévia do finance-lab:', err);
+    }
+  }
+
+  // =========================================================================
+  // 3. REVELAÇÃO SUAVE EM ROLAGEM NATIVA (SCROLL REVEAL - FAIL OPEN)
+  // =========================================================================
+
+  function initializeScrollReveal() {
+    const revealTargets = document.querySelectorAll('.chapter-feature, .systems-tools-section, .journey-footer');
+
+    if (!('IntersectionObserver' in window) || isMotionReduced) {
+      revealTargets.forEach(function (el) {
+        el.classList.add('is-revealed');
       });
-
-      banner.classList.add('is-visible');
-      banner.removeAttribute('inert');
-      banner.removeAttribute('aria-hidden');
+      return;
     }
 
-    drawAtlasCanvas();
-  }
-
-  function clearConceptualRelation() {
-    setConceptualRelation(null);
-    dispatchArtifactFocus(null, null, false);
-  }
-
-  function indicateReturnOnArtifact(projectId) {
-    const artifactElement = document.getElementById('artifact-' + projectId);
-    if (!artifactElement) return;
-    artifactElement.classList.add('returned-pulse');
-    setTimeout(function () {
-      artifactElement.classList.remove('returned-pulse');
-    }, 460);
-  }
-
-  function drawAtlasCanvas() {
-    if (!atlasCanvas || !atlasCanvasContext) return;
-    if (window.innerWidth <= 600) return;
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const viewportWidth = window.innerWidth || 1200;
-    const viewportHeight = window.innerHeight || 800;
-
-    const scaledWidth = Math.floor(viewportWidth * dpr);
-    const scaledHeight = Math.floor(viewportHeight * dpr);
-
-    if (atlasCanvas.width !== scaledWidth || atlasCanvas.height !== scaledHeight) {
-      atlasCanvas.width = scaledWidth;
-      atlasCanvas.height = scaledHeight;
-      atlasCanvas.style.width = viewportWidth + 'px';
-      atlasCanvas.style.height = viewportHeight + 'px';
-    }
-
-    atlasCanvasContext.save();
-    atlasCanvasContext.scale(dpr, dpr);
-    atlasCanvasContext.clearRect(0, 0, viewportWidth, viewportHeight);
-
-    const worldCenterX = viewportWidth / 2 + cameraState.currentPanX;
-    const worldCenterY = viewportHeight / 2 + cameraState.currentPanY;
-    const currentScale = cameraState.currentZoom;
-
-    // Grade técnica ortogonal
-    atlasCanvasContext.strokeStyle = 'rgba(14, 18, 24, 0.05)';
-    atlasCanvasContext.lineWidth = 1;
-
-    const majorGridStep = 180 * currentScale;
-    if (majorGridStep > 24) {
-      const offsetX = worldCenterX % majorGridStep;
-      const offsetY = worldCenterY % majorGridStep;
-
-      atlasCanvasContext.beginPath();
-      for (let gridX = offsetX; gridX < viewportWidth; gridX += majorGridStep) {
-        atlasCanvasContext.moveTo(gridX, 0);
-        atlasCanvasContext.lineTo(gridX, viewportHeight);
-      }
-      for (let gridY = offsetY; gridY < viewportHeight; gridY += majorGridStep) {
-        atlasCanvasContext.moveTo(0, gridY);
-        atlasCanvasContext.lineTo(viewportWidth, gridY);
-      }
-      atlasCanvasContext.stroke();
-    }
-
-    // Eixos principais cartográficos passando por (0, 0)
-    atlasCanvasContext.strokeStyle = 'rgba(14, 18, 24, 0.16)';
-    atlasCanvasContext.lineWidth = 1;
-    atlasCanvasContext.beginPath();
-    atlasCanvasContext.moveTo(worldCenterX, 0);
-    atlasCanvasContext.lineTo(worldCenterX, viewportHeight);
-    atlasCanvasContext.moveTo(0, worldCenterY);
-    atlasCanvasContext.lineTo(viewportWidth, worldCenterY);
-    atlasCanvasContext.stroke();
-
-    // Raios de anéis astronômicos concêntricos
-    atlasCanvasContext.strokeStyle = 'rgba(14, 18, 24, 0.06)';
-    atlasCanvasContext.lineWidth = 1;
-    [260, 480, 720].forEach(function (radius) {
-      atlasCanvasContext.beginPath();
-      atlasCanvasContext.arc(worldCenterX, worldCenterY, radius * currentScale, 0, Math.PI * 2);
-      atlasCanvasContext.stroke();
+    revealTargets.forEach(function (el) {
+      el.classList.add('reveal-on-scroll', 'will-reveal');
     });
 
-    // Vetores de conexão entre o meridiano e cada objeto
-    const projectKeys = Object.keys(PROJECT_COORDINATES);
-    const relatedPartnerIds = (activeRelationProject && CONCEPTUAL_RELATIONS[activeRelationProject])
-      ? CONCEPTUAL_RELATIONS[activeRelationProject].related.map(function (relation) { return relation.id; })
-      : [];
-
-    for (let i = 0; i < projectKeys.length; i += 1) {
-      const pKey = projectKeys[i];
-      const pLoc = getProjectCoordinates(pKey);
-      const pScreenX = worldCenterX + pLoc.coordX * currentScale;
-      const pScreenY = worldCenterY + pLoc.coordY * currentScale;
-      const labelClearance = 1 / Math.hypot(pLoc.coordX / 300, pLoc.coordY / 100);
-
-      const isPrimary = pKey === activeRelationProject;
-      const isPartner = relatedPartnerIds.indexOf(pKey) !== -1;
-
-      if (activeRelationProject) {
-        if (isPrimary || isPartner) {
-          atlasCanvasContext.strokeStyle = 'rgba(217, 67, 46, 0.65)';
-          atlasCanvasContext.lineWidth = 1.6;
-          atlasCanvasContext.setLineDash([4, 4]);
-        } else {
-          atlasCanvasContext.strokeStyle = 'rgba(14, 18, 24, 0.08)';
-          atlasCanvasContext.lineWidth = 0.8;
-          atlasCanvasContext.setLineDash([2, 6]);
+    const observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.remove('will-reveal');
+          entry.target.classList.add('is-revealed');
+          observer.unobserve(entry.target);
         }
-      } else {
-        atlasCanvasContext.strokeStyle = 'rgba(217, 67, 46, 0.32)';
-        atlasCanvasContext.lineWidth = 1.2;
-        atlasCanvasContext.setLineDash([4, 6]);
-      }
+      });
+    }, {
+      rootMargin: '0px 0px -40px 0px',
+      threshold: 0.1
+    });
 
-      atlasCanvasContext.beginPath();
-      atlasCanvasContext.moveTo(
-        worldCenterX + pLoc.coordX * currentScale * labelClearance,
-        worldCenterY + pLoc.coordY * currentScale * labelClearance
-      );
-      atlasCanvasContext.lineTo(pScreenX, pScreenY);
-      atlasCanvasContext.stroke();
-
-      // Ponto de mira no destino
-      atlasCanvasContext.fillStyle = (activeRelationProject && !isPrimary && !isPartner)
-        ? 'rgba(14, 18, 24, 0.25)'
-        : 'rgba(217, 67, 46, 0.85)';
-      atlasCanvasContext.beginPath();
-      atlasCanvasContext.arc(pScreenX, pScreenY, isPrimary ? 4.5 : 3, 0, Math.PI * 2);
-      atlasCanvasContext.fill();
-    }
-    atlasCanvasContext.setLineDash([]);
-
-    if (activeRelationProject && CONCEPTUAL_RELATIONS[activeRelationProject]) {
-      const sourceCoords = getProjectCoordinates(activeRelationProject);
-      const sScreenX = worldCenterX + sourceCoords.coordX * currentScale;
-      const sScreenY = worldCenterY + sourceCoords.coordY * currentScale;
-      const relList = CONCEPTUAL_RELATIONS[activeRelationProject].related;
-
-      for (let rIdx = 0; rIdx < relList.length; rIdx += 1) {
-        const targetId = relList[rIdx].id;
-        const targetCoords = getProjectCoordinates(targetId);
-        if (!targetCoords) continue;
-
-        const tScreenX = worldCenterX + targetCoords.coordX * currentScale;
-        const tScreenY = worldCenterY + targetCoords.coordY * currentScale;
-
-        const midX = (sScreenX + tScreenX) / 2;
-        const midY = (sScreenY + tScreenY) / 2;
-        const vecX = midX - worldCenterX;
-        const vecY = midY - worldCenterY;
-        const distToCenter = Math.hypot(vecX, vecY) || 1;
-        const radialPush = Math.max(90 * currentScale, 55);
-
-        const ctrlX = midX + (vecX / distToCenter) * radialPush;
-        const ctrlY = midY + (vecY / distToCenter) * radialPush;
-
-        atlasCanvasContext.strokeStyle = 'rgba(217, 67, 46, 0.72)';
-        atlasCanvasContext.lineWidth = 1.8 * currentScale;
-        atlasCanvasContext.setLineDash([5 * currentScale, 4 * currentScale]);
-        atlasCanvasContext.beginPath();
-        atlasCanvasContext.moveTo(sScreenX, sScreenY);
-        atlasCanvasContext.quadraticCurveTo(ctrlX, ctrlY, tScreenX, tScreenY);
-        atlasCanvasContext.stroke();
-
-        atlasCanvasContext.fillStyle = '#d9432e';
-        atlasCanvasContext.beginPath();
-        atlasCanvasContext.arc(ctrlX, ctrlY, 3 * currentScale, 0, Math.PI * 2);
-        atlasCanvasContext.fill();
-      }
-      atlasCanvasContext.setLineDash([]);
-    }
-
-    atlasCanvasContext.restore();
+    revealTargets.forEach(function (el) {
+      observer.observe(el);
+    });
   }
 
-  function runSpatialRenderLoop() {
-    animationFrameHandle = null;
+  // =========================================================================
+  // 4. GESTÃO DE ROTAS & RESTAURAÇÃO DE SCROLL E FOCO
+  // =========================================================================
 
-    if (!isPageVisible) {
-      return;
-    }
-
-    if (isMotionReduced) {
-      cameraState.currentPanX = cameraState.targetPanX;
-      cameraState.currentPanY = cameraState.targetPanY;
-      cameraState.currentZoom = cameraState.targetZoom;
-      cameraState.isSettled = true;
-      applyWorldTransform();
-      drawAtlasCanvas();
-      return; // Zero RAF quando idle em reduced motion
-    }
-
-    const lerpRate = pointerState.isDragging ? 0.35 : 0.22;
-    const deltaPanX = cameraState.targetPanX - cameraState.currentPanX;
-    const deltaPanY = cameraState.targetPanY - cameraState.currentPanY;
-    const deltaZoom = cameraState.targetZoom - cameraState.currentZoom;
-
-    cameraState.currentPanX += deltaPanX * lerpRate;
-    cameraState.currentPanY += deltaPanY * lerpRate;
-    cameraState.currentZoom += deltaZoom * lerpRate;
-
-    applyWorldTransform();
-    drawAtlasCanvas();
-
-    const isPanSettled = Math.abs(deltaPanX) < 0.15 && Math.abs(deltaPanY) < 0.15;
-    const isZoomSettled = Math.abs(deltaZoom) < 0.001;
-
-    if (isPanSettled && isZoomSettled && !pointerState.isDragging) {
-      cameraState.currentPanX = cameraState.targetPanX;
-      cameraState.currentPanY = cameraState.targetPanY;
-      cameraState.currentZoom = cameraState.targetZoom;
-      cameraState.isSettled = true;
-      applyWorldTransform();
-      drawAtlasCanvas();
-      // Não solicita novo frame: RAF para no estado idle!
-    } else {
-      cameraState.isSettled = false;
-      requestCameraWakeup();
-    }
-  }
-
-  // Ponteiro no Atlas: geometria e câmera permanecem fixas/estacionárias
-  function handlePointerDown(pointerEvent) {
-    if (window.innerWidth <= 600) return;
-    if (pointerEvent.button !== 0 && pointerEvent.pointerType === 'mouse') {
-      return;
-    }
-    pointerState.isPointerDown = true;
-    pointerState.isDragging = false;
-    pointerState.wasDragged = false;
-    pointerState.activePointerId = pointerEvent.pointerId;
-    pointerState.startPointerX = pointerEvent.clientX;
-    pointerState.startPointerY = pointerEvent.clientY;
-    pointerState.previousPointerX = pointerEvent.clientX;
-    pointerState.previousPointerY = pointerEvent.clientY;
-    pointerState.totalDragDistance = 0;
-  }
-
-  function handlePointerMove(pointerEvent) {
-    if (!pointerState.isPointerDown) {
-      return;
-    }
-    pointerState.previousPointerX = pointerEvent.clientX;
-    pointerState.previousPointerY = pointerEvent.clientY;
-
-    const distanceFromStart = Math.hypot(
-      pointerEvent.clientX - pointerState.startPointerX,
-      pointerEvent.clientY - pointerState.startPointerY
-    );
-    pointerState.totalDragDistance = distanceFromStart;
-    // O Atlas permanece estacionário após o ajuste inicial; nenhum arrasto desloca o mundo
-  }
-
-  function handlePointerUp(pointerEvent) {
-    if (!pointerState.isPointerDown) {
-      return;
-    }
-    pointerState.isPointerDown = false;
-    pointerState.activePointerId = null;
-
-    setTimeout(function () {
-      pointerState.totalDragDistance = 0;
-      pointerState.isDragging = false;
-      pointerState.wasDragged = false;
-    }, 60);
-  }
-
-  // Roda do mouse no Atlas: age EXCLUSIVAMENTE na profundidade da íris
-  function handleWheelZoom(wheelEvent) {
-    if (window.innerWidth <= 600) {
-      return; // Permite rolagem nativa da galeria no layout móvel
-    }
-    // Permite Ctrl+wheel e Cmd+wheel para zoom nativo do navegador
-    if (wheelEvent.ctrlKey || wheelEvent.metaKey) {
-      return;
-    }
-
-    // Permite rolagem nativa em leitura direta, salas de projetos, modais ou controles
-    if (isDirectReadingActive || currentActiveRoom || document.querySelector('.atlas-overlay-modal[open]')) {
-      return;
-    }
-    if (wheelEvent.target && (wheelEvent.target.closest('.project-room') || wheelEvent.target.closest('#direct-reading-view') || wheelEvent.target.closest('.atlas-overlay-modal') || wheelEvent.target.closest('.optics-interface'))) {
-      return;
-    }
-
-    wheelEvent.preventDefault();
-    const zoomStep = -wheelEvent.deltaY * 0.0016;
-    const nextZoom = Math.max(0.0, Math.min(1.0, targetIrisZoom + zoomStep));
-    if (Math.abs(nextZoom - targetIrisZoom) > 0.0001) {
-      dispatchIrisZoom(nextZoom, nextZoom === 0.0 && targetIrisZoom === 0.0);
-    }
-  }
-
-  // Minimapa: Frustum reflete enquadramento responsivo estacionário
-  function updateMinimapFrustum() {
-    const frustumRectangle = document.getElementById('minimap-frustum');
-    const coordReadout = document.getElementById('minimap-coord-readout');
-    if (!frustumRectangle) return;
-
-    const viewportWidth = window.innerWidth || 1200;
-    const viewportHeight = window.innerHeight || 800;
-    const scaleFactor = cameraState.currentZoom || 1;
-
-    // Dimensões do frustum no espaço do mundo (origem 0,0 centralizada)
-    const visibleWidthWorld = viewportWidth / scaleFactor;
-    const visibleHeightWorld = viewportHeight / scaleFactor;
-
-    const visibleLeftWorld = -visibleWidthWorld / 2;
-    const visibleTopWorld = -visibleHeightWorld / 2;
-
-    frustumRectangle.setAttribute('x', Math.round(visibleLeftWorld));
-    frustumRectangle.setAttribute('y', Math.round(visibleTopWorld));
-    frustumRectangle.setAttribute('width', Math.round(visibleWidthWorld));
-    frustumRectangle.setAttribute('height', Math.round(visibleHeightWorld));
-
-    if (coordReadout) {
-      coordReadout.textContent = '0, 0';
-    }
-  }
-
-  function handleMinimapClick(mouseEvent) {
-    const minimapRadar = document.getElementById('minimap-radar');
-    if (!minimapRadar) return;
-
-    // Se clicou diretamente num nó ou elemento com data-project
-    const targetElement = mouseEvent.target;
-    const directProjectId = targetElement && (targetElement.getAttribute('data-project') || (targetElement.closest && targetElement.closest('[data-project]') && targetElement.closest('[data-project]').getAttribute('data-project')));
-    if (directProjectId && (PROJECT_COORDINATES[directProjectId] || directProjectId === 'cota')) {
-      navigateToRoute(directProjectId, true);
-      return;
-    }
-
-    const boundingBox = minimapRadar.getBoundingClientRect();
-    const clickRatioX = (mouseEvent.clientX - boundingBox.left) / boundingBox.width;
-    const clickRatioY = (mouseEvent.clientY - boundingBox.top) / boundingBox.height;
-
-    // Radar viewBox: -1000 a +1000 X (largura 2000), -800 a +800 Y (altura 1600)
-    const targetWorldX = -1000 + clickRatioX * 2000;
-    const targetWorldY = -800 + clickRatioY * 1600;
-
-    // Encontra a estação de projeto mais próxima do clique
-    let closestProject = null;
-    let minDistance = Infinity;
-    const pKeys = Object.keys(PROJECT_COORDINATES);
-    for (let i = 0; i < pKeys.length; i += 1) {
-      const pKey = pKeys[i];
-      const pLoc = PROJECT_COORDINATES[pKey];
-      const dist = Math.hypot(pLoc.coordX - targetWorldX, pLoc.coordY - targetWorldY);
-      if (dist < minDistance) {
-        minDistance = dist;
-        closestProject = pKey;
+  function restoreReturnState(exitingRoomId) {
+    let focusToRestore = returnTargetFocus;
+    if (!focusToRestore || focusToRestore === document.body || !focusToRestore.isConnected) {
+      if (exitingRoomId) {
+        focusToRestore = roomTriggers.get(exitingRoomId) || document.querySelector('[data-enter-room="' + exitingRoomId + '"]');
       }
     }
-
-    if (closestProject && minDistance < 500) {
-      navigateToRoute(closestProject, true);
+    let scrollToRestore = returnTargetScroll;
+    if ((scrollToRestore === 0 || typeof scrollToRestore !== 'number') && exitingRoomId && roomScrolls.has(exitingRoomId)) {
+      scrollToRestore = roomScrolls.get(exitingRoomId);
     }
+    const applyState = function () {
+      window.scrollTo({ top: scrollToRestore, behavior: 'instant' });
+      if (focusToRestore && typeof focusToRestore.focus === 'function' && focusToRestore.isConnected) {
+        focusToRestore.focus({ preventScroll: true });
+      }
+    };
+    applyState();
+    setTimeout(applyState, 50);
+    setTimeout(applyState, 150);
+    returnTargetFocus = null;
   }
 
-  // Centralização de rotas sem criação espúria de entradas no histórico
   function navigateToRoute(routeHash, pushHistory) {
     const cleanHash = (routeHash || '').replace('#', '').trim();
+    const prevRoute = (window.location.hash || '').replace('#', '').trim() || 'atlas';
     if (pushHistory !== false) {
       const fullHash = cleanHash ? '#' + cleanHash : '#atlas';
       if (window.location.hash !== fullHash) {
         window.history.pushState(null, '', fullHash);
       }
     }
-    applyRouteState(cleanHash);
+    applyRouteState(cleanHash, prevRoute);
   }
 
-  function applyRouteState(cleanHash) {
-    const route = cleanHash || 'atlas';
+  function applyRouteState(cleanHash, optPreviousRoute) {
+    const rawRoute = cleanHash || 'atlas';
+    const route = (rawRoute === 'laboratorio') ? 'financeiro' : rawRoute;
 
-    if (route === 'atlas') {
+    // Rota #projetos (âncora suave na home ou retorno de sala)
+    if (route === 'projetos') {
+      const wasInRoom = Boolean(currentActiveRoom);
+      const exitingRoom = currentActiveRoom;
+      closeAllRoomsInternal();
+      if (isDirectReadingActive) {
+        exitDirectReadingInternal();
+      }
+      closeAllOverlaysInternal();
+      document.documentElement.setAttribute('data-view', 'atlas');
+      document.body.classList.add('mode-atlas');
+      document.body.classList.remove('mode-room');
+      currentActiveRoom = null;
+      isDirectReadingActive = false;
+
+      if (wasInRoom) {
+        restoreReturnState(exitingRoom);
+      } else {
+        const anchor = document.getElementById('projetos');
+        if (anchor) {
+          anchor.scrollIntoView({ behavior: isMotionReduced ? 'instant' : 'smooth', block: 'start' });
+        }
+      }
+      announceLiveStatus('Seção de projetos selecionada.');
+      return;
+    }
+
+    // Rota #atlas (Home principal)
+    if (route === 'atlas' || route === '') {
+      const wasInRoom = Boolean(currentActiveRoom);
+      const exitingRoom = currentActiveRoom;
       closeAllRoomsInternal();
       exitDirectReadingInternal();
       closeAllOverlaysInternal();
       currentActiveRoom = null;
       isDirectReadingActive = false;
-      updateDockActive(null);
-      setSpatialViewportInert(false);
-      clearConceptualRelation();
 
-      resetCameraToOverview(true);
-      savedAtlasCamera = null;
+      document.documentElement.setAttribute('data-view', 'atlas');
+      document.body.classList.add('mode-atlas');
+      document.body.classList.remove('mode-room');
 
-      if (lastFocusedRoomId) {
-        const trigger = savedAtlasFocus && savedAtlasFocus.isConnected && savedAtlasFocus.getClientRects().length > 0 && !savedAtlasFocus.closest('[inert]') && savedAtlasFocus !== document.body ? savedAtlasFocus : document.querySelector('[data-enter-room="' + (lastFocusedRoomId === 'cota' ? 'financeiro' : lastFocusedRoomId) + '"]');
-        if (trigger && typeof trigger.focus === 'function') {
-          trigger.focus({ preventScroll: true });
-        }
-        const originArtifact = trigger && trigger.closest('.spatial-artifact');
-        indicateReturnOnArtifact(originArtifact ? originArtifact.getAttribute('data-project') : lastFocusedRoomId);
-        savedAtlasFocus = null;
-      } else if (savedAtlasFocus && savedAtlasFocus.isConnected && !savedAtlasFocus.closest('[inert]') && savedAtlasFocus !== document.body) {
-        if (typeof savedAtlasFocus.focus === 'function') {
-          savedAtlasFocus.focus({ preventScroll: true });
-        }
-        savedAtlasFocus = null;
-      } else {
-        const directBtn = document.getElementById('btn-direct-reading');
-        if (directBtn && typeof directBtn.focus === 'function') {
-          directBtn.focus({ preventScroll: true });
-        }
+      // Restaura o scroll e foco salvos ao sair da sala
+      if (wasInRoom) {
+        restoreReturnState(exitingRoom);
       }
-      announceLiveStatus('Retornou ao Atlas Espacial.');
+      announceLiveStatus('Retornou à página inicial.');
       return;
     }
 
+    // Rota #leitura (Modo Direto)
     if (route === 'leitura') {
+      const wasInRoom = Boolean(currentActiveRoom);
+      const exitingRoom = currentActiveRoom;
       if (!currentActiveRoom && !isDirectReadingActive) {
-        savedAtlasFocus = document.activeElement;
-        savedAtlasCamera = {
-          panX: cameraState.currentPanX,
-          panY: cameraState.currentPanY,
-          zoom: cameraState.currentZoom
-        };
+        returnTargetScroll = window.scrollY || document.documentElement.scrollTop || 0;
+        returnTargetFocus = document.activeElement;
+        returnTargetRoute = 'atlas';
       }
       closeAllRoomsInternal();
       closeAllOverlaysInternal();
       enterDirectReadingInternal();
       currentActiveRoom = null;
       isDirectReadingActive = true;
-      updateDockActive(null);
-      setSpatialViewportInert(true);
+      document.documentElement.setAttribute('data-view', 'direct');
+      if (wasInRoom) {
+        restoreReturnState(exitingRoom);
+      }
       announceLiveStatus('Modo de leitura direta ativado.');
       return;
     }
 
+    // Rotas de Modais (#contato, #sobre, #indice)
     if (route === 'sobre' || route === 'contato' || route === 'indice') {
-      closeAllRoomsInternal();
-      exitDirectReadingInternal();
-      currentActiveRoom = null;
-      isDirectReadingActive = false;
-      updateDockActive(null);
-      setSpatialViewportInert(true);
+      savedModalTrigger = document.activeElement;
+      savedModalPreviousRoute = currentActiveRoom || (isDirectReadingActive ? 'leitura' : (((window.location.hash || '').replace('#', '').trim()) || 'atlas'));
       openOverlayModalInternal('overlay-' + route);
       return;
     }
 
-    const resolvedProject = (route === 'laboratorio') ? 'financeiro' : route;
-    if (PROJECT_COORDINATES[resolvedProject] || resolvedProject === 'cota') {
-      if (!currentActiveRoom && !isDirectReadingActive) {
-        savedAtlasFocus = document.activeElement;
-        savedAtlasCamera = {
-          panX: cameraState.currentPanX,
-          panY: cameraState.currentPanY,
-          zoom: cameraState.currentZoom
-        };
+    // Rotas de Salas de Projetos
+    if (PROJECT_SEQUENCE.indexOf(route) !== -1) {
+      if (!currentActiveRoom) {
+        const curScroll = window.scrollY || document.documentElement.scrollTop || 0;
+        const curFocus = document.activeElement;
+        returnTargetScroll = curScroll;
+        returnTargetFocus = curFocus;
+        if (curFocus && curFocus !== document.body && curFocus.isConnected) {
+          roomTriggers.set(route, curFocus);
+        } else if (!roomTriggers.has(route)) {
+          const defaultBtn = document.querySelector('[data-enter-room="' + route + '"]');
+          if (defaultBtn) roomTriggers.set(route, defaultBtn);
+        }
+        if (curScroll > 0) {
+          roomScrolls.set(route, curScroll);
+        }
+        if (isDirectReadingActive) {
+          returnTargetRoute = 'leitura';
+        } else {
+          const prevHash = optPreviousRoute || (window.location.hash || '').replace('#', '').trim();
+          returnTargetRoute = (prevHash === 'projetos') ? 'projetos' : 'atlas';
+        }
       }
-      clearConceptualRelation();
       exitDirectReadingInternal();
       closeAllOverlaysInternal();
-      openRoomInternal(resolvedProject);
+      openRoomInternal(route);
       document.documentElement.setAttribute('data-view', 'room');
-      currentActiveRoom = resolvedProject;
-      lastFocusedRoomId = resolvedProject;
-      isDirectReadingActive = false;
-      updateDockActive(resolvedProject === 'cota' ? null : resolvedProject);
-      setSpatialViewportInert(true);
-      announceLiveStatus('Entrou na sala do projeto: ' + resolvedProject);
+      document.body.classList.add('mode-room');
+      document.body.classList.remove('mode-atlas');
+      currentActiveRoom = route;
+      announceLiveStatus('Entrou na sala do projeto: ' + route);
       return;
     }
 
-    // Rota desconhecida: volta para o atlas
+    // Rota desconhecida: fallback para atlas
     applyRouteState('atlas');
   }
 
-  function setSpatialViewportInert(isInert) {
-    if (!spatialViewport) return;
-    if (isInert) {
-      spatialViewport.setAttribute('inert', '');
-      spatialViewport.setAttribute('aria-hidden', 'true');
-    } else {
-      spatialViewport.removeAttribute('inert');
-      spatialViewport.removeAttribute('aria-hidden');
-    }
-  }
+  function exitCurrentRoom(pushHistory) {
+    const targetRoute = returnTargetRoute || 'atlas';
+    const exitingRoom = currentActiveRoom;
 
-  function updateDockActive(activeProjectId) {
-    document.querySelectorAll('.dock-item-btn').forEach(function (dockButton) {
-      if (dockButton.getAttribute('data-dock-target') === activeProjectId) {
-        dockButton.classList.add('active');
-      } else {
-        dockButton.classList.remove('active');
+    closeAllRoomsInternal();
+    currentActiveRoom = null;
+
+    if (targetRoute === 'leitura') {
+      enterDirectReadingInternal();
+      isDirectReadingActive = true;
+      document.documentElement.setAttribute('data-view', 'direct');
+      if (pushHistory !== false) {
+        window.history.pushState(null, '', '#leitura');
       }
-    });
+    } else {
+      exitDirectReadingInternal();
+      isDirectReadingActive = false;
+      document.documentElement.setAttribute('data-view', 'atlas');
+      document.body.classList.add('mode-atlas');
+      document.body.classList.remove('mode-room');
+      const fullHash = (targetRoute === 'projetos') ? '#projetos' : '#atlas';
+      if (pushHistory !== false && window.location.hash !== fullHash) {
+        window.history.pushState(null, '', fullHash);
+      }
+      restoreReturnState(exitingRoom);
+    }
+    announceLiveStatus('Retornou à navegação.');
   }
 
-  let activeNavigationToken = 0;
-  let activeTransitionTimeoutId = null;
+  function handleOverlayClose() {
+    const triggerToRestore = savedModalTrigger;
+    const previousRoute = savedModalPreviousRoute || currentActiveRoom || (isDirectReadingActive ? 'leitura' : 'atlas');
 
-  function cancelActiveRoomTransition() {
-    activeNavigationToken++;
-    if (activeTransitionTimeoutId) {
-      clearTimeout(activeTransitionTimeoutId);
-      activeTransitionTimeoutId = null;
+    closeAllOverlaysInternal();
+
+    if (previousRoute && PROJECT_SEQUENCE.indexOf(previousRoute) !== -1) {
+      openRoomInternal(previousRoute);
+      document.documentElement.setAttribute('data-view', 'room');
+      document.body.classList.add('mode-room');
+      document.body.classList.remove('mode-atlas');
+      currentActiveRoom = previousRoute;
+      window.history.replaceState(null, '', '#' + previousRoute);
+    } else if (previousRoute === 'leitura') {
+      enterDirectReadingInternal();
+      isDirectReadingActive = true;
+      document.documentElement.setAttribute('data-view', 'direct');
+      window.history.replaceState(null, '', '#leitura');
+    } else if (previousRoute === 'projetos') {
+      window.history.replaceState(null, '', '#projetos');
+    } else {
+      window.history.replaceState(null, '', '#atlas');
     }
-    document.querySelectorAll('.spatial-artifact.is-dismissing').forEach(function (art) {
-      art.classList.remove('is-dismissing');
-    });
-    document.querySelectorAll('.room-enter-expand').forEach(function (room) {
-      room.classList.remove('room-enter-expand');
-    });
+
+    savedModalPreviousRoute = null;
+
+    if (triggerToRestore && typeof triggerToRestore.focus === 'function' && triggerToRestore.isConnected) {
+      triggerToRestore.focus({ preventScroll: true });
+    }
+    savedModalTrigger = null;
   }
 
   function openRoomInternal(projectId) {
-    const targetRoomElement = document.getElementById('room-' + projectId);
-    if (!targetRoomElement) return;
-
-    if (animationFrameHandle) {
-      cancelAnimationFrame(animationFrameHandle);
-      animationFrameHandle = null;
-    }
-
-    cancelActiveRoomTransition();
-    const currentToken = activeNavigationToken;
-
-    // Limpa luz contextual ao entrar na sala
-    dispatchArtifactFocus(null, null, false);
-
-    const artElement = document.getElementById('artifact-' + projectId);
-    let hasVisualOrigin = false;
-    if (artElement) {
-      const artRect = artElement.getBoundingClientRect();
-      const vpW = window.innerWidth || 1200;
-      const vpH = window.innerHeight || 800;
-      if (artRect.width > 0 && artRect.right > 20 && artRect.left < vpW - 20 && artRect.bottom > 20 && artRect.top < vpH - 20) {
-        const originX = Math.round(((artRect.left + artRect.width / 2) / vpW) * 100);
-        const originY = Math.round(((artRect.top + artRect.height / 2) / vpH) * 100);
-        targetRoomElement.style.setProperty('--room-origin-x', originX + '%');
-        targetRoomElement.style.setProperty('--room-origin-y', originY + '%');
-        targetRoomElement.classList.add('room-enter-expand');
-        hasVisualOrigin = true;
-      }
-    }
-    if (!hasVisualOrigin) {
-      targetRoomElement.style.removeProperty('--room-origin-x');
-      targetRoomElement.style.removeProperty('--room-origin-y');
-      targetRoomElement.classList.remove('room-enter-expand');
-    }
-
-    if (hasVisualOrigin && document.documentElement.getAttribute('data-motion') !== 'paused') {
-      document.querySelectorAll('.spatial-artifact').forEach(function (art) {
-        if (art !== artElement) {
-          art.classList.add('is-dismissing');
-        }
-      });
-      activeTransitionTimeoutId = setTimeout(function () {
-        if (activeNavigationToken !== currentToken) return;
-        document.querySelectorAll('.spatial-artifact.is-dismissing').forEach(function (art) {
-          art.classList.remove('is-dismissing');
-        });
-        targetRoomElement.classList.remove('room-enter-expand');
-        activeTransitionTimeoutId = null;
-      }, 350);
-    }
-
     document.querySelectorAll('.project-room').forEach(function (room) {
-      if (room !== targetRoomElement) {
-        room.classList.remove('is-active', 'room-enter-expand');
+      if (room.getAttribute('data-room-id') === projectId) {
+        room.hidden = false;
+        room.classList.add('is-active');
+        room.scrollTop = 0;
+        const backBtn = room.querySelector('.room-back-btn');
+        if (backBtn && typeof backBtn.focus === 'function') {
+          setTimeout(function () { backBtn.focus({ preventScroll: true }); }, 50);
+        }
+      } else {
         room.hidden = true;
+        room.classList.remove('is-active');
       }
     });
-
-    targetRoomElement.hidden = false;
-    targetRoomElement.classList.add('is-active');
-
-    const backButton = targetRoomElement.querySelector('.room-back-btn');
-    if (backButton && typeof backButton.focus === 'function') {
-      backButton.focus();
-    }
   }
 
   function closeAllRoomsInternal() {
-    cancelActiveRoomTransition();
     document.querySelectorAll('.project-room').forEach(function (room) {
-      room.classList.remove('is-active', 'room-enter-expand');
       room.hidden = true;
+      room.classList.remove('is-active');
     });
   }
 
-  function updateHeaderHeightVar() {
-    const headerElement = document.querySelector('.atlas-header');
-    if (headerElement) {
-      document.documentElement.style.removeProperty('--header-height');
-      const computedHeight = headerElement.offsetHeight;
-      if (computedHeight > 0) {
-        document.documentElement.style.setProperty('--header-height', computedHeight + 'px');
-      }
-    }
-  }
-
   function enterDirectReadingInternal() {
-    if (animationFrameHandle) {
-      cancelAnimationFrame(animationFrameHandle);
-      animationFrameHandle = null;
-    }
-    document.body.classList.remove('mode-atlas');
-    document.body.classList.add('mode-direct');
-    document.documentElement.setAttribute('data-view', 'direct');
-
     const directView = document.getElementById('direct-reading-view');
     if (directView) {
       directView.hidden = false;
-    }
-
-    const readingBtn = document.getElementById('btn-direct-reading');
-    if (readingBtn) {
-      readingBtn.setAttribute('aria-pressed', 'true');
-      readingBtn.classList.add('active');
-    }
-
-    const dockElement = document.getElementById('atlas-dock');
-    if (dockElement) {
-      dockElement.setAttribute('inert', '');
-      dockElement.setAttribute('aria-hidden', 'true');
-    }
-
-    const minimapElement = document.getElementById('atlas-minimap-container');
-    if (minimapElement) {
-      minimapElement.setAttribute('inert', '');
-      minimapElement.setAttribute('aria-hidden', 'true');
-    }
-
-    const bannerElement = document.getElementById('atlas-relation-banner');
-    if (bannerElement) {
-      bannerElement.setAttribute('inert', '');
-      bannerElement.setAttribute('aria-hidden', 'true');
-    }
-
-    updateHeaderHeightVar();
-
-    const returnBtn = document.getElementById('btn-return-to-atlas');
-    if (returnBtn && typeof returnBtn.focus === 'function') {
-      returnBtn.focus();
+      document.body.classList.add('mode-direct');
+      document.body.classList.remove('mode-atlas');
+      window.scrollTo(0, 0);
+      const returnBtn = document.getElementById('btn-return-to-atlas');
+      if (returnBtn) returnBtn.focus({ preventScroll: true });
     }
   }
 
   function exitDirectReadingInternal() {
-    document.body.classList.remove('mode-direct');
-    document.body.classList.add('mode-atlas');
-    document.documentElement.setAttribute('data-view', 'atlas');
-
     const directView = document.getElementById('direct-reading-view');
     if (directView) {
       directView.hidden = true;
-    }
-
-    const readingBtn = document.getElementById('btn-direct-reading');
-    if (readingBtn) {
-      readingBtn.setAttribute('aria-pressed', 'false');
-      readingBtn.classList.remove('active');
-    }
-
-    const dockElement = document.getElementById('atlas-dock');
-    if (dockElement) {
-      dockElement.removeAttribute('inert');
-      dockElement.removeAttribute('aria-hidden');
-    }
-
-    const minimapElement = document.getElementById('atlas-minimap-container');
-    if (minimapElement) {
-      minimapElement.removeAttribute('inert');
-      minimapElement.removeAttribute('aria-hidden');
-    }
-
-    const bannerElement = document.getElementById('atlas-relation-banner');
-    if (bannerElement) {
-      bannerElement.removeAttribute('inert');
-      bannerElement.removeAttribute('aria-hidden');
+      document.body.classList.remove('mode-direct');
     }
   }
 
-  function openOverlayModalInternal(modalId) {
-    closeAllOverlaysInternal();
-    const modalElement = document.getElementById(modalId);
+  function openOverlayModalInternal(overlayId) {
+    const modalElement = document.getElementById(overlayId);
     if (!modalElement) return;
-
+    const overlaysContainer = document.getElementById('overlays-container');
+    if (overlaysContainer) {
+      overlaysContainer.removeAttribute('aria-hidden');
+    }
+    if (!modalElement.__hasCancelHandler) {
+      modalElement.addEventListener('cancel', function (cancelEvent) {
+        cancelEvent.preventDefault();
+        handleOverlayClose();
+      });
+      modalElement.__hasCancelHandler = true;
+    }
     if (typeof modalElement.showModal === 'function') {
-      modalElement.showModal();
+      if (!modalElement.open) {
+        modalElement.showModal();
+      }
     } else {
       modalElement.setAttribute('open', '');
     }
-
-    const container = document.getElementById('overlays-container');
-    if (container) container.setAttribute('aria-hidden', 'false');
-
     const closeBtn = modalElement.querySelector('[data-action="close-overlay"]');
     if (closeBtn && typeof closeBtn.focus === 'function') {
-      closeBtn.focus();
+      setTimeout(function () { closeBtn.focus(); }, 20);
     }
   }
 
   function closeAllOverlaysInternal() {
     document.querySelectorAll('.atlas-overlay-modal').forEach(function (modal) {
-      if (typeof modal.close === 'function' && modal.open) {
-        modal.close();
+      if (typeof modal.close === 'function') {
+        if (modal.open) modal.close();
       } else {
         modal.removeAttribute('open');
       }
     });
-
-    const container = document.getElementById('overlays-container');
-    if (container) container.setAttribute('aria-hidden', 'true');
+    const overlaysContainer = document.getElementById('overlays-container');
+    if (overlaysContainer) {
+      overlaysContainer.setAttribute('aria-hidden', 'true');
+    }
   }
 
   function stepActiveRoom(stepDirection) {
@@ -1121,37 +486,40 @@
     navigateToRoute(PROJECT_SEQUENCE[targetIndex], true);
   }
 
-  // Navegação por teclado & gestão de foco
+  // =========================================================================
+  // 5. NAVEGAÇÃO POR TECLADO
+  // =========================================================================
+
   function initializeKeyboardNavigation() {
     window.addEventListener('keydown', function (keyboardEvent) {
-      // 1. Esc SEMPRE fecha salas ou modais, MESMO com foco dentro de inputs/selects!
-      if (keyboardEvent.key === 'Escape') {
+      // Esc fecha modal ou sai da sala
+      if (keyboardEvent.key === 'Escape' || keyboardEvent.key === 'Esc') {
         const openModal = document.querySelector('.atlas-overlay-modal[open]');
         if (openModal) {
-          navigateToRoute('atlas', true);
+          handleOverlayClose();
           keyboardEvent.preventDefault();
           return;
         }
+
         if (currentActiveRoom) {
-          navigateToRoute('atlas', true);
+          exitCurrentRoom(true);
           keyboardEvent.preventDefault();
           return;
         }
+
         if (isDirectReadingActive) {
-          navigateToRoute('atlas', true);
+          exitCurrentRoom(true);
           keyboardEvent.preventDefault();
           return;
         }
       }
 
-      // Se um campo de formulário estiver focado, não sequestra setas/teclas de digitação
-      const activeTag = (document.activeElement && document.activeElement.tagName) || '';
-      if (['INPUT', 'SELECT', 'TEXTAREA'].includes(activeTag)) {
-        return;
-      }
-
-      // 2. Quando em sala ativa: setas navegam entre salas
-      if (currentActiveRoom) {
+      // Setas esquerda/direita alternam salas quando dentro de um projeto
+      if (currentActiveRoom && !document.querySelector('.atlas-overlay-modal[open]')) {
+        const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
+        if (activeTag === 'input' || activeTag === 'textarea' || activeTag === 'select') {
+          return;
+        }
         if (keyboardEvent.key === 'ArrowRight') {
           stepActiveRoom('next');
           keyboardEvent.preventDefault();
@@ -1159,33 +527,13 @@
           stepActiveRoom('prev');
           keyboardEvent.preventDefault();
         }
-        return;
-      }
-
-      // 3. Em modo leitura ou modal aberta: NÃO capturar setas para permitir rolagem nativa!
-      if (isDirectReadingActive || document.querySelector('.atlas-overlay-modal[open]')) {
-        return;
-      }
-
-      // 4. No Atlas: a geometria é estacionária; +/- ajustam profundidade da íris, 0 restaura enquadramento
-      if (keyboardEvent.key === '+' || keyboardEvent.key === '=') {
-        const nextZoom = Math.min(1.0, targetIrisZoom + 0.20);
-        dispatchIrisZoom(nextZoom, false);
-        announceLiveStatus('Íris aproximada.');
-        keyboardEvent.preventDefault();
-      } else if (keyboardEvent.key === '-' || keyboardEvent.key === '_') {
-        const nextZoom = Math.max(0.0, targetIrisZoom - 0.20);
-        dispatchIrisZoom(nextZoom, nextZoom === 0.0);
-        announceLiveStatus(nextZoom === 0.0 ? 'Íris no enquadramento padrão.' : 'Íris recuada.');
-        keyboardEvent.preventDefault();
-      } else if (keyboardEvent.key === '0') {
-        dispatchIrisZoom(0.0, true);
-        resetCameraToOverview(true);
-        announceLiveStatus('Enquadramento padrão restaurado.');
-        keyboardEvent.preventDefault();
       }
     });
   }
+
+  // =========================================================================
+  // 6. CONTROLE DE ANIMAÇÃO & PREFERÊNCIAS DE MOVIMENTO
+  // =========================================================================
 
   function initializeMotionControls() {
     const motionButton = document.getElementById('motion-toggle-btn');
@@ -1222,11 +570,7 @@
     const motionStatusLabel = document.getElementById('motion-status-label');
 
     if (isMotionReduced) {
-      cancelActiveRoomTransition();
       document.documentElement.setAttribute('data-motion', 'paused');
-      document.querySelectorAll('.room-enter-expand').forEach(function (room) {
-        room.classList.remove('room-enter-expand');
-      });
       if (motionButton) {
         motionButton.setAttribute('aria-pressed', 'true');
         motionButton.setAttribute('aria-label', 'Ativar animações de câmera e partículas');
@@ -1238,12 +582,6 @@
       if (saveToStorage) {
         safeStorageSet(STORAGE_MOTION_KEY, 'paused');
       }
-      cameraState.currentPanX = cameraState.targetPanX;
-      cameraState.currentPanY = cameraState.targetPanY;
-      cameraState.currentZoom = cameraState.targetZoom;
-      cameraState.isSettled = true;
-      applyWorldTransform();
-      drawAtlasCanvas();
       announceLiveStatus('Animações pausadas.');
     } else {
       document.documentElement.setAttribute('data-motion', 'active');
@@ -1258,11 +596,13 @@
       if (saveToStorage) {
         safeStorageSet(STORAGE_MOTION_KEY, 'active');
       }
-      cameraState.isSettled = false;
-      requestCameraWakeup();
       announceLiveStatus('Animações ativadas.');
     }
   }
+
+  // =========================================================================
+  // 7. CÓPIA DE E-MAIL COM ACESSIBILIDADE
+  // =========================================================================
 
   function initializeEmailCopy() {
     const copyButtons = document.querySelectorAll('[data-copy-email]');
@@ -1311,72 +651,40 @@
     });
   }
 
-  // Demos Interativos das Salas
+  // =========================================================================
+  // 8. DEMOS INTERATIVOS DAS SALAS DE PROJETOS
+  // =========================================================================
+
   function initializeYahcwDemo() {
     const toggleOverviewButton = document.getElementById('btn-toggle-overview');
-    const cornerTrigger = document.getElementById('sim-corner-trigger');
-    const dwmOverviewOverlay = document.getElementById('sim-dwm-overview');
-    const closeOverviewButton = document.getElementById('btn-close-overview');
     const brightnessSlider = document.getElementById('sim-brightness-slider');
     const brightnessDisplay = document.getElementById('brightness-val-display');
-    const screenPreview = document.getElementById('sim-screen-preview');
     const audioSelect = document.getElementById('sim-audio-select');
     const yahcwLogBox = document.getElementById('yahcw-log-box');
-    const trayAudioLabel = document.getElementById('sim-tray-audio-label');
-    const trayBrightLabel = document.getElementById('sim-tray-bright-label');
+    const screenFrame = document.getElementById('yahcw-screen-frame');
 
-    function toggleDwmOverview() {
-      if (!dwmOverviewOverlay) return;
-      const isHidden = dwmOverviewOverlay.hidden;
-      dwmOverviewOverlay.hidden = !isHidden;
-      if (yahcwLogBox) {
-        yahcwLogBox.innerHTML = isHidden
-          ? '<code>[DWM] Hot Corner ativado: Visão Geral de Miniaturas aberta.</code>'
-          : '<code>[DWM] Visão Geral fechada.</code>';
-      }
-    }
-
-    if (toggleOverviewButton) toggleOverviewButton.addEventListener('click', toggleDwmOverview);
-    if (cornerTrigger) {
-      cornerTrigger.addEventListener('click', toggleDwmOverview);
-      cornerTrigger.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter' || e.key === ' ') {
-          toggleDwmOverview();
-          e.preventDefault();
+    if (toggleOverviewButton) {
+      toggleOverviewButton.addEventListener('click', function () {
+        if (screenFrame) {
+          screenFrame.classList.toggle('overview-active');
         }
-      });
-    }
-    if (closeOverviewButton) {
-      closeOverviewButton.addEventListener('click', function () {
-        if (dwmOverviewOverlay) dwmOverviewOverlay.hidden = true;
-      });
-    }
-
-    const windowThumbnails = document.querySelectorAll('.overview-thumb');
-    windowThumbnails.forEach(function (thumb) {
-      thumb.addEventListener('click', function () {
-        const winId = thumb.getAttribute('data-select-win');
-        document.querySelectorAll('.sim-window-tile').forEach(function (tile) {
-          tile.classList.remove('is-active');
-        });
-        const targetTile = document.getElementById('win-tile-' + winId);
-        if (targetTile) targetTile.classList.add('is-active');
-        if (dwmOverviewOverlay) dwmOverviewOverlay.hidden = true;
         if (yahcwLogBox) {
-          yahcwLogBox.innerHTML = '<code>[DWM] Janela focada via miniatura: #' + winId + '</code>';
+          yahcwLogBox.innerHTML = '<code>[DWM] Hot Corner ativado: Visão Geral de Miniaturas alternada.</code>';
         }
       });
-    });
+    }
 
-    if (brightnessSlider && screenPreview) {
+    if (brightnessSlider) {
       brightnessSlider.addEventListener('input', function () {
         const val = brightnessSlider.value;
         if (brightnessDisplay) brightnessDisplay.textContent = val + '%';
-        if (trayBrightLabel) trayBrightLabel.textContent = val + '%';
         const filterFactor = 0.3 + (val / 100) * 0.7;
-        screenPreview.style.filter = 'brightness(' + filterFactor.toFixed(2) + ')';
+        const screenPreview = document.getElementById('screen-preview-content');
+        if (screenPreview) {
+          screenPreview.style.filter = 'brightness(' + filterFactor.toFixed(2) + ')';
+        }
         if (yahcwLogBox) {
-          yahcwLogBox.innerHTML = '<code>[Filtro Simulado] Demonstração: VCP 0x10 -> ' + val + '% no monitor DDC/CI</code>';
+          yahcwLogBox.innerHTML = '<code>[Filtro Simulado] VCP 0x10 -> ' + val + '% no monitor DDC/CI</code>';
         }
       });
     }
@@ -1384,7 +692,6 @@
     if (audioSelect) {
       audioSelect.addEventListener('change', function () {
         const chosenAudio = audioSelect.value;
-        if (trayAudioLabel) trayAudioLabel.textContent = chosenAudio;
         if (yahcwLogBox) {
           yahcwLogBox.innerHTML = '<code>[IPolicyConfig] Dispositivo comutado para ' + chosenAudio + ' (COM status S_OK)</code>';
         }
@@ -1403,19 +710,19 @@
     const nodeTargetLabel = document.getElementById('node-target-label');
     const tuyaLogBox = document.getElementById('tuya-log-box');
 
-    let isLampPowerOn = false;
+    let isLampPowered = true;
     let isTcpActive = true;
 
-    if (powerButton && bulbElement) {
+    if (powerButton) {
       powerButton.addEventListener('click', function () {
-        isLampPowerOn = !isLampPowerOn;
-        if (isLampPowerOn) bulbElement.classList.add('is-on');
-        else bulbElement.classList.remove('is-on');
-
-        const activeRoute = isTcpActive ? 'TCP Socket (porta 6668)' : 'Tuya Cloud OpenAPI';
+        isLampPowered = !isLampPowered;
+        if (bulbElement) {
+          bulbElement.style.opacity = isLampPowered ? '1' : '0.2';
+          bulbElement.style.boxShadow = isLampPowered ? '0 0 20px rgba(199, 154, 96, 0.8)' : 'none';
+        }
         if (tuyaLogBox) {
-          tuyaLogBox.innerHTML += '<br><code>[COMANDO] Power state -> ' + (isLampPowerOn ? 'ON' : 'OFF') + ' via ' + activeRoute + '</code>';
-          tuyaLogBox.scrollTop = tuyaLogBox.scrollHeight;
+          const routeName = isTcpActive ? 'TCP LOCAL (192.168.1.104:6668)' : 'OPENAPI NUVEM';
+          tuyaLogBox.innerHTML = '<code>[COMANDO] Lâmpada ' + (isLampPowered ? 'LIGADA' : 'DESLIGADA') + ' via ' + routeName + '</code>';
         }
       });
     }
@@ -1424,18 +731,15 @@
       failureButton.addEventListener('click', function () {
         isTcpActive = false;
         if (badgeRouteMode) {
-          badgeRouteMode.textContent = 'ROTA CONTINGÊNCIA: CLOUD OPENAPI';
-          badgeRouteMode.className = 'route-badge cloud';
+          badgeRouteMode.textContent = 'ROTA CONTINGÊNCIA: OPENAPI NUVEM';
+          badgeRouteMode.classList.remove('active');
+          badgeRouteMode.classList.add('fallback');
         }
-        if (pingReadout) pingReadout.textContent = '148ms (simulado)';
-        if (wireSegment) wireSegment.className = 'wire wire-active';
-        if (nodeTargetLabel) nodeTargetLabel.textContent = 'Nuvem Tuya (OpenAPI Gateway)';
-
+        if (pingReadout) pingReadout.textContent = '148ms (nuvem simulada)';
+        if (wireSegment) wireSegment.classList.add('wire-fallback');
+        if (nodeTargetLabel) nodeTargetLabel.textContent = 'Nuvem Tuya (OpenAPI SSE)';
         if (tuyaLogBox) {
-          tuyaLogBox.innerHTML += '<br><code>[SOCKET-ERROR] Timeout de ping local na porta 6668</code>' +
-            '<br><code>[CONTINGENCY] Comutando para Tuya Cloud OpenAPI</code>' +
-            '<br><code>[OPENAPI] Sessão estabelecida via OpenAPI (Latência simulada: 148ms)</code>';
-          tuyaLogBox.scrollTop = tuyaLogBox.scrollHeight;
+          tuyaLogBox.innerHTML = '<code>[WATCHDOG] Queda TCP local detectada. Comutação para OpenAPI Cloud ativa.</code>';
         }
       });
     }
@@ -1445,15 +749,14 @@
         isTcpActive = true;
         if (badgeRouteMode) {
           badgeRouteMode.textContent = 'ROTA ATIVA: TCP LOCAL';
-          badgeRouteMode.className = 'route-badge active';
+          badgeRouteMode.classList.remove('fallback');
+          badgeRouteMode.classList.add('active');
         }
         if (pingReadout) pingReadout.textContent = '4ms (simulado)';
-        if (wireSegment) wireSegment.className = 'wire wire-active';
+        if (wireSegment) wireSegment.classList.remove('wire-fallback');
         if (nodeTargetLabel) nodeTargetLabel.textContent = 'Lâmpada (192.168.1.104)';
-
         if (tuyaLogBox) {
-          tuyaLogBox.innerHTML += '<br><code>[TCP-RECOVER] Barramento local restabelecido em 192.168.1.104:6668 (Latência simulada: 4ms)</code>';
-          tuyaLogBox.scrollTop = tuyaLogBox.scrollHeight;
+          tuyaLogBox.innerHTML = '<code>[TCP-SOCKET] Conexão local reestabelecida em 192.168.1.104:6668.</code>';
         }
       });
     }
@@ -1461,90 +764,69 @@
 
   function initializeGamingDemo() {
     const presetButtons = document.querySelectorAll('.preset-btn');
-    const metricAvgFps = document.getElementById('metric-avg-fps');
-    const metricLowFps = document.getElementById('metric-low-fps');
-    const metricFrametime = document.getElementById('metric-frametime');
-    const metricMaxHitch = document.getElementById('metric-max-hitch');
-    const gamingChartLine = document.getElementById('gaming-chart-line');
-    const gamingJsonDisplay = document.getElementById('gaming-json-display');
+    const avgFpsElement = document.getElementById('metric-avg-fps');
+    const lowFpsElement = document.getElementById('metric-low-fps');
+    const frametimeElement = document.getElementById('metric-frametime');
+    const maxHitchElement = document.getElementById('metric-max-hitch');
+    const jsonDisplay = document.getElementById('gaming-json-display');
     const copyJsonButton = document.getElementById('btn-copy-gaming-json');
 
-    const syntheticPresets = {
+    const SCENARIOS = {
       stable: {
-        avgFps: '144.1 FPS',
-        lowFps: '139.8 FPS',
-        frameTime: '6.94 ms',
-        maxHitch: '7.42 ms',
-        pathData: 'M 0 50 Q 100 48 200 52 T 400 50',
-        jsonPayload: '{\n  "timestamp_ns": 1730219842104500,\n  "present_count": 86420,\n  "avg_frame_time_ms": 6.94,\n  "one_percent_low_fps": 139.8,\n  "active_swapchain": "0x7ffd98b04a20",\n  "hitch_count_last_sec": 0\n}'
+        avg: '144.1 FPS', low: '139.8 FPS', ft: '6.94 ms', hitch: '7.42 ms',
+        json: { timestamp_ns: 1730219842104500, present_count: 86420, avg_frame_time_ms: 6.94, one_percent_low_fps: 139.8, active_swapchain: "0x7ffd98b04a20", hitch_count_last_sec: 0 }
       },
       stutter: {
-        avgFps: '112.4 FPS',
-        lowFps: '28.5 FPS',
-        frameTime: '8.89 ms',
-        maxHitch: '35.40 ms',
-        pathData: 'M 0 50 L 120 50 L 130 115 L 140 50 L 260 50 L 270 110 L 280 50 L 400 50',
-        jsonPayload: '{\n  "timestamp_ns": 1730219842998100,\n  "present_count": 86840,\n  "avg_frame_time_ms": 8.89,\n  "one_percent_low_fps": 28.5,\n  "active_swapchain": "0x7ffd98b04a20",\n  "hitch_count_last_sec": 4,\n  "last_stutter_cause": "vkCreateGraphicsPipelines shader compile"\n}'
+        avg: '118.4 FPS', low: '42.1 FPS', ft: '8.44 ms', hitch: '34.80 ms',
+        json: { timestamp_ns: 1730219843105200, present_count: 86538, avg_frame_time_ms: 8.44, one_percent_low_fps: 42.1, active_swapchain: "0x7ffd98b04a20", hitch_count_last_sec: 4 }
       },
       heavy: {
-        avgFps: '59.8 FPS',
-        lowFps: '54.2 FPS',
-        frameTime: '16.72 ms',
-        maxHitch: '19.80 ms',
-        pathData: 'M 0 80 Q 80 75 160 85 T 320 80 T 400 85',
-        jsonPayload: '{\n  "timestamp_ns": 1730219843650000,\n  "present_count": 87210,\n  "avg_frame_time_ms": 16.72,\n  "one_percent_low_fps": 54.2,\n  "active_swapchain": "0x7ffd98b04a20",\n  "hitch_count_last_sec": 0\n}'
+        avg: '59.8 FPS', low: '56.2 FPS', ft: '16.72 ms', hitch: '18.10 ms',
+        json: { timestamp_ns: 1730219844106100, present_count: 86598, avg_frame_time_ms: 16.72, one_percent_low_fps: 56.2, active_swapchain: "0x7ffd98b04a20", hitch_count_last_sec: 0 }
       }
     };
 
-    presetButtons.forEach(function (button) {
-      button.addEventListener('click', function () {
+    presetButtons.forEach(function (btn) {
+      btn.addEventListener('click', function () {
         presetButtons.forEach(function (b) { b.classList.remove('active'); });
-        button.classList.add('active');
-        const presetKey = button.getAttribute('data-preset');
-        const data = syntheticPresets[presetKey];
+        btn.classList.add('active');
+        const key = btn.getAttribute('data-preset') || 'stable';
+        const data = SCENARIOS[key];
         if (!data) return;
-
-        if (metricAvgFps) metricAvgFps.textContent = data.avgFps;
-        if (metricLowFps) metricLowFps.textContent = data.lowFps;
-        if (metricFrametime) metricFrametime.textContent = data.frameTime;
-        if (metricMaxHitch) metricMaxHitch.textContent = data.maxHitch;
-        if (gamingChartLine) gamingChartLine.setAttribute('d', data.pathData);
-        if (gamingJsonDisplay) gamingJsonDisplay.textContent = data.jsonPayload;
+        if (avgFpsElement) avgFpsElement.textContent = data.avg;
+        if (lowFpsElement) lowFpsElement.textContent = data.low;
+        if (frametimeElement) frametimeElement.textContent = data.ft;
+        if (maxHitchElement) maxHitchElement.textContent = data.hitch;
+        if (jsonDisplay) jsonDisplay.textContent = JSON.stringify(data.json, null, 2);
       });
     });
 
-    if (copyJsonButton && gamingJsonDisplay) {
+    if (copyJsonButton && jsonDisplay) {
       copyJsonButton.addEventListener('click', async function () {
-        if (navigator.clipboard && window.isSecureContext) {
-          try {
-            await navigator.clipboard.writeText(gamingJsonDisplay.textContent);
-            copyJsonButton.textContent = 'Copiado!';
-            setTimeout(function () { copyJsonButton.textContent = 'Copiar JSON'; }, 2000);
-          } catch (_) {
-            copyJsonButton.textContent = 'Falha ao copiar';
-          }
-        }
+        try {
+          await navigator.clipboard.writeText(jsonDisplay.textContent);
+          copyJsonButton.textContent = 'Copiado!';
+          setTimeout(function () { copyJsonButton.textContent = 'Copiar JSON'; }, 1500);
+        } catch (_) {}
       });
     }
   }
 
   function initializePythonDemo() {
     const codeTabButtons = document.querySelectorAll('.code-tab-btn');
-    codeTabButtons.forEach(function (tab) {
-      tab.addEventListener('click', function () {
+    codeTabButtons.forEach(function (btn) {
+      btn.addEventListener('click', function () {
         codeTabButtons.forEach(function (b) { b.classList.remove('active'); });
-        tab.classList.add('active');
-        const targetIndex = tab.getAttribute('data-code-tab');
-
+        btn.classList.add('active');
+        const tabNum = btn.getAttribute('data-code-tab');
         document.querySelectorAll('.code-tab-content').forEach(function (panel) {
-          panel.classList.remove('active');
           panel.hidden = true;
+          panel.classList.remove('active');
         });
-
-        const activePanel = document.getElementById('code-panel-' + targetIndex);
-        if (activePanel) {
-          activePanel.classList.add('active');
-          activePanel.hidden = false;
+        const targetPanel = document.getElementById('code-panel-' + tabNum);
+        if (targetPanel) {
+          targetPanel.hidden = false;
+          targetPanel.classList.add('active');
         }
       });
     });
@@ -1553,20 +835,18 @@
   function initializeSpotifastDemo() {
     const tokenTiles = document.querySelectorAll('[data-copy-hex]');
     const statusBox = document.getElementById('spotifast-copy-status');
-
     tokenTiles.forEach(function (tile) {
       tile.addEventListener('click', async function () {
         const hex = tile.getAttribute('data-copy-hex');
-        if (navigator.clipboard && window.isSecureContext) {
-          try {
+        if (!hex) return;
+        try {
+          if (navigator.clipboard && window.isSecureContext) {
             await navigator.clipboard.writeText(hex);
-            if (statusBox) statusBox.innerHTML = '<code>Token copiado: ' + hex + '</code>';
-          } catch (_) {
-            if (statusBox) statusBox.innerHTML = '<code>Valor do token: ' + hex + '</code>';
           }
-        } else {
-          if (statusBox) statusBox.innerHTML = '<code>Valor do token: ' + hex + '</code>';
-        }
+          if (statusBox) {
+            statusBox.innerHTML = '<code>Token copiado: ' + hex + '</code>';
+          }
+        } catch (_) {}
       });
     });
   }
@@ -1580,23 +860,14 @@
     const monthlyRateElement = document.getElementById('res-monthly-rate');
     const chartSvg = document.getElementById('finance-chart-svg');
 
-    function formatCurrencyReal(amount) {
-      return 'R$ ' + Number(amount).toLocaleString('pt-BR', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      });
-    }
-
     function renderFinanceChart(pointsList, totalContributed, finalBalance) {
       if (!chartSvg) return;
       const chartWidth = 500;
       const chartHeight = 200;
       const padX = 40;
       const padY = 25;
-
       const plotWidth = chartWidth - padX * 2;
       const plotHeight = chartHeight - padY * 2;
-
       const maxY = Math.max(finalBalance * 1.08, 100);
       const maxMonth = pointsList[pointsList.length - 1].month || 1;
 
@@ -1627,18 +898,18 @@
 
       chartSvg.innerHTML =
         '<defs>' +
-        '  <linearGradient id="chartGradientAreaV2" x1="0" y1="0" x2="0" y2="1">' +
-        '    <stop offset="0%" stop-color="#d9432e" stop-opacity="0.25" />' +
-        '    <stop offset="100%" stop-color="#d9432e" stop-opacity="0.02" />' +
+        '  <linearGradient id="chartGradientAreaV3" x1="0" y1="0" x2="0" y2="1">' +
+        '    <stop offset="0%" stop-color="#C79A60" stop-opacity="0.30" />' +
+        '    <stop offset="100%" stop-color="#173F46" stop-opacity="0.02" />' +
         '  </linearGradient>' +
         '</defs>' +
-        '<line x1="' + padX + '" y1="' + baselineY + '" x2="' + (chartWidth - padX) + '" y2="' + baselineY + '" stroke="#0e1218" stroke-width="1.2" />' +
-        '<line x1="' + padX + '" y1="' + padY + '" x2="' + padX + '" y2="' + baselineY + '" stroke="#0e1218" stroke-width="1.2" />' +
-        '<line x1="' + padX + '" y1="' + midLineY.toFixed(1) + '" x2="' + (chartWidth - padX) + '" y2="' + midLineY.toFixed(1) + '" stroke="#0e1218" stroke-width="0.5" stroke-dasharray="3 3" stroke-opacity="0.2" />' +
-        '<path d="' + areaFillPath + '" fill="url(#chartGradientAreaV2)" />' +
-        '<path d="' + contributedPath + '" fill="none" stroke="#5c6779" stroke-width="1.8" stroke-dasharray="4 4" />' +
-        '<path d="' + balancePath + '" fill="none" stroke="#d9432e" stroke-width="2.5" />' +
-        '<circle cx="' + (chartWidth - padX) + '" cy="' + (chartHeight - padY - (finalBalance / maxY) * plotHeight).toFixed(1) + '" r="4.5" fill="#d9432e" />';
+        '<line x1="' + padX + '" y1="' + baselineY + '" x2="' + (chartWidth - padX) + '" y2="' + baselineY + '" stroke="#173F46" stroke-width="1.2" />' +
+        '<line x1="' + padX + '" y1="' + padY + '" x2="' + padX + '" y2="' + baselineY + '" stroke="#173F46" stroke-width="1.2" />' +
+        '<line x1="' + padX + '" y1="' + midLineY.toFixed(1) + '" x2="' + (chartWidth - padX) + '" y2="' + midLineY.toFixed(1) + '" stroke="#173F46" stroke-width="0.5" stroke-dasharray="3 3" stroke-opacity="0.5" />' +
+        '<path d="' + areaFillPath + '" fill="url(#chartGradientAreaV3)" />' +
+        '<path d="' + contributedPath + '" fill="none" stroke="#618F83" stroke-width="1.8" stroke-dasharray="4 4" />' +
+        '<path d="' + balancePath + '" fill="none" stroke="#C79A60" stroke-width="2.5" />' +
+        '<circle cx="' + (chartWidth - padX) + '" cy="' + (chartHeight - padY - (finalBalance / maxY) * plotHeight).toFixed(1) + '" r="4.5" fill="#C79A60" />';
     }
 
     function runCalculationWithParameters(params) {
@@ -1650,405 +921,185 @@
         return false;
       }
 
-      // Validação estrita: prazos fracionários devem ser rejeitados preservando o gráfico anterior!
-      if (!Number.isInteger(params.months) || params.months < 1) {
-        if (errorBox) {
-          errorBox.textContent = 'Prazo em meses deve ser um número inteiro positivo (ex: 12). Valores fracionários são rejeitados.';
-          errorBox.hidden = false;
-        }
-        return false;
-      }
-
       try {
         const result = window.PortfolioFinance.calculate(params);
-        if (errorBox) {
-          errorBox.textContent = '';
-          errorBox.hidden = true;
-        }
-        if (finalBalanceElement) finalBalanceElement.textContent = formatCurrencyReal(result.finalBalance);
-        if (totalContributedElement) totalContributedElement.textContent = formatCurrencyReal(result.totalContributed);
-        if (totalInterestElement) totalInterestElement.textContent = formatCurrencyReal(result.interest);
+        if (errorBox) errorBox.hidden = true;
+
+        if (finalBalanceElement) finalBalanceElement.textContent = formatBRL(result.finalBalance);
+        if (totalContributedElement) totalContributedElement.textContent = formatBRL(result.totalContributed);
+        if (totalInterestElement) totalInterestElement.textContent = formatBRL(result.interest);
         if (monthlyRateElement) {
-          monthlyRateElement.textContent = (result.monthlyRate * 100).toFixed(2) + '% a.m.';
+          monthlyRateElement.textContent = (result.monthlyRate * 100).toLocaleString('pt-BR', {
+            minimumFractionDigits: 4,
+            maximumFractionDigits: 4
+          }) + '%';
         }
+
         renderFinanceChart(result.points, result.totalContributed, result.finalBalance);
         return true;
-      } catch (err) {
+      } catch (calcError) {
         if (errorBox) {
-          errorBox.textContent = err.message || 'Parâmetros inválidos para o cálculo.';
+          errorBox.textContent = calcError.message || 'Erro ao calcular parâmetros financeiros.';
           errorBox.hidden = false;
         }
-        // Preserva o gráfico e os resultados anteriores intactos!
         return false;
       }
     }
 
     if (financeForm) {
-      financeForm.addEventListener('submit', function (e) {
-        e.preventDefault();
+      financeForm.addEventListener('submit', function (submitEvent) {
+        submitEvent.preventDefault();
+        const initialAmount = Number(document.getElementById('param-initial-amount').value);
+        const monthlyContribution = Number(document.getElementById('param-monthly-contribution').value);
+        const annualRatePercent = Number(document.getElementById('param-annual-rate').value);
+        const months = Number(document.getElementById('param-months').value);
 
-        const initialRaw = document.getElementById('fin-initial-amount')?.value.trim();
-        const contribRaw = document.getElementById('fin-monthly-contrib')?.value.trim();
-        const rateRaw = document.getElementById('fin-annual-rate')?.value.trim();
-        const monthsRaw = document.getElementById('fin-months')?.value.trim();
-
-        if (!initialRaw || !contribRaw || !rateRaw || !monthsRaw) {
-          if (errorBox) {
-            errorBox.textContent = 'Preencha todos os campos antes de calcular.';
-            errorBox.hidden = false;
-          }
-          return;
-        }
-
-        const monthsNum = Number(monthsRaw);
         runCalculationWithParameters({
-          initialAmount: Number(initialRaw),
-          monthlyContribution: Number(contribRaw),
-          annualRatePercent: Number(rateRaw),
-          months: monthsNum
+          initialAmount: initialAmount,
+          monthlyContribution: monthlyContribution,
+          annualRatePercent: annualRatePercent,
+          months: months
         });
       });
+    }
 
-      // Execução canônica inicial com caso de referência: 1000, 100, 12, 12 -> R$ 2.384,65
-      runCalculationWithParameters({
-        initialAmount: 1000,
-        monthlyContribution: 100,
-        annualRatePercent: 12,
-        months: 12
+    const resetCaseButton = document.getElementById('btn-reset-finance-case');
+    if (resetCaseButton) {
+      resetCaseButton.addEventListener('click', function () {
+        document.getElementById('param-initial-amount').value = 1000;
+        document.getElementById('param-monthly-contribution').value = 100;
+        document.getElementById('param-annual-rate').value = 12;
+        document.getElementById('param-months').value = 12;
+        runCalculationWithParameters({
+          initialAmount: 1000,
+          monthlyContribution: 100,
+          annualRatePercent: 12,
+          months: 12
+        });
       });
     }
+
+    // Inicialização canônica da sala
+    runCalculationWithParameters({
+      initialAmount: 1000,
+      monthlyContribution: 100,
+      annualRatePercent: 12,
+      months: 12
+    });
   }
 
+  // =========================================================================
+  // 9. INICIALIZADOR GLOBAL DE EVENTOS & DELEGAÇÃO DE CLIQUE
+  // =========================================================================
+
   function initializeEventListeners() {
-    if (spatialViewport) {
-      spatialViewport.addEventListener('pointerdown', handlePointerDown);
-      window.addEventListener('pointermove', handlePointerMove);
-      window.addEventListener('pointerup', handlePointerUp);
-      window.addEventListener('pointercancel', handlePointerUp);
-      spatialViewport.addEventListener('wheel', handleWheelZoom, { passive: false });
-      spatialViewport.addEventListener('dblclick', function () {
-        resetCameraToOverview();
+    // Scroll do hero para zoom sutil da íris (sem wheel preventDefault)
+    window.addEventListener('scroll', handleHeroScroll, { passive: true });
+    window.addEventListener('resize', dispatchHeroFraming, { passive: true });
+
+    // Botões de entrada em sala
+    document.querySelectorAll('[data-enter-room]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const target = btn.getAttribute('data-enter-room');
+        if (target) navigateToRoute(target, true);
       });
-      spatialViewport.addEventListener('scroll', function () {
-        if (activeFocusProjectId) {
-          const activeArt = document.getElementById('artifact-' + activeFocusProjectId);
-          if (activeArt) {
-            dispatchArtifactFocus(activeArt, activeFocusProjectId, true);
-          }
-        }
-      }, { passive: true });
-    }
-
-    // Minimapa
-    const minimapRadar = document.getElementById('minimap-radar');
-    if (minimapRadar) {
-      minimapRadar.addEventListener('click', handleMinimapClick);
-      minimapRadar.addEventListener('keydown', function (keyboardEvent) {
-        if (keyboardEvent.key === 'Enter' || keyboardEvent.key === ' ' || keyboardEvent.key === 'Spacebar') {
-          keyboardEvent.preventDefault();
-          resetCameraToOverview();
-          announceLiveStatus('Enquadramento geral restaurado pelo radar.');
-        }
-      });
-    }
-
-    document.querySelectorAll('.spatial-artifact').forEach(function (artifact) {
-      const projId = artifact.getAttribute('data-project');
-      const trigger = artifact.querySelector('.artifact-trigger');
-
-      function onEnter() {
-        if (!currentActiveRoom && !isDirectReadingActive) {
-          setConceptualRelation(projId);
-          dispatchArtifactFocus(artifact, projId, true);
-        }
-      }
-
-      function onLeave(pointerEvent) {
-        if (pointerEvent && pointerEvent.relatedTarget && artifact.contains(pointerEvent.relatedTarget)) {
-          return;
-        }
-        if (!currentActiveRoom && !isDirectReadingActive) {
-          // O teclado tem precedência sobre o mouse: pointerleave não apaga foco se elemento retém seleção
-          if (!artifact.matches(':focus-within') && !artifact.contains(document.activeElement)) {
-            scheduleRelationDismissal();
-            dispatchArtifactFocus(artifact, projId, false);
-          }
-        }
-      }
-
-      artifact.addEventListener('pointerenter', onEnter);
-      artifact.addEventListener('pointerleave', onLeave);
-      artifact.addEventListener('focusin', onEnter);
-
-      if (trigger) {
-        trigger.addEventListener('focus', onEnter);
-        trigger.addEventListener('blur', function () {
-          if (!currentActiveRoom && !isDirectReadingActive) {
-            setTimeout(function () {
-              const activeEl = document.activeElement;
-              const banner = document.getElementById('atlas-relation-banner');
-              if (activeEl && (artifact.contains(activeEl) || (banner && banner.contains(activeEl)))) {
-                return;
-              }
-              if (activeRelationProject === projId) {
-                clearConceptualRelation();
-              }
-              dispatchArtifactFocus(artifact, projId, false);
-            }, 15);
-          }
-        });
-      }
     });
 
-    const relationBanner = document.getElementById('atlas-relation-banner');
-    if (relationBanner) {
-      relationBanner.setAttribute('inert', '');
-      relationBanner.addEventListener('pointerenter', cancelRelationDismissal);
-      relationBanner.addEventListener('pointerleave', scheduleRelationDismissal);
-      relationBanner.addEventListener('focusin', cancelRelationDismissal);
-      relationBanner.addEventListener('focusout', scheduleRelationDismissal);
-    }
-
-    // Controle de Visão Geral no Dock
-    const dockOverview = document.getElementById('btn-dock-overview');
-    if (dockOverview) {
-      dockOverview.addEventListener('click', function () {
-        dispatchIrisZoom(0.0, true);
-        navigateToRoute('atlas', true);
-        resetCameraToOverview(true);
-        announceLiveStatus('Visão geral do Atlas restaurada.');
+    // Pular de índice ou callouts para sala
+    document.querySelectorAll('[data-jump-room]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const target = btn.getAttribute('data-jump-room');
+        if (target) navigateToRoute(target, true);
       });
-    }
+    });
 
-    // Modo Leitura Direta
-    const directBtn = document.getElementById('btn-direct-reading');
-    if (directBtn) {
-      directBtn.addEventListener('click', function () {
-        if (isDirectReadingActive) {
-          navigateToRoute('atlas', true);
-        } else {
-          navigateToRoute('leitura', true);
+    // Botões de voltar da sala
+    document.querySelectorAll('[data-action="exit-room"]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        exitCurrentRoom(true);
+      });
+    });
+
+    // Botões de avanço/recuo de sala
+    document.querySelectorAll('[data-step-dir]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const dir = btn.getAttribute('data-step-dir');
+        if (dir === 'next' || dir === 'prev') {
+          stepActiveRoom(dir);
         }
       });
-    }
+    });
 
+    // Botão de retorno do modo de leitura direta
     const returnAtlasBtn = document.getElementById('btn-return-to-atlas');
     if (returnAtlasBtn) {
       returnAtlasBtn.addEventListener('click', function () {
-        navigateToRoute('atlas', true);
+        exitCurrentRoom(true);
       });
     }
 
     const returnAtlasFooterBtn = document.getElementById('btn-return-to-atlas-footer');
     if (returnAtlasFooterBtn) {
       returnAtlasFooterBtn.addEventListener('click', function () {
-        navigateToRoute('atlas', true);
+        exitCurrentRoom(true);
       });
     }
 
-    const brandHomeLink = document.getElementById('brand-home-link');
-    if (brandHomeLink) {
-      brandHomeLink.addEventListener('click', function (e) {
-        e.preventDefault();
-        navigateToRoute('atlas', true);
-        resetCameraToOverview();
-      });
-    }
-
-    // Botões do Header
-    const btnIndice = document.getElementById('btn-header-indice');
-    if (btnIndice) {
-      btnIndice.addEventListener('click', function () {
-        navigateToRoute('indice', true);
-      });
-    }
-
-    const btnSobre = document.getElementById('btn-header-sobre');
-    if (btnSobre) {
-      btnSobre.addEventListener('click', function () {
-        navigateToRoute('sobre', true);
-      });
-    }
-
-    const btnContato = document.getElementById('btn-header-contato');
-    if (btnContato) {
-      btnContato.addEventListener('click', function () {
+    // Botão de contato do Hero
+    const btnHeroContact = document.getElementById('btn-hero-contact');
+    if (btnHeroContact) {
+      btnHeroContact.addEventListener('click', function () {
         navigateToRoute('contato', true);
       });
     }
 
-    const btnMeridianContato = document.getElementById('btn-meridian-contato');
-    if (btnMeridianContato) {
-      btnMeridianContato.addEventListener('click', function () {
-        navigateToRoute('contato', true);
-      });
-    }
-
-    // Fechar Overlays
-    const closeOverlayBtns = document.querySelectorAll('[data-action="close-overlay"]');
-    closeOverlayBtns.forEach(function (btn) {
+    // Fechar Overlays Modais
+    document.querySelectorAll('[data-action="close-overlay"]').forEach(function (btn) {
       btn.addEventListener('click', function () {
-        navigateToRoute('atlas', true);
+        handleOverlayClose();
       });
     });
 
-    // Pular de Índice para Sala
-    const indiceJumps = document.querySelectorAll('[data-jump-room]');
-    indiceJumps.forEach(function (jump) {
-      jump.addEventListener('click', function () {
-        const target = jump.getAttribute('data-jump-room');
-        navigateToRoute(target, true);
-      });
-    });
-
-    // CLIQUE REAL nos artefatos espaciais: somente abre se NÃO foi arrasto (>6px)
-    const enterButtons = document.querySelectorAll('[data-enter-room]');
-    enterButtons.forEach(function (btn) {
-      btn.addEventListener('click', function (clickEvent) {
-        if (clickEvent.detail !== 0 && (pointerState.totalDragDistance > 6 || pointerState.wasDragged)) {
-          clickEvent.preventDefault();
-          clickEvent.stopPropagation();
-          return;
-        }
-        const target = btn.getAttribute('data-enter-room');
-        navigateToRoute(target, true);
-      });
-    });
-
-    // Clique no artigo como hit-target complementar
-    const spatialArtifacts = document.querySelectorAll('.spatial-artifact');
-    spatialArtifacts.forEach(function (artifact) {
-      artifact.addEventListener('click', function (clickEvent) {
-        if (clickEvent.detail !== 0 && (pointerState.totalDragDistance > 6 || pointerState.wasDragged)) {
-          clickEvent.preventDefault();
-          clickEvent.stopPropagation();
-          return;
-        }
-        if (clickEvent.target.closest('button')) {
-          return;
-        }
-        const target = artifact.getAttribute('data-project');
-        if (target) {
-          navigateToRoute(target, true);
-        }
-      });
-    });
-
-    // Dock: Botões de Projeto
-    const dockButtons = document.querySelectorAll('[data-dock-target]');
-    dockButtons.forEach(function (dockBtn) {
-      dockBtn.addEventListener('click', function () {
-        const target = dockBtn.getAttribute('data-dock-target');
-        navigateToRoute(target, true);
-      });
-    });
-
-    // Voltar da Sala
-    const backButtons = document.querySelectorAll('[data-action="exit-room"]');
-    backButtons.forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        navigateToRoute('atlas', true);
-      });
-    });
-
-    // Passo entre Salas (Anterior / Próximo)
-    const stepButtons = document.querySelectorAll('[data-step-dir]');
-    stepButtons.forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        const dir = btn.getAttribute('data-step-dir');
-        stepActiveRoom(dir);
-      });
-    });
-
-    // Histórico Back/Forward do navegador
+    // Sincronização do Histórico e Hash
     window.addEventListener('popstate', function () {
-      cancelActiveRoomTransition();
       applyRouteState(window.location.hash.replace('#', ''));
     });
-
-    // Redimensionamento de Janela
-    window.addEventListener('resize', function () {
-      updateHeaderHeightVar();
-      if (!currentActiveRoom && !isDirectReadingActive) {
-        if (window.innerWidth > 600) {
-          const fitZoom = calculateOverviewFit();
-          cameraState.targetZoom = fitZoom;
-          if (isMotionReduced) {
-            cameraState.currentZoom = fitZoom;
-          }
-          applyWorldTransform();
-          drawAtlasCanvas();
-        } else {
-          if (spatialWorld) {
-            spatialWorld.style.transform = 'none';
-          }
-          document.documentElement.style.setProperty('--atlas-scale', '1');
-        }
-        if (activeFocusProjectId) {
-          const activeArt = document.getElementById('artifact-' + activeFocusProjectId);
-          if (activeArt) {
-            dispatchArtifactFocus(activeArt, activeFocusProjectId, true);
-          }
-        }
-      }
-      requestCameraWakeup();
-    });
-
-    // Visibilidade da Página (Zero RAF ao ocultar aba)
-    document.addEventListener('visibilitychange', function () {
-      isPageVisible = !document.hidden;
-      document.documentElement.toggleAttribute('data-page-hidden', !isPageVisible);
-      cancelActiveRoomTransition();
-      if (!isPageVisible) {
-        dispatchArtifactFocus(null, null, false);
-        document.querySelectorAll('.room-enter-expand').forEach(function (room) {
-          room.classList.remove('room-enter-expand');
-        });
-        if (animationFrameHandle) cancelAnimationFrame(animationFrameHandle);
-        animationFrameHandle = null;
-      }
-      if (isPageVisible) {
-        requestCameraWakeup();
-      }
+    window.addEventListener('hashchange', function () {
+      applyRouteState(window.location.hash.replace('#', ''));
     });
   }
 
-  function initializeAtlasApp() {
-    updateHeaderHeightVar();
+  // =========================================================================
+  // 10. BOOTSTRAP DO PORTFÓLIO
+  // =========================================================================
+
+  function initializeApp() {
+    dispatchHeroFraming();
     initializeMotionControls();
-    initializeEmailCopy();
     initializeKeyboardNavigation();
+    initializeEmailCopy();
     initializeYahcwDemo();
     initializeTuyaDemo();
     initializeGamingDemo();
     initializePythonDemo();
     initializeSpotifastDemo();
     initializeFinanceDemo();
+    initializeFinancePreview();
+    initializeScrollReveal();
     initializeEventListeners();
 
-    // Inicialização da Câmera com FIT real
-    const initialFitZoom = calculateOverviewFit();
-    cameraState.currentZoom = initialFitZoom;
-    cameraState.targetZoom = initialFitZoom;
-    cameraState.currentPanX = 0;
-    cameraState.currentPanY = 0;
-    cameraState.targetPanX = 0;
-    cameraState.targetPanY = 0;
-
-    applyWorldTransform();
-    drawAtlasCanvas();
-
-    // Rota inicial (se houver hash)
-    if (window.location.hash && window.location.hash !== '#atlas') {
-      applyRouteState(window.location.hash.replace('#', ''));
+    // Rota inicial pela URL
+    const initialHash = window.location.hash.replace('#', '').trim();
+    if (initialHash) {
+      applyRouteState(initialHash);
     } else {
-      requestCameraWakeup();
+      applyRouteState('atlas');
     }
   }
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeAtlasApp);
+    document.addEventListener('DOMContentLoaded', initializeApp);
   } else {
-    initializeAtlasApp();
+    initializeApp();
   }
 })();

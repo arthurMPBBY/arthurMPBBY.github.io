@@ -3,21 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#070b0e">
-  <title>Arthur Kadri de Oliveira | Atlas Espacial de Sistemas</title>
-  <meta name="description" content="Atlas espacial interativo de Arthur Kadri de Oliveira. Graduação na UFABC (2º período). Programação em C#, Python e C++, utilitários Win32, automação de rede e modelagem quantitativa. Busca de estágio em mercado financeiro ou dados.">
-  <link rel="icon" type="image/svg+xml" href="favicon.svg?v=20261030-iris-v1">
+  <meta name="theme-color" content="#070D0F">
+  <title>Arthur Kadri | Portfólio de Dados, Finanças &amp; Sistemas</title>
+  <meta name="description" content="Portfólio de Arthur Kadri de Oliveira. Graduando na UFABC (2º período) em busca de estágio em Análise de Dados e Mercado Financeiro. Projetos em Python, C#, C++, modelagem quantitativa e sistemas.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg?v=20261103-monumental-v1">
   <link rel="canonical" href="https://arthurmpbby.github.io/">
-  <meta property="og:title" content="Arthur Kadri de Oliveira | Atlas Espacial de Sistemas">
-  <meta property="og:description" content="Entre sistemas, dados e possibilidades. Explore os projetos de Arthur Kadri em um atlas espacial com uma íris tridimensional interativa. UFABC, em busca de estágio em dados ou finanças.">
-  <meta property="og:image" content="https://arthurmpbby.github.io/og-image.png?v=20261030-iris">
+  <meta property="og:title" content="Arthur Kadri | Portfólio de Dados, Finanças &amp; Sistemas">
+  <meta property="og:description" content="Entre sistemas, dados e possibilidades. Projetos e análises quantitativas de Arthur Kadri. Estudante UFABC, busca de estágio em análise de dados e mercado financeiro.">
+  <meta property="og:image" content="https://arthurmpbby.github.io/og-image.png?v=20261103-monumental-v1">
   <meta property="og:url" content="https://arthurmpbby.github.io/">
   <meta property="og:type" content="website">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20261101-iris-zoom-v2">
-  <link rel="stylesheet" href="optics-interface.css?v=20261101-iris-zoom-v2">
+  <link rel="stylesheet" href="styles.css?v=20261103-monumental-v1">
 </head>
 <body class="mode-atlas">
   <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
@@ -28,459 +27,783 @@
   <!-- CONTEÚDO PRINCIPAL -->
   <main id="main-content">
 
-    <!-- 1. VIEWPORT ESPACIAL (ATLAS 2D + PROFUNDIDADE ARQUITETURAL) -->
-    <div id="spatial-viewport" class="spatial-viewport" tabindex="0" role="region" aria-label="Atlas Espacial de Sistemas. Projetos em posições fixas com íris central interativa. Use a roda do mouse ou controles para aproximar a íris.">
-
-      <!-- Fundo gerativo em Canvas 2D -->
+    <!-- 1. VIEWPORT HERO (ABERTURA COM ÍRIS MONUMENTAL) -->
+    <!-- Preserve #spatial-viewport como container APENAS da abertura/hero e #kaleidoscope-canvas -->
+    <section id="spatial-viewport" class="spatial-viewport hero-section" role="region" aria-label="Abertura do Portfólio de Arthur Kadri">
+      <!-- Fundo gerativo em Canvas WebGL (preservado para renderizador da íris) -->
       <canvas id="kaleidoscope-canvas" class="kaleidoscope-canvas" aria-hidden="true"></canvas>
-      <canvas id="atlas-canvas" class="atlas-canvas" aria-hidden="true"></canvas>
 
-      <!-- Plano espacial transformado via CSS (Pan & Zoom em sistema de coordenadas reais) -->
-      <div id="spatial-world" class="spatial-world">
+      <!-- Máscara/vignette suave no desktop para proteger área textual sem retângulo visível -->
+      <div class="hero-vignette" aria-hidden="true"></div>
 
-        <!-- Âncora Tipográfica Central / Meridiano de Origem (0, 0) -->
-        <div class="spatial-meridian" id="spatial-origin-meridian">
-          <div class="meridian-crosshair" aria-hidden="true"></div>
-          <div class="meridian-rings" aria-hidden="true"></div>
-          <div class="meridian-typography">
-            <span class="meridian-academic-tag">UFABC &middot; 2&ordm; período</span>
-            <h1 class="meridian-title">Arthur Kadri</h1>
-            <p class="meridian-lead">Entre sistemas, dados e possibilidades.<br><span class="meridian-career">Busco estágio em Análise de Dados &amp; Finanças.</span></p>
-            <div class="meridian-contact-group">
-              <button type="button" class="meridian-contact-btn" id="btn-meridian-contato" aria-haspopup="dialog" aria-controls="overlay-contato" title="Abrir canais de contato direto">
-                <span class="contact-dot" aria-hidden="true"></span>
-                <span>Contato direto</span>
-              </button>
-            </div>
-            <div class="meridian-hint" aria-hidden="true">
-              <span class="hint-pulse"></span>
-              <span>Atlas de Sistemas &middot; Roda do mouse ou controles para zoom na íris &middot; Selecione um projeto</span>
-            </div>
-          </div>
-          <!-- Vetores de orientação conectando aos 6 objetos -->
-          <div class="meridian-vectors" aria-hidden="true">
-            <span class="vector-line line-yahcw" data-target="yahcw"></span>
-            <span class="vector-line line-tuya" data-target="tuya"></span>
-            <span class="vector-line line-gaming" data-target="gaming"></span>
-            <span class="vector-line line-python" data-target="python"></span>
-            <span class="vector-line line-spotifast" data-target="spotifast"></span>
-            <span class="vector-line line-financeiro" data-target="financeiro"></span>
+      <!-- Conteúdo do Hero (No desktop: terço esquerdo, sem textura atrás do texto) -->
+      <div class="hero-content-wrapper" id="hero-content-wrapper">
+        <div class="hero-text-column" id="hero-text-column">
+          <div class="hero-academic-tag">UFABC &middot; 2º período &middot; Ciência e Tecnologia</div>
+          <h1 class="hero-title">Arthur Kadri</h1>
+          <p class="hero-lead">Entre sistemas, dados e possibilidades.</p>
+          <p class="hero-career">
+            Busco primeiro estágio em <strong>Análise de Dados &amp; Mercado Financeiro</strong>.
+          </p>
+          <div class="hero-actions">
+            <a href="#projetos" class="hero-action-link primary-action" id="btn-hero-projects">
+              <span>Ver projetos</span>
+              <span class="action-arrow" aria-hidden="true">&darr;</span>
+            </a>
+            <button type="button" class="hero-action-link secondary-action" id="btn-hero-contact" aria-haspopup="dialog" aria-controls="overlay-contato">
+              <span>Contato</span>
+              <span class="action-arrow" aria-hidden="true">&rarr;</span>
+            </button>
           </div>
         </div>
+      </div>
+    </section>
 
-        <!-- OBJETO 01: YAHCW (Janelas Isométricas Win32 / DWM) -->
-        <article class="spatial-artifact artifact-yahcw" id="artifact-yahcw" data-project="yahcw" aria-labelledby="art-title-yahcw">
-          <button type="button" class="artifact-trigger" data-enter-room="yahcw" aria-label="Explorar sala 01: Seu desktop, pelos cantos - YAHCW, Hot Corners e DWM em C#">
-            <div class="object-editorial-label">
-              <div class="label-pre">
-                <span class="label-index">01</span>
-                <span class="label-category">Win32 &middot; C# &middot; DDC/CI</span>
-              </div>
-              <h2 class="label-title label-human-title" id="art-title-yahcw">Seu desktop, pelos cantos</h2>
-              <p class="label-tech-subtitle">YAHCW &mdash; Hot Corners e DWM</p>
-              <p class="label-discovery-phrase">Janelas, áudio e brilho num só lugar.</p>
-              <div class="label-cta">
-                <span class="cta-text">Explorar sala</span>
-                <span class="cta-arrow" aria-hidden="true">&rarr;</span>
-              </div>
+
+    <!-- 2. JORNADA EDITORIAL COM ROLAGEM NATIVA (FORA DE #spatial-viewport) -->
+    <div id="narrative-journey" class="narrative-journey">
+      <!-- Âncora de navegação para #projetos -->
+      <div id="projetos" class="projects-anchor" aria-hidden="true"></div>
+
+      <!-- CAPÍTULO 1: COTA ABERTA (DESTAQUE GRANDE 01) -->
+      <article class="chapter-feature chapter-cota" id="cota-chapter">
+        <div class="chapter-grid">
+          <div class="chapter-info">
+            <div class="chapter-meta">
+              <span class="chapter-number">01</span>
+              <span class="chapter-tag">Dados &amp; Finanças &middot; Python</span>
             </div>
+            <h2 class="chapter-title">Cota Aberta</h2>
+            <p class="chapter-lead">
+              Uma ferramenta para explorar cotas e patrimônio de fundos a partir de dados públicos da CVM.
+            </p>
 
-            <!-- Escultura livre em SVG com camadas e sombras reais -->
-            <div class="object-sculpture sculpture-yahcw" aria-hidden="true">
-              <svg class="sculpture-svg" viewBox="0 0 420 220" width="100%" height="100%">
+            <ul class="chapter-capabilities">
+              <li>Retorno no período e cotas em base 100.</li>
+              <li>Diagnóstico de dados ausentes, com origem registrada.</li>
+              <li>Consulta por fundo e período, com exportação CSV.</li>
+            </ul>
+
+            <div class="chapter-actions">
+              <button type="button" class="action-btn primary-action" data-enter-room="cota" id="btn-open-cota">
+                <span>Abrir projeto</span>
+                <span class="btn-arrow" aria-hidden="true">&rarr;</span>
+              </button>
+              <a href="https://github.com/arthurMPBBY/cota-aberta" class="action-btn secondary-action" target="_blank" rel="noopener noreferrer">
+                <span>Código no GitHub</span>
+                <span class="btn-arrow" aria-hidden="true">&nearr;</span>
+              </a>
+            </div>
+          </div>
+
+          <div class="chapter-visual">
+            <div class="cota-diagram-frame" aria-label="Diagrama do fluxo de dados do Cota Aberta">
+              <svg class="cota-feature-svg" viewBox="0 0 540 380" width="100%" height="auto">
                 <defs>
-                  <filter id="shadow-yahcw" x="-15%" y="-15%" width="130%" height="130%">
-                    <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#0b0f15" flood-opacity="0.14" />
-                  </filter>
-                  <pattern id="yahcwGrid" width="20" height="20" patternUnits="userSpaceOnUse">
-                    <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#0e1218" stroke-width="0.5" stroke-opacity="0.08" />
-                  </pattern>
-                </defs>
-
-                <!-- Camada 3: Mixer de Áudio IPolicyConfig -->
-                <g class="stacked-window window-back" transform="translate(130, 24)" filter="url(#shadow-yahcw)">
-                  <rect width="220" height="120" rx="4" fill="#f8fafc" stroke="#0e1218" stroke-width="1.2" stroke-opacity="0.35" />
-                  <rect width="220" height="22" rx="4" fill="#e9edf2" />
-                  <text x="12" y="15" font-family="'JetBrains Mono', monospace" font-size="8.5" font-weight="700" fill="#4b5565">AUDIO-IPolicyConfig.sys</text>
-                  <circle cx="195" cy="11" r="3" fill="#cbd5e1" />
-                  <circle cx="205" cy="11" r="3" fill="#cbd5e1" />
-                  <line x1="20" y1="46" x2="200" y2="46" stroke="#cbd5e1" stroke-width="1.5" />
-                  <line x1="20" y1="68" x2="160" y2="68" stroke="#cbd5e1" stroke-width="1.5" />
-                  <line x1="20" y1="90" x2="130" y2="90" stroke="#cbd5e1" stroke-width="1.5" />
-                </g>
-
-                <!-- Camada 2: BrightTray VCP Opcode 0x10 -->
-                <g class="stacked-window window-mid" transform="translate(70, 52)" filter="url(#shadow-yahcw)">
-                  <rect width="240" height="130" rx="4" fill="#ffffff" stroke="#0e1218" stroke-width="1.2" stroke-opacity="0.45" />
-                  <rect width="240" height="24" rx="4" fill="#e2e7ee" />
-                  <text x="12" y="16" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="700" fill="#2c3545">BrightTray [NamedPipe 0x10]</text>
-                  <rect x="24" y="52" width="190" height="6" rx="3" fill="#e2e8f0" />
-                  <rect x="24" y="52" width="140" height="6" rx="3" fill="#0e1218" />
-                  <circle cx="164" cy="55" r="6" fill="#d9432e" />
-                  <text x="24" y="82" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="600" fill="#0e1218">Lumin&acirc;ncia Hardware: 75%</text>
-                  <text x="24" y="102" font-family="'DM Sans', sans-serif" font-size="9" fill="#5c6779">VCP Opcode 0x10 &middot; Monitor DDC/CI</text>
-                </g>
-
-                <!-- Camada 1: Miniatura Viva DWM com Hot Corner ativo -->
-                <g class="stacked-window window-front" transform="translate(20, 80)" filter="url(#shadow-yahcw)">
-                  <rect width="260" height="130" rx="4" fill="#ffffff" stroke="#0e1218" stroke-width="1.6" />
-                  <rect width="260" height="26" rx="4" fill="#0e1218" />
-                  <text x="36" y="17" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700" fill="#ffffff">YAHCW.DwmThumbnail.cs</text>
-
-                  <!-- Hot Corner Active Beacon (Top-Left) -->
-                  <rect x="2" y="2" width="26" height="22" rx="2" fill="#d9432e" />
-                  <circle cx="15" cy="13" r="4.5" fill="#ffffff" />
-
-                  <!-- Thumbnail live window grid -->
-                  <rect x="18" y="44" width="105" height="66" rx="3" fill="#f8fafc" stroke="#0e1218" stroke-width="1" stroke-opacity="0.3" />
-                  <rect x="135" y="44" width="105" height="66" rx="3" fill="#f8fafc" stroke="#0e1218" stroke-width="1" stroke-opacity="0.3" />
-                  <text x="32" y="82" font-family="'JetBrains Mono', monospace" font-size="8.5" font-weight="600" fill="#5c6779">DWM LIVE #1</text>
-                  <text x="148" y="82" font-family="'JetBrains Mono', monospace" font-size="8.5" font-weight="600" fill="#5c6779">DWM LIVE #2</text>
-                </g>
-
-                <!-- Caliper / Named Pipe Interconnect -->
-                <path d="M 315 115 L 345 115 L 345 56 L 355 56" fill="none" stroke="#d9432e" stroke-width="1.6" stroke-dasharray="3 3" />
-                <circle cx="315" cy="115" r="3.5" fill="#d9432e" />
-                <circle cx="355" cy="56" r="3.5" fill="#d9432e" />
-              </svg>
-            </div>
-          </button>
-        </article>
-
-        <!-- OBJETO 02: TUYA SMART LAMPS (Órbita e Luminaire Concêntrico) -->
-        <article class="spatial-artifact artifact-tuya" id="artifact-tuya" data-project="tuya" aria-labelledby="art-title-tuya">
-          <button type="button" class="artifact-trigger" data-enter-room="tuya" aria-label="Explorar sala 02: Luz sob seu controle - tuya-smart-lamps, automação TCP local e OpenAPI">
-            <div class="object-editorial-label">
-              <div class="label-pre">
-                <span class="label-index">02</span>
-                <span class="label-category">Redes &middot; Sockets TCP &middot; OpenAPI</span>
-              </div>
-              <h2 class="label-title label-human-title" id="art-title-tuya">Luz sob seu controle</h2>
-              <p class="label-tech-subtitle">tuya-smart-lamps</p>
-              <p class="label-discovery-phrase">Automação local com alternativa pela nuvem.</p>
-              <div class="label-cta">
-                <span class="cta-text">Explorar sala</span>
-                <span class="cta-arrow" aria-hidden="true">&rarr;</span>
-              </div>
-            </div>
-
-            <!-- Escultura livre em SVG com anéis de rede concêntricos -->
-            <div class="object-sculpture sculpture-tuya" aria-hidden="true">
-              <svg class="sculpture-svg" viewBox="0 0 420 220" width="100%" height="100%">
-                <defs>
-                  <radialGradient id="lampGlowV2" cx="50%" cy="50%" r="50%">
-                    <stop offset="0%" stop-color="#d9432e" stop-opacity="0.32" />
-                    <stop offset="70%" stop-color="#d9432e" stop-opacity="0.08" />
-                    <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
-                  </radialGradient>
-                  <filter id="shadow-tuya" x="-15%" y="-15%" width="130%" height="130%">
-                    <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#0b0f15" flood-opacity="0.12" />
-                  </filter>
-                </defs>
-
-                <!-- Grade técnica circular e órbitas -->
-                <circle cx="210" cy="110" r="95" fill="none" stroke="#0e1218" stroke-width="0.8" stroke-opacity="0.16" stroke-dasharray="4 4" />
-                <circle cx="210" cy="110" r="70" fill="none" stroke="#0e1218" stroke-width="1.2" stroke-opacity="0.25" />
-                <circle cx="210" cy="110" r="45" fill="url(#lampGlowV2)" />
-
-                <!-- Eixos ortogonais -->
-                <line x1="70" y1="110" x2="350" y2="110" stroke="#0e1218" stroke-width="0.7" stroke-opacity="0.2" />
-                <line x1="210" y1="10" x2="210" y2="210" stroke="#0e1218" stroke-width="0.7" stroke-opacity="0.2" />
-
-                <!-- Núcleo do Luminaire com filamento coral -->
-                <circle cx="210" cy="110" r="24" fill="#ffffff" stroke="#0e1218" stroke-width="1.8" filter="url(#shadow-tuya)" />
-                <path d="M 203 115 Q 210 98 217 115" fill="none" stroke="#d9432e" stroke-width="2.6" />
-                <circle cx="210" cy="110" r="3.5" fill="#d9432e" />
-
-                <!-- Rota 1: Anel Local TCP (Porta 6668) -->
-                <g class="orbit-local" filter="url(#shadow-tuya)">
-                  <circle cx="135" cy="110" r="9" fill="#ffffff" stroke="#0e1218" stroke-width="1.6" />
-                  <circle cx="135" cy="110" r="3.5" fill="#0e1218" />
-                  <text x="85" y="94" font-family="'JetBrains Mono', monospace" font-size="8.5" font-weight="700" fill="#0e1218">TCP LOCAL: 4ms</text>
-                  <circle cx="170" cy="110" r="3.5" fill="#d9432e" />
-                </g>
-
-                <!-- Rota 2: Órbita Externa Cloud OpenAPI -->
-                <g class="orbit-cloud" filter="url(#shadow-tuya)">
-                  <circle cx="285" cy="110" r="9" fill="#ffffff" stroke="#0e1218" stroke-width="1.6" />
-                  <circle cx="285" cy="110" r="3.5" fill="#d9432e" />
-                  <text x="250" y="142" font-family="'JetBrains Mono', monospace" font-size="8.5" font-weight="700" fill="#5c6779">OPENAPI CLOUD</text>
-                  <text x="250" y="154" font-family="'JetBrains Mono', monospace" font-size="7.5" fill="#5c6779">148ms SIMULADO</text>
-                </g>
-
-                <!-- Vetor de contingência automática -->
-                <path d="M 210 65 Q 260 65 285 101" fill="none" stroke="#d9432e" stroke-width="1.5" stroke-dasharray="3 3" />
-                <text x="205" y="54" font-family="'JetBrains Mono', monospace" font-size="7.5" font-weight="700" fill="#d9432e">AUTO CONTINGENCY</text>
-              </svg>
-            </div>
-          </button>
-        </article>
-
-        <!-- OBJETO 03: GAMING FPS HUD (Fita de Telemetria Vulkan) -->
-        <article class="spatial-artifact artifact-gaming" id="artifact-gaming" data-project="gaming" aria-labelledby="art-title-gaming">
-          <button type="button" class="artifact-trigger" data-enter-room="gaming" aria-label="Explorar sala 03: Cada frame conta - gaming-fps-hud, Vulkan vkQueuePresentKHR e Wayland">
-            <div class="object-editorial-label">
-              <div class="label-pre">
-                <span class="label-index">03</span>
-                <span class="label-category">C++17 &middot; Vulkan &middot; Wayland</span>
-              </div>
-              <h2 class="label-title label-human-title" id="art-title-gaming">Cada frame conta</h2>
-              <p class="label-tech-subtitle">gaming-fps-hud</p>
-              <p class="label-discovery-phrase">Observe FPS e variações no tempo de quadro.</p>
-              <div class="label-cta">
-                <span class="cta-text">Explorar sala</span>
-                <span class="cta-arrow" aria-hidden="true">&rarr;</span>
-              </div>
-            </div>
-
-            <!-- Escultura livre em SVG com fita de telemetria contínua -->
-            <div class="object-sculpture sculpture-gaming" aria-hidden="true">
-              <svg class="sculpture-svg" viewBox="0 0 420 220" width="100%" height="100%">
-                <defs>
-                  <filter id="shadow-gaming" x="-15%" y="-15%" width="130%" height="130%">
-                    <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#0b0f15" flood-opacity="0.12" />
-                  </filter>
-                </defs>
-
-                <!-- Fita de telemetria desdobrada -->
-                <path d="M 20 155 Q 90 75 170 115 T 320 85 T 400 125" fill="none" stroke="#0e1218" stroke-width="2" />
-                <path d="M 20 170 Q 90 90 170 130 T 320 100 T 400 140" fill="none" stroke="#cbd5e1" stroke-width="1.2" />
-
-                <!-- Gradiente de área sob a fita -->
-                <path d="M 20 155 Q 90 75 170 115 T 320 85 T 400 125 L 400 195 L 20 195 Z" fill="#0e1218" fill-opacity="0.04" />
-
-                <!-- Linhas guia de frame pacing -->
-                <line x1="20" y1="95" x2="400" y2="95" stroke="#0e1218" stroke-width="0.8" stroke-dasharray="2 3" stroke-opacity="0.25" />
-                <text x="30" y="89" font-family="'JetBrains Mono', monospace" font-size="8.5" fill="#5c6779">6.94ms (144 FPS BASELINE)</text>
-
-                <line x1="20" y1="145" x2="400" y2="145" stroke="#0e1218" stroke-width="0.8" stroke-dasharray="2 3" stroke-opacity="0.25" />
-                <text x="30" y="139" font-family="'JetBrains Mono', monospace" font-size="8.5" fill="#5c6779">16.6ms (60 FPS BOUNDARY)</text>
-
-                <!-- Caliper / Braçadeira de Medição de Frame Pacing -->
-                <g class="telemetry-caliper" transform="translate(160, 40)" filter="url(#shadow-gaming)">
-                  <rect width="94" height="44" rx="3" fill="#ffffff" stroke="#0e1218" stroke-width="1.4" />
-                  <text x="8" y="16" font-family="'JetBrains Mono', monospace" font-size="8.5" font-weight="700" fill="#0e1218">1% LOW DELTA</text>
-                  <text x="8" y="34" font-family="'JetBrains Mono', monospace" font-size="13" font-weight="700" fill="#d9432e">4.12 ms</text>
-                  <line x1="47" y1="44" x2="47" y2="75" stroke="#d9432e" stroke-width="1.5" stroke-dasharray="2 2" />
-                  <circle cx="47" cy="75" r="3.5" fill="#d9432e" />
-                </g>
-
-                <!-- Bracket de Emissão JSON Atômico -->
-                <g class="json-bracket" transform="translate(285, 26)" filter="url(#shadow-gaming)">
-                  <rect width="115" height="50" rx="3" fill="#f8fafc" stroke="#0e1218" stroke-width="1" stroke-opacity="0.35" />
-                  <text x="8" y="15" font-family="'JetBrains Mono', monospace" font-size="7.5" font-weight="700" fill="#2c3545">{ ATOMIC JSON }</text>
-                  <text x="8" y="29" font-family="'JetBrains Mono', monospace" font-size="7.5" fill="#5c6779">&quot;present_cnt&quot;: 86420</text>
-                  <text x="8" y="42" font-family="'JetBrains Mono', monospace" font-size="7.5" fill="#5c6779">&quot;swapchain&quot;: 0x7ffd98</text>
-                </g>
-              </svg>
-            </div>
-          </button>
-        </article>
-
-        <!-- OBJETO 04: PYTHON CURSO (Estruturas de Dados e Algoritmos) -->
-        <article class="spatial-artifact artifact-python" id="artifact-python" data-project="python" aria-labelledby="art-title-python">
-          <button type="button" class="artifact-trigger" data-enter-room="python" aria-label="Explorar sala 04: Da lógica ao código - python-curso, algoritmos e estruturas de dados">
-            <div class="object-editorial-label">
-              <div class="label-pre">
-                <span class="label-index">04</span>
-                <span class="label-category">Python 3 &middot; Algoritmos UFABC</span>
-              </div>
-              <h2 class="label-title label-human-title" id="art-title-python">Da lógica ao código</h2>
-              <p class="label-tech-subtitle">python-curso</p>
-              <p class="label-discovery-phrase">Exercícios que transformam conceitos em programas.</p>
-              <div class="label-cta">
-                <span class="cta-text">Explorar sala</span>
-                <span class="cta-arrow" aria-hidden="true">&rarr;</span>
-              </div>
-            </div>
-
-            <!-- Escultura livre em SVG com monograma estrutural e nós -->
-            <div class="object-sculpture sculpture-python" aria-hidden="true">
-              <svg class="sculpture-svg" viewBox="0 0 420 220" width="100%" height="100%">
-                <defs>
-                  <filter id="shadow-python" x="-15%" y="-15%" width="130%" height="130%">
-                    <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#0b0f15" flood-opacity="0.12" />
-                  </filter>
-                </defs>
-
-                <!-- Coluna de sintaxe central -->
-                <g filter="url(#shadow-python)">
-                  <rect x="180" y="18" width="60" height="184" rx="3" fill="#ffffff" stroke="#0e1218" stroke-width="1.6" />
-                  <rect x="180" y="18" width="60" height="26" rx="3" fill="#0e1218" />
-                  <text x="195" y="35" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700" fill="#ffffff">MATH</text>
-
-                  <!-- Glifos matemáticos e de coleções -->
-                  <text x="198" y="72" font-family="'JetBrains Mono', monospace" font-size="14" font-weight="700" fill="#0e1218">&lambda;</text>
-                  <text x="198" y="110" font-family="'JetBrains Mono', monospace" font-size="14" font-weight="700" fill="#d9432e">&Sigma;</text>
-                  <text x="195" y="148" font-family="'JetBrains Mono', monospace" font-size="13" font-weight="700" fill="#0e1218">&isin; S</text>
-                  <text x="194" y="184" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#5c6779">SET</text>
-                </g>
-
-                <!-- Nós e treliças à esquerda (Listas / Filtragem) -->
-                <line x1="180" y1="72" x2="105" y2="52" stroke="#0e1218" stroke-width="1.2" stroke-opacity="0.3" />
-                <rect x="45" y="36" width="85" height="32" rx="3" fill="#f8fafc" stroke="#0e1218" stroke-width="1.2" filter="url(#shadow-python)" />
-                <text x="54" y="56" font-family="'JetBrains Mono', monospace" font-size="8.5" font-weight="600" fill="#0e1218">list.filter()</text>
-
-                <line x1="180" y1="148" x2="95" y2="155" stroke="#0e1218" stroke-width="1.2" stroke-opacity="0.3" />
-                <rect x="35" y="138" width="95" height="32" rx="3" fill="#f8fafc" stroke="#0e1218" stroke-width="1.2" filter="url(#shadow-python)" />
-                <text x="44" y="158" font-family="'JetBrains Mono', monospace" font-size="8.5" font-weight="600" fill="#0e1218">set.difference()</text>
-
-                <!-- Nós e treliças à direita (Numérico / Séries) -->
-                <line x1="240" y1="72" x2="310" y2="52" stroke="#0e1218" stroke-width="1.2" stroke-opacity="0.3" />
-                <rect x="290" y="36" width="95" height="32" rx="3" fill="#f8fafc" stroke="#0e1218" stroke-width="1.2" filter="url(#shadow-python)" />
-                <text x="298" y="56" font-family="'JetBrains Mono', monospace" font-size="8.5" font-weight="600" fill="#0e1218">series.sum()</text>
-
-                <line x1="240" y1="148" x2="320" y2="155" stroke="#0e1218" stroke-width="1.2" stroke-opacity="0.3" />
-                <rect x="300" y="138" width="95" height="32" rx="3" fill="#f8fafc" stroke="#0e1218" stroke-width="1.2" filter="url(#shadow-python)" />
-                <text x="308" y="158" font-family="'JetBrains Mono', monospace" font-size="8.5" font-weight="600" fill="#d9432e">monthly_rate()</text>
-              </svg>
-            </div>
-          </button>
-        </article>
-
-        <!-- OBJETO 05: SPOTIFAST NEON THEME (Disco & Tokens JSON) -->
-        <article class="spatial-artifact artifact-spotifast" id="artifact-spotifast" data-project="spotifast" aria-labelledby="art-title-spotifast">
-          <button type="button" class="artifact-trigger" data-enter-room="spotifast" aria-label="Explorar sala 05: Uma interface, outra identidade - spotifast-neon-theme, tokens JSON e paleta">
-            <div class="object-editorial-label">
-              <div class="label-pre">
-                <span class="label-index">05</span>
-                <span class="label-category">Design Tokens &middot; JSON</span>
-              </div>
-              <h2 class="label-title label-human-title" id="art-title-spotifast">Uma interface, outra identidade</h2>
-              <p class="label-tech-subtitle">spotifast-neon-theme</p>
-              <p class="label-discovery-phrase">Explore cores e tokens de uma interface.</p>
-              <div class="label-cta">
-                <span class="cta-text">Explorar sala</span>
-                <span class="cta-arrow" aria-hidden="true">&rarr;</span>
-              </div>
-            </div>
-
-            <!-- Escultura livre em SVG com disco mecânico usinado -->
-            <div class="object-sculpture sculpture-spotifast" aria-hidden="true">
-              <svg class="sculpture-svg" viewBox="0 0 420 220" width="100%" height="100%">
-                <defs>
-                  <filter id="shadow-spotifast" x="-15%" y="-15%" width="130%" height="130%">
-                    <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#0b0f15" flood-opacity="0.14" />
-                  </filter>
-                </defs>
-
-                <!-- Disco de vinil milled -->
-                <circle cx="165" cy="110" r="85" fill="#0e1218" stroke="#cbd5e1" stroke-width="1" filter="url(#shadow-spotifast)" />
-                <circle cx="165" cy="110" r="75" fill="none" stroke="#252f3f" stroke-width="0.8" />
-                <circle cx="165" cy="110" r="60" fill="none" stroke="#252f3f" stroke-width="0.8" />
-                <circle cx="165" cy="110" r="45" fill="none" stroke="#252f3f" stroke-width="0.8" />
-
-                <!-- Rótulo central com setores radiais do tema -->
-                <circle cx="165" cy="110" r="30" fill="#ffffff" stroke="#0e1218" stroke-width="1.6" />
-                <!-- Setor Coral -->
-                <path d="M 165 110 L 165 80 A 30 30 0 0 1 195 110 Z" fill="#d9432e" />
-                <!-- Setor Muted Slate -->
-                <path d="M 165 110 L 195 110 A 30 30 0 0 1 165 140 Z" fill="#94a3b8" />
-                <circle cx="165" cy="110" r="5" fill="#ffffff" stroke="#0e1218" stroke-width="1" />
-
-                <!-- Braço de leitura usinado (Tonearm) -->
-                <path d="M 330 26 L 275 80 L 215 95" fill="none" stroke="#0e1218" stroke-width="2.6" />
-                <circle cx="330" cy="26" r="10" fill="#ffffff" stroke="#0e1218" stroke-width="1.6" />
-                <rect x="205" y="90" width="14" height="10" rx="2" fill="#0e1218" />
-
-                <!-- Swatches de tokens neon.json -->
-                <g class="palette-swatches" transform="translate(275, 82)" filter="url(#shadow-spotifast)">
-                  <rect x="0" y="0" width="125" height="24" rx="3" fill="#0f141c" stroke="#cbd5e1" stroke-width="0.8" />
-                  <text x="8" y="16" font-family="'JetBrains Mono', monospace" font-size="8.5" fill="#ffffff">--bg: #0f141c</text>
-
-                  <rect x="0" y="30" width="125" height="24" rx="3" fill="#ffffff" stroke="#0e1218" stroke-width="0.8" />
-                  <text x="8" y="46" font-family="'JetBrains Mono', monospace" font-size="8.5" fill="#0e1218">--text: #f8fafc</text>
-
-                  <rect x="0" y="60" width="125" height="24" rx="3" fill="#ffffff" stroke="#d9432e" stroke-width="1.2" />
-                  <text x="8" y="76" font-family="'JetBrains Mono', monospace" font-size="8.5" font-weight="700" fill="#d9432e">--accent: #d9432e</text>
-                </g>
-              </svg>
-            </div>
-          </button>
-        </article>
-
-        <!-- OBJETO 06: LABORATÓRIO FINANCEIRO (Curva Exponencial e Juros Compostos) -->
-        <article class="spatial-artifact artifact-financeiro" id="artifact-financeiro" data-project="financeiro" aria-labelledby="art-title-financeiro">
-          <button type="button" class="artifact-trigger" data-enter-room="financeiro" aria-label="Explorar sala 06: Explore os juros compostos - Laboratório Financeiro e simulação quantitativa">
-            <div class="object-editorial-label">
-              <div class="label-pre">
-                <span class="label-index">06</span>
-                <span class="label-category">Finanças &middot; Modelagem Quantitativa</span>
-              </div>
-              <h2 class="label-title label-human-title" id="art-title-financeiro">Explore os juros compostos</h2>
-              <p class="label-tech-subtitle">Laboratório Financeiro</p>
-              <p class="label-discovery-phrase">Compare cenários com aportes, prazo e taxa.</p>
-              <div class="label-cta">
-                <span class="cta-text">Explorar sala</span>
-                <span class="cta-arrow" aria-hidden="true">&rarr;</span>
-              </div>
-            </div>
-
-            <!-- Escultura livre em SVG com fita tridimensional exponencial -->
-            <div class="object-sculpture sculpture-financeiro" aria-hidden="true">
-              <svg class="sculpture-svg" viewBox="0 0 420 220" width="100%" height="100%">
-                <defs>
-                  <linearGradient id="finCompoundGradV2" x1="0%" y1="100%" x2="100%" y2="0%">
-                    <stop offset="0%" stop-color="#0e1218" stop-opacity="0.04" />
-                    <stop offset="100%" stop-color="#d9432e" stop-opacity="0.22" />
+                  <linearGradient id="cotaPillGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#162428" />
+                    <stop offset="100%" stop-color="#101A1D" />
                   </linearGradient>
-                  <filter id="shadow-finance" x="-15%" y="-15%" width="130%" height="130%">
-                    <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#0b0f15" flood-opacity="0.12" />
+                  <linearGradient id="cotaAccentGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#C79A60" />
+                    <stop offset="100%" stop-color="#618F83" />
+                  </linearGradient>
+                  <filter id="cotaSoftGlow" x="-10%" y="-10%" width="120%" height="120%">
+                    <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000000" flood-opacity="0.4" />
                   </filter>
                 </defs>
 
-                <!-- Eixos ortogonais de coordenadas financeiras -->
-                <line x1="40" y1="180" x2="380" y2="180" stroke="#0e1218" stroke-width="1.4" />
-                <line x1="40" y1="28" x2="40" y2="180" stroke="#0e1218" stroke-width="1.4" />
-
-                <!-- Linhas guia de referência -->
-                <line x1="40" y1="130" x2="380" y2="130" stroke="#0e1218" stroke-width="0.6" stroke-dasharray="3 3" stroke-opacity="0.2" />
-                <line x1="40" y1="80" x2="380" y2="80" stroke="#0e1218" stroke-width="0.6" stroke-dasharray="3 3" stroke-opacity="0.2" />
-
-                <!-- Linha linear de aportes (base cinza) -->
-                <line x1="40" y1="180" x2="380" y2="110" stroke="#5c6779" stroke-width="1.8" stroke-dasharray="4 3" />
-                <text x="250" y="125" font-family="'JetBrains Mono', monospace" font-size="8.5" fill="#5c6779">TOTAL APORTES</text>
-
-                <!-- Área sob a curva exponencial de juros compostos -->
-                <path d="M 40 180 Q 220 170 380 40 L 380 180 Z" fill="url(#finCompoundGradV2)" />
-
-                <!-- Curva exponencial em destaque (coral) -->
-                <path d="M 40 180 Q 220 170 380 40" fill="none" stroke="#d9432e" stroke-width="2.8" />
-
-                <!-- Placa de marco final (12 meses: R$ 2.384,65) -->
-                <g class="milestone-plaque" transform="translate(245, 18)" filter="url(#shadow-finance)">
-                  <rect width="145" height="44" rx="3" fill="#ffffff" stroke="#d9432e" stroke-width="1.4" />
-                  <text x="10" y="17" font-family="'JetBrains Mono', monospace" font-size="8.5" font-weight="700" fill="#0e1218">12 MESES &middot; EFETIVA</text>
-                  <text x="10" y="34" font-family="'JetBrains Mono', monospace" font-size="13" font-weight="700" fill="#d9432e">R$ 2.384,65</text>
-                  <circle cx="132" cy="22" r="3.5" fill="#d9432e" />
+                <!-- Bloco 1: Entrada -->
+                <g transform="translate(24, 24)" filter="url(#cotaSoftGlow)">
+                  <rect width="224" height="78" rx="8" fill="url(#cotaPillGrad)" stroke="#173F46" stroke-width="1.2" />
+                  <line x1="0" y1="0" x2="4" y2="78" stroke="#C79A60" stroke-width="4" />
+                  <text x="18" y="26" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700" fill="#C79A60">01. ENTRADA</text>
+                  <text x="18" y="44" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="600" fill="#F1EEE5">Importação CVM e CSV</text>
+                  <text x="18" y="62" font-family="'Plus Jakarta Sans', sans-serif" font-size="10.5" fill="#AFBCB8">Validação e origem</text>
                 </g>
 
-                <!-- Fórmula gravada -->
-                <text x="50" y="50" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="700" fill="#2c3545">FV = PV·(1+i)ⁿ + PMT·[((1+i)ⁿ - 1)/i]</text>
+                <!-- Bloco 2: Banco SQLite -->
+                <g transform="translate(292, 24)" filter="url(#cotaSoftGlow)">
+                  <rect width="224" height="78" rx="8" fill="url(#cotaPillGrad)" stroke="#173F46" stroke-width="1.2" />
+                  <line x1="0" y1="0" x2="4" y2="78" stroke="#618F83" stroke-width="4" />
+                  <text x="18" y="26" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700" fill="#618F83">02. PERSISTÊNCIA</text>
+                  <text x="18" y="44" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="600" fill="#F1EEE5">SQLite</text>
+                  <text x="18" y="62" font-family="'Plus Jakarta Sans', sans-serif" font-size="10.5" fill="#AFBCB8">Séries e patrimônio</text>
+                </g>
+
+                <!-- Linhas conectadas -->
+                <path d="M 136 102 L 136 138 L 270 138 L 270 162" fill="none" stroke="#618F83" stroke-width="1.5" stroke-dasharray="4,4" />
+                <path d="M 404 102 L 404 138 L 270 138" fill="none" stroke="#618F83" stroke-width="1.5" stroke-dasharray="4,4" />
+
+                <!-- Bloco Central: Processamento -->
+                <g transform="translate(130, 162)" filter="url(#cotaSoftGlow)">
+                  <rect width="280" height="82" rx="8" fill="url(#cotaPillGrad)" stroke="#C79A60" stroke-width="1.2" />
+                  <line x1="0" y1="0" x2="280" y2="0" stroke="url(#cotaAccentGrad)" stroke-width="3" />
+                  <text x="20" y="26" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700" fill="#C79A60">03. PROCESSAMENTO</text>
+                  <text x="20" y="46" font-family="'Plus Jakarta Sans', sans-serif" font-size="13" font-weight="600" fill="#F1EEE5">Diagnóstico e Base 100</text>
+                  <text x="20" y="65" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" fill="#AFBCB8">Identificação de dados ausentes</text>
+                </g>
+
+                <!-- Conexão para o módulo de saída -->
+                <path d="M 270 244 L 270 274" fill="none" stroke="#C79A60" stroke-width="1.5" />
+
+                <!-- Bloco 4: Métricas e Saída -->
+                <g transform="translate(24, 274)" filter="url(#cotaSoftGlow)">
+                  <rect width="492" height="84" rx="8" fill="url(#cotaPillGrad)" stroke="#173F46" stroke-width="1.2" />
+                  <line x1="0" y1="0" x2="4" y2="84" stroke="url(#cotaAccentGrad)" stroke-width="4" />
+
+                  <g transform="translate(20, 18)">
+                    <text x="0" y="16" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="700" fill="#C79A60">RETORNO NO PERÍODO</text>
+                    <text x="0" y="34" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="600" fill="#F1EEE5">Cota(t) / Cota(0) &minus; 1</text>
+                    <text x="0" y="50" font-family="'Plus Jakarta Sans', sans-serif" font-size="10" fill="#AFBCB8">Datas registradas</text>
+                  </g>
+
+                  <g transform="translate(180, 18)">
+                    <text x="0" y="16" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="700" fill="#618F83">SÉRIE NORMALIZADA</text>
+                    <text x="0" y="34" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="600" fill="#F1EEE5">Base 100 na data inicial</text>
+                    <text x="0" y="50" font-family="'Plus Jakarta Sans', sans-serif" font-size="10" fill="#AFBCB8">Comparação temporal</text>
+                  </g>
+
+                  <g transform="translate(340, 18)">
+                    <text x="0" y="16" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="700" fill="#AFBCB8">ANÁLISE E EXPORTAÇÃO</text>
+                    <text x="0" y="34" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="600" fill="#F1EEE5">Streamlit &middot; CSV</text>
+                    <text x="0" y="50" font-family="'Plus Jakarta Sans', sans-serif" font-size="10" fill="#AFBCB8">Dados sintéticos demonstrados</text>
+                  </g>
+                </g>
               </svg>
+              <div class="diagram-caption">
+                <span>Esquema ilustrativo &middot; Dados sintéticos para demonstração</span>
+              </div>
             </div>
-          </button>
-        </article>
-
-      </div> <!-- /#spatial-world -->
-    </div> <!-- /#spatial-viewport -->
+          </div>
+        </div>
+      </article>
 
 
-    <!-- 2. CONTAINER DAS 6 SALAS DEDICADAS (FULL VIEWPORT) -->
+      <!-- CAPÍTULO 2: LABORATÓRIO FINANCEIRO (DESTAQUE GRANDE 02 - LADO INVERTIDO) -->
+      <article class="chapter-feature chapter-financeiro reverse-layout" id="financeiro-chapter">
+        <div class="chapter-grid">
+          <!-- Visualização à esquerda no desktop -->
+          <div class="chapter-visual">
+            <div class="finance-preview-card" id="finance-preview-card" aria-label="Prévia da simulação calculada via finance-lab.js">
+              <div class="finance-card-header">
+                <div class="finance-badge-group">
+                  <span class="live-indicator-dot" aria-hidden="true"></span>
+                  <span class="preview-badge">Simulação de exemplo</span>
+                </div>
+                <span class="synthetic-data-tag">Dados Sintéticos / Demonstração Educacional</span>
+              </div>
+
+              <div class="finance-card-body">
+                <div class="finance-metrics-grid">
+                  <div class="metric-block">
+                    <span class="metric-label">Valor Final Acumulado</span>
+                    <strong class="metric-value highlight" id="fp-final-balance">R$ 2.384,65</strong>
+                    <span class="metric-sub">12 meses a 12% a.a.</span>
+                  </div>
+                  <div class="metric-block">
+                    <span class="metric-label">Capital Aportado</span>
+                    <strong class="metric-value" id="fp-total-contributed">R$ 2.200,00</strong>
+                    <span class="metric-sub">R$ 1.000 + R$ 100/mês</span>
+                  </div>
+                  <div class="metric-block">
+                    <span class="metric-label">Juros Efetivos</span>
+                    <strong class="metric-value accent" id="fp-total-interest">R$ 184,65</strong>
+                    <span class="metric-sub">Taxa mensal: 0,9489%</span>
+                  </div>
+                </div>
+
+                <!-- Gráfico de Trajetória gerado a partir de PortfolioFinance.calculate() -->
+                <div class="finance-chart-container" id="fp-chart-container" aria-label="Gráfico de evolução do saldo mês a mês">
+                  <div class="chart-bars-track" id="fp-bars-track">
+                    <!-- Gerado dinamicamente com chamada a PortfolioFinance.calculate() -->
+                  </div>
+                  <div class="chart-axes">
+                    <span>Mês 0</span>
+                    <span>Mês 3</span>
+                    <span>Mês 6</span>
+                    <span>Mês 9</span>
+                    <span>Mês 12</span>
+                  </div>
+                </div>
+
+                <div class="finance-formula-box">
+                  <code>i_m = (1 + i_a)^(1/12) - 1 &middot; FV = PV&middot;(1+i)^n + PMT&middot;[((1+i)^n - 1)/i]</code>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Texto à direita no desktop -->
+          <div class="chapter-info">
+            <div class="chapter-meta">
+              <span class="chapter-number">02</span>
+              <span class="chapter-tag">Modelagem &middot; Juros Compostos</span>
+            </div>
+            <h2 class="chapter-title">Laboratório Financeiro</h2>
+            <p class="chapter-lead">
+              Explore como os aportes mensais e os juros compostos influenciam a evolução de um patrimônio.
+            </p>
+
+            <ul class="chapter-capabilities">
+              <li>Taxa anual efetiva, convertida em taxa mensal equivalente; aportes no fim do mês.</li>
+              <li>Evolução mês a mês discriminando capital aportado e rendimento.</li>
+              <li>Ajuste o valor inicial, os aportes, a taxa e o prazo.</li>
+            </ul>
+
+            <div class="chapter-actions">
+              <button type="button" class="action-btn primary-action" data-enter-room="financeiro" id="btn-open-financeiro">
+                <span>Abrir simulador interativo</span>
+                <span class="btn-arrow" aria-hidden="true">&rarr;</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </article>
+
+
+      <!-- CAPÍTULO 3: SISTEMAS E FERRAMENTAS (LINHAS EDITORIAIS COMPACTAS) -->
+      <section class="systems-tools-section" id="sistemas">
+        <div class="section-header">
+          <div class="section-tag">Engenharia &middot; Utilitários &middot; Baixo Nível</div>
+          <h2 class="section-title">Sistemas e Ferramentas</h2>
+          <p class="section-desc">
+            Projetos práticos explorando APIs nativas do Windows, automação de redes locais, telemetria gráfica em Vulkan e fundamentos de desenvolvimento.
+          </p>
+        </div>
+
+        <div class="editorial-rows-list">
+          <!-- Linha 1: YAHCW -->
+          <article class="editorial-row" data-project="yahcw">
+            <div class="row-num">03</div>
+            <div class="row-main">
+              <div class="row-meta">
+                <span class="row-tech">C# &middot; .NET &middot; Win32 &middot; DWM &middot; DDC/CI</span>
+              </div>
+              <h3 class="row-title">YAHCW &mdash; Hot Corners, Áudio e Brilho para Windows</h3>
+              <p class="row-summary">
+                Atalhos nos cantos da tela para organizar janelas e controlar áudio e brilho no Windows.
+              </p>
+            </div>
+            <div class="row-visual">
+              <div class="row-sculpture-thumb sculpture-yahcw-thumb">
+                <svg viewBox="0 0 120 70" width="100%" height="100%" aria-hidden="true">
+                  <rect x="5" y="5" width="110" height="60" rx="4" fill="#101A1D" stroke="#173F46" stroke-width="1.2"/>
+                  <rect x="15" y="15" width="40" height="40" rx="3" fill="#162428" stroke="#618F83" stroke-width="1"/>
+                  <rect x="65" y="15" width="40" height="40" rx="3" fill="#162428" stroke="#C79A60" stroke-width="1"/>
+                  <circle cx="25" cy="25" r="3" fill="#618F83"/>
+                  <circle cx="75" cy="25" r="3" fill="#C79A60"/>
+                </svg>
+              </div>
+            </div>
+            <div class="row-action">
+              <button type="button" class="row-open-btn" data-enter-room="yahcw" aria-label="Abrir projeto YAHCW">
+                <span>Abrir</span>
+                <span class="btn-arrow" aria-hidden="true">&rarr;</span>
+              </button>
+            </div>
+          </article>
+
+          <!-- Linha 2: Tuya -->
+          <article class="editorial-row" data-project="tuya">
+            <div class="row-num">04</div>
+            <div class="row-main">
+              <div class="row-meta">
+                <span class="row-tech">Python 3 &middot; Sockets TCP &middot; OpenAPI Tuya &middot; LAN Watchdog</span>
+              </div>
+              <h3 class="row-title">tuya-smart-lamps &mdash; Automação de Rede Híbrida</h3>
+              <p class="row-summary">
+                Controle de lâmpadas pela rede local, com contingência pela nuvem.
+              </p>
+            </div>
+            <div class="row-visual">
+              <div class="row-sculpture-thumb sculpture-tuya-thumb">
+                <svg viewBox="0 0 120 70" width="100%" height="100%" aria-hidden="true">
+                  <rect x="5" y="5" width="110" height="60" rx="4" fill="#101A1D" stroke="#173F46" stroke-width="1.2"/>
+                  <circle cx="40" cy="35" r="14" fill="#162428" stroke="#618F83" stroke-width="1.2"/>
+                  <circle cx="40" cy="35" r="6" fill="#C79A60"/>
+                  <line x1="56" y1="35" x2="80" y2="35" stroke="#618F83" stroke-width="1.5" stroke-dasharray="3,3"/>
+                  <circle cx="88" cy="35" r="8" fill="#162428" stroke="#AFBCB8" stroke-width="1"/>
+                </svg>
+              </div>
+            </div>
+            <div class="row-action">
+              <button type="button" class="row-open-btn" data-enter-room="tuya" aria-label="Abrir projeto tuya-smart-lamps">
+                <span>Abrir</span>
+                <span class="btn-arrow" aria-hidden="true">&rarr;</span>
+              </button>
+            </div>
+          </article>
+
+          <!-- Linha 3: Gaming -->
+          <article class="editorial-row" data-project="gaming">
+            <div class="row-num">05</div>
+            <div class="row-main">
+              <div class="row-meta">
+                <span class="row-tech">C++17 &middot; Vulkan API &middot; Qt 6 Quick &middot; KDE Wayland</span>
+              </div>
+              <h3 class="row-title">gaming-fps-hud &mdash; Telemetria Vulkan &amp; 1% Lows</h3>
+              <p class="row-summary">
+                Monitoramento do tempo de quadro e do desempenho em aplicações Vulkan.
+              </p>
+            </div>
+            <div class="row-visual">
+              <div class="row-sculpture-thumb sculpture-gaming-thumb">
+                <svg viewBox="0 0 120 70" width="100%" height="100%" aria-hidden="true">
+                  <rect x="5" y="5" width="110" height="60" rx="4" fill="#101A1D" stroke="#173F46" stroke-width="1.2"/>
+                  <polyline points="20,50 35,42 50,45 65,25 80,30 95,20" fill="none" stroke="#618F83" stroke-width="1.8"/>
+                  <circle cx="95" cy="20" r="3" fill="#C79A60"/>
+                </svg>
+              </div>
+            </div>
+            <div class="row-action">
+              <button type="button" class="row-open-btn" data-enter-room="gaming" aria-label="Abrir projeto gaming-fps-hud">
+                <span>Abrir</span>
+                <span class="btn-arrow" aria-hidden="true">&rarr;</span>
+              </button>
+            </div>
+          </article>
+
+          <!-- Linha 4: Python -->
+          <article class="editorial-row" data-project="python">
+            <div class="row-num">06</div>
+            <div class="row-main">
+              <div class="row-meta">
+                <span class="row-tech">Python 3 &middot; Algoritmos &middot; Estruturas de Dados &middot; UFABC</span>
+              </div>
+              <h3 class="row-title">python-curso &mdash; Fundamentos e Algoritmos Numéricos</h3>
+              <p class="row-summary">
+                Exercícios de algoritmos e estruturas de dados desenvolvidos durante os estudos na UFABC.
+              </p>
+            </div>
+            <div class="row-visual">
+              <div class="row-sculpture-thumb sculpture-python-thumb">
+                <svg viewBox="0 0 120 70" width="100%" height="100%" aria-hidden="true">
+                  <rect x="5" y="5" width="110" height="60" rx="4" fill="#101A1D" stroke="#173F46" stroke-width="1.2"/>
+                  <rect x="25" y="20" width="30" height="30" rx="3" fill="#173F46" stroke="#618F83" stroke-width="1"/>
+                  <rect x="65" y="20" width="30" height="30" rx="3" fill="#162428" stroke="#C79A60" stroke-width="1"/>
+                  <text x="35" y="38" font-family="'JetBrains Mono', monospace" font-size="12" fill="#F1EEE5">{ }</text>
+                  <text x="75" y="38" font-family="'JetBrains Mono', monospace" font-size="12" fill="#C79A60">[ ]</text>
+                </svg>
+              </div>
+            </div>
+            <div class="row-action">
+              <button type="button" class="row-open-btn" data-enter-room="python" aria-label="Abrir projeto python-curso">
+                <span>Abrir</span>
+                <span class="btn-arrow" aria-hidden="true">&rarr;</span>
+              </button>
+            </div>
+          </article>
+
+          <!-- Linha 5: Spotifast -->
+          <article class="editorial-row" data-project="spotifast">
+            <div class="row-num">07</div>
+            <div class="row-main">
+              <div class="row-meta">
+                <span class="row-tech">Design Tokens &middot; Paleta JSON &middot; Hierarquia Visual</span>
+              </div>
+              <h3 class="row-title">spotifast-neon-theme &mdash; Especificação de Cores e Tokens</h3>
+              <p class="row-summary">
+                Tema visual organizado em tokens de cor para personalizar uma interface multimídia.
+              </p>
+            </div>
+            <div class="row-visual">
+              <div class="row-sculpture-thumb sculpture-spotifast-thumb">
+                <svg viewBox="0 0 120 70" width="100%" height="100%" aria-hidden="true">
+                  <rect x="5" y="5" width="110" height="60" rx="4" fill="#101A1D" stroke="#173F46" stroke-width="1.2"/>
+                  <circle cx="35" cy="35" r="10" fill="#173F46" stroke="#618F83" stroke-width="1"/>
+                  <circle cx="60" cy="35" r="10" fill="#618F83" stroke="#F1EEE5" stroke-width="1"/>
+                  <circle cx="85" cy="35" r="10" fill="#C79A60" stroke="#F1EEE5" stroke-width="1"/>
+                </svg>
+              </div>
+            </div>
+            <div class="row-action">
+              <button type="button" class="row-open-btn" data-enter-room="spotifast" aria-label="Abrir projeto spotifast-neon-theme">
+                <span>Abrir</span>
+                <span class="btn-arrow" aria-hidden="true">&rarr;</span>
+              </button>
+            </div>
+          </article>
+        </div>
+      </section>
+
+
+      <!-- CAPÍTULO 4: CONTATO FINAL SIMPLES -->
+      <footer class="journey-footer" id="contato-final">
+        <div class="footer-container">
+          <div class="footer-header">
+            <span class="footer-tag">Comunicação Direta</span>
+            <h2 class="footer-title">Vamos conversar</h2>
+            <p class="footer-lead">
+              Estou à disposição para oportunidades de estágio em <strong>Análise de Dados &amp; Finanças</strong>, desafios de engenharia e troca de ideias técnicas.
+            </p>
+          </div>
+
+          <div class="footer-channels">
+            <div class="channel-card">
+              <span class="channel-type">E-mail Direto</span>
+              <a href="mailto:arthurkadri968@gmail.com" class="channel-link-main">arthurkadri968@gmail.com</a>
+              <button type="button" class="copy-email-btn" data-copy-email aria-label="Copiar e-mail arthurkadri968@gmail.com">
+                <span>Copiar e-mail</span>
+              </button>
+            </div>
+
+            <div class="channel-card">
+              <span class="channel-type">Código &middot; Repositórios</span>
+              <a href="https://github.com/arthurMPBBY" class="channel-link-main" target="_blank" rel="noopener noreferrer">
+                <span>github.com/arthurMPBBY</span>
+                <span class="link-arrow" aria-hidden="true">&nearr;</span>
+              </a>
+              <span class="channel-desc">Código aberto, commits e projetos</span>
+            </div>
+
+            <div class="channel-card">
+              <span class="channel-type">Rede Profissional</span>
+              <a href="https://www.linkedin.com/in/arthur-kadri-de-oliveira-2586a12b2/" class="channel-link-main" target="_blank" rel="noopener noreferrer">
+                <span>Arthur Kadri de Oliveira</span>
+                <span class="link-arrow" aria-hidden="true">&nearr;</span>
+              </a>
+              <span class="channel-desc">Trajetória e conexões</span>
+            </div>
+          </div>
+
+          <div class="footer-bottom-bar">
+            <div class="footer-academic">
+              <span>Arthur Kadri &middot; Universidade Federal do ABC (UFABC &mdash; 2º período)</span>
+            </div>
+            <div class="footer-return">
+              <a href="#atlas" class="return-top-btn" id="btn-return-top">
+                <span>Voltar ao início</span>
+                <span class="return-arrow" aria-hidden="true">&uarr;</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div> <!-- /#narrative-journey -->
+
+
+    <!-- 3. CONTAINER DAS 7 SALAS DEDICADAS (FULL VIEWPORT) -->
+    <!-- Sequência: Cota -> Financeiro -> YAHCW -> Tuya -> Gaming -> Python -> Spotifast -->
     <div id="rooms-container" class="rooms-container" aria-live="polite">
 
-      <!-- SALA 01: YAHCW -->
+      <!-- SALA 01: COTA ABERTA -->
+      <section class="project-room" id="room-cota" data-room-id="cota" hidden aria-labelledby="room-title-cota">
+        <div class="room-inner">
+          <header class="room-header">
+            <div class="room-nav-controls">
+              <button type="button" class="room-back-btn" data-action="exit-room">
+                <span class="back-arrow" aria-hidden="true">&larr;</span>
+                <span>Voltar ao início <kbd>Esc</kbd></span>
+              </button>
+              <div class="room-indexer">
+                <span class="room-index-num">01 / 07</span>
+                <span class="room-index-name">cota-aberta</span>
+              </div>
+              <div class="room-stepper">
+                <button type="button" class="room-step-btn" data-step-dir="prev" aria-label="Projeto anterior: spotifast-neon-theme">&larr; Anterior</button>
+                <button type="button" class="room-step-btn" data-step-dir="next" aria-label="Próximo projeto: Laboratório Financeiro">Próximo &rarr;</button>
+              </div>
+            </div>
+          </header>
+
+          <div class="room-body-split">
+            <div class="room-content-pane">
+              <div class="room-meta-badge">
+                <span>Python 3.11+ &middot; SQLite &middot; Streamlit &middot; Pandas</span>
+              </div>
+              <h2 class="room-heading" id="room-title-cota">Cota Aberta &mdash; Análise de Fundos CVM</h2>
+              <p class="room-lead">
+                Aplicação analítica em Python para consulta, processamento e diagnóstico de séries temporais de cotas e patrimônio de fundos de investimento a partir dos informes diários públicos da CVM.
+              </p>
+
+              <div class="tech-deep-dive">
+                <h3 class="dive-title">Arquitetura de Dados &amp; Funcionalidades</h3>
+                <ul class="dive-list">
+                  <li>
+                    <strong>Pesquisa Parametrizada:</strong> Consulta por CNPJ e subclasse do fundo com filtro temporal customizado por data inicial e final.
+                  </li>
+                  <li>
+                    <strong>Cotas no Período:</strong> Retorno calculado pelas cotas inicial e final e evolução da série normalizada em base 100, com as datas efetivamente usadas à vista.
+                  </li>
+                  <li>
+                    <strong>Diagnóstico de Dados Ausentes:</strong> Identificação de lacunas de negociação entre a primeira e a última data, separando fins de semana de dias úteis sem cotação reportada.
+                  </li>
+                  <li>
+                    <strong>Patrimônio e Cotistas:</strong> Trajetória diária de patrimônio líquido, captação e resgates líquidos apurados a partir dos informes CVM.
+                  </li>
+                </ul>
+
+                <div class="technical-notice">
+                  <h4 class="notice-title">Ambiente de Demonstração &amp; Dados Sintéticos</h4>
+                  <p>
+                    A demonstração inclui dados <em>sintéticos</em> com lacunas planejadas para evidenciar o funcionamento do diagnóstico. O repositório documenta as rotinas de importação dos informes públicos da CVM e os esquemas SQLite.
+                  </p>
+                </div>
+
+                <div class="room-links-bar">
+                  <a href="https://github.com/arthurMPBBY/cota-aberta" class="external-repo-link" target="_blank" rel="noopener noreferrer">
+                    <span>Repositório GitHub &middot; cota-aberta</span>
+                    <span aria-hidden="true">&nearr;</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Painel Demonstrativo de Fluxo -->
+            <div class="room-demo-pane">
+              <div class="demo-card-frame">
+                <div class="demo-card-header">
+                  <span class="demo-status-pill">FLUXO DO PIPELINE ANALÍTICO</span>
+                  <span class="demo-caption">Da Ingestão à Normalização em Base 100</span>
+                </div>
+
+                <div class="cota-diagram-container">
+                  <svg class="cota-flow-svg" id="cota-flow-svg" viewBox="0 0 540 380" aria-label="Diagrama do fluxo de dados do Cota Aberta">
+                    <defs>
+                      <linearGradient id="cotaBoxGradRoom" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#162428" />
+                        <stop offset="100%" stop-color="#101A1D" />
+                      </linearGradient>
+                      <linearGradient id="cotaAccentGradRoom" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#C79A60" />
+                        <stop offset="100%" stop-color="#618F83" />
+                      </linearGradient>
+                      <filter id="cotaDropRoom" x="-10%" y="-10%" width="120%" height="120%">
+                        <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.5" />
+                      </filter>
+                    </defs>
+
+                    <g transform="translate(20, 24)" filter="url(#cotaDropRoom)">
+                      <rect width="230" height="76" rx="6" fill="url(#cotaBoxGradRoom)" stroke="#173F46" stroke-width="1.2" />
+                      <line x1="0" y1="0" x2="4" y2="76" stroke="#C79A60" stroke-width="4" />
+                      <text x="14" y="24" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="700" fill="#C79A60">INGESTÃO CVM</text>
+                      <text x="14" y="42" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="600" fill="#F1EEE5">Informes Diários CVM</text>
+                      <text x="14" y="58" font-family="'Plus Jakarta Sans', sans-serif" font-size="10" fill="#AFBCB8">Download e staging</text>
+                    </g>
+
+                    <g transform="translate(290, 24)" filter="url(#cotaDropRoom)">
+                      <rect width="230" height="76" rx="6" fill="url(#cotaBoxGradRoom)" stroke="#173F46" stroke-width="1.2" />
+                      <line x1="0" y1="0" x2="4" y2="76" stroke="#618F83" stroke-width="4" />
+                      <text x="14" y="24" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="700" fill="#618F83">ARMAZENAMENTO</text>
+                      <text x="14" y="42" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="600" fill="#F1EEE5">Banco SQLite Relacional</text>
+                      <text x="14" y="58" font-family="'Plus Jakarta Sans', sans-serif" font-size="10" fill="#AFBCB8">Schema indexado por CNPJ</text>
+                    </g>
+
+                    <path d="M 135 100 L 135 130 L 270 130 L 270 160" fill="none" stroke="#618F83" stroke-width="1.5" stroke-dasharray="4 4" />
+                    <path d="M 405 100 L 405 130 L 270 130" fill="none" stroke="#618F83" stroke-width="1.5" stroke-dasharray="4 4" />
+
+                    <g transform="translate(130, 160)" filter="url(#cotaDropRoom)">
+                      <rect width="280" height="78" rx="6" fill="url(#cotaBoxGradRoom)" stroke="#C79A60" stroke-width="1.2" />
+                      <line x1="0" y1="0" x2="280" y2="0" stroke="url(#cotaAccentGradRoom)" stroke-width="3" />
+                      <text x="16" y="24" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="700" fill="#C79A60">DIAGNÓSTICO E TRATAMENTO</text>
+                      <text x="16" y="44" font-family="'Plus Jakarta Sans', sans-serif" font-size="13" font-weight="600" fill="#F1EEE5">Auditoria de Dados Ausentes</text>
+                      <text x="16" y="62" font-family="'Plus Jakarta Sans', sans-serif" font-size="10" fill="#AFBCB8">Flags de inconsistência e feriados</text>
+                    </g>
+
+                    <path d="M 270 238 L 270 274" fill="none" stroke="#C79A60" stroke-width="1.5" />
+
+                    <g transform="translate(20, 274)" filter="url(#cotaDropRoom)">
+                      <rect width="500" height="88" rx="6" fill="url(#cotaBoxGradRoom)" stroke="#173F46" stroke-width="1.2" />
+                      <line x1="0" y1="0" x2="4" y2="88" stroke="url(#cotaAccentGradRoom)" stroke-width="4" />
+                      <g transform="translate(16, 18)">
+                        <text x="0" y="16" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="700" fill="#C79A60">RETORNO DA COTA</text>
+                        <text x="0" y="34" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="600" fill="#F1EEE5">Cota(t) / Cota(0) &minus; 1</text>
+                        <text x="0" y="50" font-family="'Plus Jakarta Sans', sans-serif" font-size="10" fill="#AFBCB8">Datas efetivas do período</text>
+                      </g>
+                      <g transform="translate(180, 18)">
+                        <text x="0" y="16" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="700" fill="#618F83">COTA NORMALIZADA</text>
+                        <text x="0" y="34" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="600" fill="#F1EEE5">Série Base 100</text>
+                        <text x="0" y="50" font-family="'Plus Jakarta Sans', sans-serif" font-size="10" fill="#AFBCB8">Comparação temporal</text>
+                      </g>
+                      <g transform="translate(340, 18)">
+                        <text x="0" y="16" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="700" fill="#AFBCB8">PL &middot; COTISTAS &middot; CSV</text>
+                        <text x="0" y="34" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="600" fill="#F1EEE5">Interface Streamlit</text>
+                        <text x="0" y="50" font-family="'Plus Jakarta Sans', sans-serif" font-size="10" fill="#AFBCB8">Exportação analítica</text>
+                      </g>
+                    </g>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- SALA 02: LABORATÓRIO FINANCEIRO (SIMULADOR DE JUROS COMPOSTOS) -->
+      <section class="project-room" id="room-financeiro" data-room-id="financeiro" hidden aria-labelledby="room-title-financeiro">
+        <div class="room-inner">
+          <header class="room-header">
+            <div class="room-nav-controls">
+              <button type="button" class="room-back-btn" data-action="exit-room">
+                <span class="back-arrow" aria-hidden="true">&larr;</span>
+                <span>Voltar ao início <kbd>Esc</kbd></span>
+              </button>
+              <div class="room-indexer">
+                <span class="room-index-num">02 / 07</span>
+                <span class="room-index-name">laboratorio-financeiro</span>
+              </div>
+              <div class="room-stepper">
+                <button type="button" class="room-step-btn" data-step-dir="prev" aria-label="Projeto anterior: cota-aberta">&larr; Anterior</button>
+                <button type="button" class="room-step-btn" data-step-dir="next" aria-label="Próximo projeto: YAHCW">Próximo &rarr;</button>
+              </div>
+            </div>
+          </header>
+
+          <div class="room-body-split">
+            <div class="room-content-pane">
+              <div class="room-meta-badge">
+                <span>Modelagem Quantitativa &middot; Taxa Efetiva &middot; Gráfico Reativo SVG</span>
+              </div>
+              <h2 class="room-heading" id="room-title-financeiro">Simulador de Juros Compostos</h2>
+              <p class="room-lead">
+                Ajuste os valores para explorar a evolução de um patrimônio com juros compostos e aportes no fim de cada mês. A taxa anual é convertida em sua taxa mensal equivalente.
+              </p>
+
+              <div class="tech-deep-dive">
+                <h3 class="dive-title">Fundamentos Matemáticos &amp; Validação</h3>
+                <ul class="dive-list">
+                  <li>
+                    <strong>Conversão de Taxa Efetiva:</strong> Aplica a relação estrita <code>taxaMensal = (1 + taxaAnual / 100) ** (1 / 12) - 1</code>, calculada com precisão via <code>Math.expm1(Math.log1p(annualRatePercent / 100) / 12)</code>.
+                  </li>
+                  <li>
+                    <strong>Validação Estrita &amp; Preservação de Estado:</strong> Entradas inválidas, nulas ou prazos fracionários são rejeitados pelo validador, preservando intacto o gráfico da simulação anterior e exibindo mensagem diagnóstica.
+                  </li>
+                  <li>
+                    <strong>Propósito Acadêmico:</strong> Instrumento desenvolvido para estudos quantitativos de trajetórias de capitalização, sem constituir recomendação financeira.
+                  </li>
+                </ul>
+              </div>
+
+              <!-- Callout de Descoberta: Cota Aberta -->
+              <div class="cota-discovery-callout">
+                <div class="cota-discovery-head">
+                  <span class="cota-discovery-tag">Dados &amp; Finanças &middot; Projeto Irmão</span>
+                  <h3 class="cota-discovery-title">Cota Aberta &mdash; Análise de Fundos CVM</h3>
+                </div>
+                <p class="cota-discovery-desc">
+                  Ferramenta analítica em Python 3.11+, SQLite e Streamlit para exploração de cotas e patrimônio de fundos com dados sintéticos.
+                </p>
+                <button type="button" class="cota-discovery-btn" data-jump-room="cota" aria-label="Explorar sala do projeto Cota Aberta">
+                  <span>Conhecer Cota Aberta</span>
+                  <span aria-hidden="true">&rarr;</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Painel Demonstrativo de Cálculo Financeiro -->
+            <div class="room-demo-pane">
+              <div class="demo-card-frame">
+                <div class="demo-card-header">
+                  <span class="demo-status-pill">SIMULADOR INTERATIVO</span>
+                  <span class="demo-caption">Matemática Determinística &middot; Taxa Efetiva Anual</span>
+                </div>
+
+                <div class="finance-sim-body">
+                  <form class="finance-form" id="finance-calc-form" novalidate>
+                    <div class="form-inputs-grid">
+                      <div class="form-field">
+                        <label for="param-initial-amount" class="field-label">Valor Inicial (PV):</label>
+                        <div class="input-currency-wrapper">
+                          <span class="currency-prefix">R$</span>
+                          <input type="number" id="param-initial-amount" name="initialAmount" class="field-input" value="1000" min="0" max="1000000" step="100" required>
+                        </div>
+                      </div>
+
+                      <div class="form-field">
+                        <label for="param-monthly-contribution" class="field-label">Aporte Mensal (PMT):</label>
+                        <div class="input-currency-wrapper">
+                          <span class="currency-prefix">R$</span>
+                          <input type="number" id="param-monthly-contribution" name="monthlyContribution" class="field-input" value="100" min="0" max="10000" step="50" required>
+                        </div>
+                      </div>
+
+                      <div class="form-field">
+                        <label for="param-annual-rate" class="field-label">Taxa Anual Efetiva (%):</label>
+                        <div class="input-percent-wrapper">
+                          <input type="number" id="param-annual-rate" name="annualRatePercent" class="field-input" value="12" min="0" max="30" step="0.5" required>
+                          <span class="percent-suffix">% a.a.</span>
+                        </div>
+                      </div>
+
+                      <div class="form-field">
+                        <label for="param-months" class="field-label">Prazo (Meses inteiros):</label>
+                        <div class="input-months-wrapper">
+                          <input type="number" id="param-months" name="months" class="field-input" value="12" min="1" max="360" step="1" required>
+                          <span class="months-suffix">meses</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="form-actions-row">
+                      <button type="submit" class="sim-action-btn primary" id="btn-recalculate-finance">
+                        <span>Recalcular Projeção</span>
+                      </button>
+                      <button type="button" class="sim-action-btn secondary" id="btn-reset-finance-case">
+                        <span>Restaurar Caso Canônico (R$ 1.000 + R$ 100 &middot; 12m)</span>
+                      </button>
+                    </div>
+                  </form>
+
+                  <div class="finance-error-banner" id="finance-error-box" role="alert" hidden></div>
+
+                  <div class="finance-results-grid">
+                    <div class="finance-result-card highlight">
+                      <span class="res-label">Saldo Acumulado Final</span>
+                      <strong class="res-value" id="res-final-balance">R$ 2.384,65</strong>
+                      <span class="res-caption">Capital total ao fim do prazo</span>
+                    </div>
+
+                    <div class="finance-result-card">
+                      <span class="res-label">Total Aportado</span>
+                      <strong class="res-value" id="res-total-contributed">R$ 2.200,00</strong>
+                      <span class="res-caption">Depósitos do investidor</span>
+                    </div>
+
+                    <div class="finance-result-card">
+                      <span class="res-label">Total em Juros</span>
+                      <strong class="res-value accent" id="res-total-interest">R$ 184,65</strong>
+                      <span class="res-caption">Rendimento dos juros compostos</span>
+                    </div>
+
+                    <div class="finance-result-card">
+                      <span class="res-label">Taxa Mensal Equivalente</span>
+                      <strong class="res-value" id="res-monthly-rate">0,9489%</strong>
+                      <span class="res-caption">Efetiva mensal derivada</span>
+                    </div>
+                  </div>
+
+                  <div class="finance-chart-wrapper">
+                    <div class="chart-header-row">
+                      <span class="chart-title">Trajetória Temporal do Patrimônio</span>
+                      <div class="chart-legend">
+                        <span class="legend-item"><span class="legend-dot balance"></span> Saldo Total</span>
+                        <span class="legend-item"><span class="legend-dot contributed"></span> Aportes</span>
+                      </div>
+                    </div>
+                    <svg class="finance-chart-svg" id="finance-chart-svg" viewBox="0 0 500 200" width="100%" height="200" aria-label="Gráfico de evolução do saldo"></svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- SALA 03: YAHCW (HOT CORNERS WIN32) -->
       <section class="project-room" id="room-yahcw" data-room-id="yahcw" hidden aria-labelledby="room-title-yahcw">
         <div class="room-inner">
           <header class="room-header">
             <div class="room-nav-controls">
               <button type="button" class="room-back-btn" data-action="exit-room">
                 <span class="back-arrow" aria-hidden="true">&larr;</span>
-                <span>Voltar ao Atlas <kbd>Esc</kbd></span>
+                <span>Voltar ao início <kbd>Esc</kbd></span>
               </button>
               <div class="room-indexer">
-                <span class="room-index-num">01 / 06</span>
-                <span class="room-index-name">YAHCW (Hot Corners)</span>
+                <span class="room-index-num">03 / 07</span>
+                <span class="room-index-name">yahcw</span>
               </div>
               <div class="room-stepper">
                 <button type="button" class="room-step-btn" data-step-dir="prev" aria-label="Projeto anterior: Laboratório Financeiro">&larr; Anterior</button>
@@ -494,7 +817,7 @@
               <div class="room-meta-badge">
                 <span>C# &middot; .NET &middot; WinForms &middot; Win32 API &middot; DWM</span>
               </div>
-              <h2 class="room-heading" id="room-title-yahcw">YAHCW (Yet Another Hot Corners for Windows)</h2>
+              <h2 class="room-heading" id="room-title-yahcw">YAHCW &mdash; Hot Corners, Áudio e Brilho</h2>
               <p class="room-lead">
                 Utilitário de produtividade nativo para Windows que integra ativação ágil por cantos de tela (hot corners), visualização de miniaturas em tempo real via Desktop Window Manager (DWM), ajuste de luminosidade via DDC/CI e chaveamento de áudio COM.
               </p>
@@ -518,8 +841,8 @@
 
                 <div class="technical-notice">
                   <h4 class="notice-title">Ressalvas Técnicas &amp; Demonstração Ilustrativa</h4>
-                  <p class="notice-text">
-                    A demonstração abaixo é <strong>ilustrativa</strong> e roda no navegador: o ajuste de brilho aplica um filtro visual simulado (CSS brightness), demonstrando o fluxo operacional que o executável C# realiza no hardware via VCP 0x10.
+                  <p>
+                    O controle de brilho depende de monitor com suporte a DDC/CI ativado. A demonstração na web aplica filtro simulado (CSS brightness) para ilustrar o comportamento da API sem interagir com drivers locais.
                   </p>
                 </div>
 
@@ -532,100 +855,70 @@
               </div>
             </div>
 
-            <!-- Mini-Desktop Interativo Demonstrativo -->
+            <!-- Painel Demonstrativo -->
             <div class="room-demo-pane">
               <div class="demo-card-frame">
                 <div class="demo-card-header">
-                  <span class="demo-status-pill">SIMULAÇÃO ILUSTRATIVA</span>
-                  <span class="demo-caption">Desktop Ilustrativo Win32</span>
+                  <span class="demo-status-pill">SIMULAÇÃO INTERATIVA</span>
+                  <span class="demo-caption">DWM Hot Corner &amp; VCP 0x10</span>
                 </div>
 
-                <div class="sim-desktop-container" id="sim-yahcw-desktop">
-                  <!-- Gatilho de Canto Superior Esquerdo -->
-                  <div class="sim-hot-corner-trigger" id="sim-corner-trigger" title="Gatilho de Hot Corner (Canto Superior Esquerdo)" tabindex="0" role="button" aria-label="Acionar Visão Geral de Janelas via Hot Corner">
-                    <span class="corner-glow" aria-hidden="true"></span>
-                  </div>
-
-                  <div class="sim-screen-view" id="sim-screen-preview">
-                    <!-- Barra de tarefas simulada -->
-                    <div class="sim-taskbar">
-                      <div class="sim-start-btn">AK</div>
-                      <div class="sim-task-items">
-                        <span class="task-badge active">Terminal</span>
-                        <span class="task-badge">Compiler</span>
-                        <span class="task-badge">AudioMixer</span>
-                      </div>
-                      <div class="sim-tray">
-                        <span id="sim-tray-audio-label">Speakers</span> &middot;
-                        <span id="sim-tray-bright-label">85%</span>
-                      </div>
+                <div class="yahcw-sim-body">
+                  <div class="sim-screen-container" id="yahcw-screen-frame">
+                    <div class="screen-corner-hotspot top-left" id="hotspot-tl" title="Canto Ativo: Alternar Visão Geral">
+                      <span class="hotspot-glyph" aria-hidden="true">&bull;</span>
                     </div>
-
-                    <!-- Janelas do Desktop -->
-                    <div class="sim-windows-area">
-                      <div class="sim-window-tile is-active" id="win-tile-1" tabindex="0" role="button" aria-label="Janela 1: Terminal C#">
-                        <div class="win-bar"><span>PowerShell - YAHCW.Host.exe</span></div>
-                        <div class="win-content"><code>[NamedPipe] Conectado ao BrightTray<br>[DWM] RegisterThumbnail OK</code></div>
+                    <div class="screen-preview-content" id="screen-preview-content">
+                      <div class="window-thumb-card active">
+                        <div class="window-thumb-header">
+                          <span class="window-dot red"></span>
+                          <span class="window-dot yellow"></span>
+                          <span class="window-dot green"></span>
+                          <span class="window-title-text">Visual Studio &middot; YAHCW.sln</span>
+                        </div>
+                        <div class="window-thumb-preview win-code"></div>
                       </div>
-                      <div class="sim-window-tile" id="win-tile-2" tabindex="0" role="button" aria-label="Janela 2: Compilador C#">
-                        <div class="win-bar"><span>Build Output - Release x64</span></div>
-                        <div class="win-content"><code>Compilação concluída sem erros.</code></div>
-                      </div>
-                    </div>
-
-                    <!-- Overlay DWM Overview -->
-                    <div class="sim-overview-overlay" id="sim-dwm-overview" hidden>
-                      <div class="overview-header">
-                        <span>VISÃO GERAL DWM &middot; SELECIONE UMA JANELA</span>
-                        <button type="button" class="overview-close-btn" id="btn-close-overview">&times;</button>
-                      </div>
-                      <div class="overview-grid">
-                        <div class="overview-thumb" data-select-win="1" tabindex="0" role="button">
-                          <span>Terminal</span>
+                      <div class="window-thumb-card">
+                        <div class="window-thumb-header">
+                          <span class="window-dot red"></span>
+                          <span class="window-dot yellow"></span>
+                          <span class="window-dot green"></span>
+                          <span class="window-title-text">Terminal PowerShell</span>
                         </div>
-                        <div class="overview-thumb" data-select-win="2" tabindex="0" role="button">
-                          <span>Compiler</span>
-                        </div>
-                        <div class="overview-thumb" data-select-win="3" tabindex="0" role="button">
-                          <span>Browser</span>
-                        </div>
-                        <div class="overview-thumb" data-select-win="4" tabindex="0" role="button">
-                          <span>Spotify</span>
-                        </div>
+                        <div class="window-thumb-preview win-terminal"></div>
                       </div>
                     </div>
                   </div>
-                </div>
 
-                <!-- Painel de Controles -->
-                <div class="sim-controls-panel">
-                  <div class="control-row">
-                    <button type="button" class="sim-action-btn" id="btn-toggle-overview">
-                      <span>Alternar Visão Geral (Canto Superior Esquerdo)</span>
-                    </button>
-                  </div>
+                  <div class="sim-controls-panel">
+                    <div class="control-row">
+                      <button type="button" class="sim-action-btn" id="btn-toggle-overview">
+                        <span>Alternar Visão Geral (Canto Superior Esquerdo)</span>
+                      </button>
+                    </div>
 
-                  <div class="control-row">
-                    <label for="sim-brightness-slider" class="control-label">
-                      <span>Filtro de Brilho Simulado (Ilustração VCP 0x10):</span>
-                      <strong id="brightness-val-display">85%</strong>
-                    </label>
-                    <input type="range" id="sim-brightness-slider" min="10" max="100" value="85" step="1" class="sim-range-input">
-                  </div>
+                    <div class="control-row">
+                      <label for="sim-brightness-slider" class="control-label">
+                        <span>Filtro de Brilho Simulado (Ilustração VCP 0x10):</span>
+                        <strong id="brightness-val-display">85%</strong>
+                      </label>
+                      <input type="range" id="sim-brightness-slider" min="10" max="100" value="85" step="1" class="sim-range-input">
+                    </div>
 
-                  <div class="control-row">
-                    <label for="sim-audio-select" class="control-label">
-                      <span>Dispositivo de Áudio Padrão (COM IPolicyConfig):</span>
-                    </label>
-                    <select id="sim-audio-select" class="sim-select-input">
-                      <option value="Speakers">Speakers (Realtek High Definition Audio)</option>
-                      <option value="Headphones">Headphones (SteelSeries Arctis Nova)</option>
-                      <option value="DisplayPort">Digital Audio (DisplayPort Monitor 1)</option>
-                    </select>
-                  </div>
+                    <div class="control-row">
+                      <label for="sim-audio-select" class="control-label">
+                        <span>Dispositivo de Áudio Padrão (COM IPolicyConfig):</span>
+                      </label>
+                      <select id="sim-audio-select" class="sim-select-input">
+                        <option value="Speakers">Speakers (Realtek High Definition Audio)</option>
+                        <option value="Headphones">Headphones (SteelSeries Arctis Nova)</option>
+                        <option value="DisplayPort">Digital Audio (DisplayPort Monitor 1)</option>
+                      </select>
+                    </div>
 
-                  <div class="sim-log-output" id="yahcw-log-box" aria-live="polite">
-                    <code>Pronto. Mova o controle de brilho ou acione o canto para testar.</code>
+                    <div class="sim-log-output" id="yahcw-log-box" aria-live="polite">
+                      <code>Pronto. Mova o controle de brilho ou acione o canto para testar.</code>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -634,17 +927,18 @@
         </div>
       </section>
 
-      <!-- SALA 02: TUYA SMART LAMPS -->
+
+      <!-- SALA 04: TUYA SMART LAMPS -->
       <section class="project-room" id="room-tuya" data-room-id="tuya" hidden aria-labelledby="room-title-tuya">
         <div class="room-inner">
           <header class="room-header">
             <div class="room-nav-controls">
               <button type="button" class="room-back-btn" data-action="exit-room">
                 <span class="back-arrow" aria-hidden="true">&larr;</span>
-                <span>Voltar ao Atlas <kbd>Esc</kbd></span>
+                <span>Voltar ao início <kbd>Esc</kbd></span>
               </button>
               <div class="room-indexer">
-                <span class="room-index-num">02 / 06</span>
+                <span class="room-index-num">04 / 07</span>
                 <span class="room-index-name">tuya-smart-lamps</span>
               </div>
               <div class="room-stepper">
@@ -671,7 +965,7 @@
                     <strong>Sessão TCP Persistente Local:</strong> Conexão de socket criptografado com a porta 6668 do dispositivo na LAN, mantendo independência da internet pública.
                   </li>
                   <li>
-                    <strong>Fallback OpenAPI em Nuvem:</strong> Se o watchdog local detectar timeouts consecutivos, as requisições são roteadas para a OpenAPI da Tuya na nuvem, com telemetria via Server-Sent Events (SSE) na UI.
+                    <strong>Fallback OpenAPI em Nuvem:</strong> Se o watchdog local detectar timeouts consecutivos, as requisições são roteadas para a OpenAPI da Tuya na nuvem, com telemetria via Server-Sent Events (SSE).
                   </li>
                   <li>
                     <strong>Latências Simuladas para Demonstração:</strong> Os valores de latência exibidos no teste (4ms local vs 148ms nuvem) são <em>valores simulados</em> para ilustrar o contraste entre rota LAN direta e trânsito externo de nuvem.
@@ -741,17 +1035,18 @@
         </div>
       </section>
 
-      <!-- SALA 03: GAMING FPS HUD -->
+
+      <!-- SALA 05: GAMING FPS HUD -->
       <section class="project-room" id="room-gaming" data-room-id="gaming" hidden aria-labelledby="room-title-gaming">
         <div class="room-inner">
           <header class="room-header">
             <div class="room-nav-controls">
               <button type="button" class="room-back-btn" data-action="exit-room">
                 <span class="back-arrow" aria-hidden="true">&larr;</span>
-                <span>Voltar ao Atlas <kbd>Esc</kbd></span>
+                <span>Voltar ao início <kbd>Esc</kbd></span>
               </button>
               <div class="room-indexer">
-                <span class="room-index-num">03 / 06</span>
+                <span class="room-index-num">05 / 07</span>
                 <span class="room-index-name">gaming-fps-hud</span>
               </div>
               <div class="room-stepper">
@@ -833,9 +1128,9 @@
 
                   <div class="frametime-chart-container">
                     <svg class="frametime-svg" id="gaming-chart-svg" viewBox="0 0 400 120" width="100%" height="120">
-                      <line x1="0" y1="50" x2="400" y2="50" stroke="#0e1218" stroke-width="0.7" stroke-dasharray="3 3" stroke-opacity="0.25" />
-                      <line x1="0" y1="80" x2="400" y2="80" stroke="#0e1218" stroke-width="0.7" stroke-dasharray="3 3" stroke-opacity="0.25" />
-                      <path id="gaming-chart-line" d="M 0 50 L 400 50" fill="none" stroke="#0e1218" stroke-width="1.8" />
+                      <line x1="0" y1="50" x2="400" y2="50" stroke="#173F46" stroke-width="0.7" stroke-dasharray="3 3" stroke-opacity="0.5" />
+                      <line x1="0" y1="80" x2="400" y2="80" stroke="#173F46" stroke-width="0.7" stroke-dasharray="3 3" stroke-opacity="0.5" />
+                      <path id="gaming-chart-line" d="M 0 50 L 400 50" fill="none" stroke="#618F83" stroke-width="1.8" />
                     </svg>
                   </div>
 
@@ -860,17 +1155,18 @@
         </div>
       </section>
 
-      <!-- SALA 04: PYTHON CURSO -->
+
+      <!-- SALA 06: PYTHON CURSO -->
       <section class="project-room" id="room-python" data-room-id="python" hidden aria-labelledby="room-title-python">
         <div class="room-inner">
           <header class="room-header">
             <div class="room-nav-controls">
               <button type="button" class="room-back-btn" data-action="exit-room">
                 <span class="back-arrow" aria-hidden="true">&larr;</span>
-                <span>Voltar ao Atlas <kbd>Esc</kbd></span>
+                <span>Voltar ao início <kbd>Esc</kbd></span>
               </button>
               <div class="room-indexer">
-                <span class="room-index-num">04 / 06</span>
+                <span class="room-index-num">06 / 07</span>
                 <span class="room-index-name">python-curso</span>
               </div>
               <div class="room-stepper">
@@ -969,22 +1265,23 @@
         </div>
       </section>
 
-      <!-- SALA 05: SPOTIFAST NEON THEME -->
+
+      <!-- SALA 07: SPOTIFAST NEON THEME -->
       <section class="project-room" id="room-spotifast" data-room-id="spotifast" hidden aria-labelledby="room-title-spotifast">
         <div class="room-inner">
           <header class="room-header">
             <div class="room-nav-controls">
               <button type="button" class="room-back-btn" data-action="exit-room">
                 <span class="back-arrow" aria-hidden="true">&larr;</span>
-                <span>Voltar ao Atlas <kbd>Esc</kbd></span>
+                <span>Voltar ao início <kbd>Esc</kbd></span>
               </button>
               <div class="room-indexer">
-                <span class="room-index-num">05 / 06</span>
+                <span class="room-index-num">07 / 07</span>
                 <span class="room-index-name">spotifast-neon-theme</span>
               </div>
               <div class="room-stepper">
                 <button type="button" class="room-step-btn" data-step-dir="prev" aria-label="Projeto anterior: python-curso">&larr; Anterior</button>
-                <button type="button" class="room-step-btn" data-step-dir="next" aria-label="Próximo projeto: Laboratório Financeiro">Próximo &rarr;</button>
+                <button type="button" class="room-step-btn" data-step-dir="next" aria-label="Próximo projeto: cota-aberta">Próximo &rarr;</button>
               </div>
             </div>
           </header>
@@ -1028,25 +1325,25 @@
                 </div>
 
                 <div class="spotifast-tokens-grid">
-                  <div class="token-tile" data-copy-hex="#0f141c" tabindex="0" role="button" aria-label="Token bg-base #0f141c">
-                    <span class="token-color-chip" style="background-color: #0f141c;"></span>
+                  <div class="token-tile" data-copy-hex="#101A1D" tabindex="0" role="button" aria-label="Token bg-base #101A1D">
+                    <span class="token-color-chip" style="background-color: #101A1D;"></span>
                     <span class="token-name">bg-base</span>
-                    <code class="token-hex">#0f141c</code>
+                    <code class="token-hex">#101A1D</code>
                   </div>
-                  <div class="token-tile" data-copy-hex="#18202c" tabindex="0" role="button" aria-label="Token surface-card #18202c">
-                    <span class="token-color-chip" style="background-color: #18202c;"></span>
+                  <div class="token-tile" data-copy-hex="#162428" tabindex="0" role="button" aria-label="Token surface-card #162428">
+                    <span class="token-color-chip" style="background-color: #162428;"></span>
                     <span class="token-name">surface-card</span>
-                    <code class="token-hex">#18202c</code>
+                    <code class="token-hex">#162428</code>
                   </div>
-                  <div class="token-tile" data-copy-hex="#f4f6f8" tabindex="0" role="button" aria-label="Token text-primary #f4f6f8">
-                    <span class="token-color-chip" style="background-color: #f4f6f8;"></span>
+                  <div class="token-tile" data-copy-hex="#F1EEE5" tabindex="0" role="button" aria-label="Token text-primary #F1EEE5">
+                    <span class="token-color-chip" style="background-color: #F1EEE5;"></span>
                     <span class="token-name">text-primary</span>
-                    <code class="token-hex">#f4f6f8</code>
+                    <code class="token-hex">#F1EEE5</code>
                   </div>
-                  <div class="token-tile" data-copy-hex="#d9432e" tabindex="0" role="button" aria-label="Token accent-coral #d9432e">
-                    <span class="token-color-chip" style="background-color: #d9432e;"></span>
-                    <span class="token-name">accent-coral</span>
-                    <code class="token-hex">#d9432e</code>
+                  <div class="token-tile" data-copy-hex="#C79A60" tabindex="0" role="button" aria-label="Token accent-amber #C79A60">
+                    <span class="token-color-chip" style="background-color: #C79A60;"></span>
+                    <span class="token-name">accent-amber</span>
+                    <code class="token-hex">#C79A60</code>
                   </div>
                 </div>
 
@@ -1059,310 +1356,16 @@
         </div>
       </section>
 
-      <!-- SALA 06: LABORATÓRIO FINANCEIRO (SIMULADOR DE JUROS COMPOSTOS) -->
-      <section class="project-room" id="room-financeiro" data-room-id="financeiro" hidden aria-labelledby="room-title-financeiro">
-        <div class="room-inner">
-          <header class="room-header">
-            <div class="room-nav-controls">
-              <button type="button" class="room-back-btn" data-action="exit-room">
-                <span class="back-arrow" aria-hidden="true">&larr;</span>
-                <span>Voltar ao Atlas <kbd>Esc</kbd></span>
-              </button>
-              <div class="room-indexer">
-                <span class="room-index-num">06 / 06</span>
-                <span class="room-index-name">Dados &amp; Finanças / Laboratório</span>
-              </div>
-              <div class="room-stepper">
-                <button type="button" class="room-step-btn" data-step-dir="prev" aria-label="Projeto anterior: spotifast-neon-theme">&larr; Anterior</button>
-                <button type="button" class="room-step-btn" data-step-dir="next" aria-label="Próximo projeto: Cota Aberta">Próximo &rarr;</button>
-              </div>
-            </div>
-          </header>
-
-          <div class="room-body-split">
-            <!-- Rigor Quantitativo -->
-            <div class="room-content-pane">
-              <div class="room-meta-badge">
-                <span>Modelagem Quantitativa &middot; Taxa Efetiva &middot; Gráfico Reativo SVG</span>
-              </div>
-              <h2 class="room-heading" id="room-title-financeiro">Simulador Quantitativo de Juros Compostos</h2>
-              <p class="room-lead">
-                Motor matemático determinístico preservado em <code>finance-lab.js</code> que calcula a evolução temporal de patrimônio a partir da taxa anual efetiva convertida em taxa mensal equivalente, com aportes regulares no final de cada período.
-              </p>
-
-              <div class="tech-deep-dive">
-                <h3 class="dive-title">Fundamentos Matemáticos &amp; Validação</h3>
-                <ul class="dive-list">
-                  <li>
-                    <strong>Conversão de Taxa Efetiva:</strong> Aplica a relação estrita <code>taxaMensal = (1 + taxaAnual / 100) ** (1 / 12) - 1</code>, calculada com precisão via <code>Math.expm1(Math.log1p(annualRatePercent / 100) / 12)</code>.
-                  </li>
-                  <li>
-                    <strong>Validação Estrita &amp; Preservação de Estado:</strong> Entradas inválidas, nulas ou prazos fracionários (ex: 12.5 meses) são rejeitados pelo validador, preservando intacto o gráfico da simulação anterior e exibindo mensagem diagnóstica.
-                  </li>
-                  <li>
-                    <strong>Propósito Acadêmico:</strong> Instrumento desenvolvido para estudos quantitativos de trajetórias de capitalização, sem constituir recomendação financeira.
-                  </li>
-                </ul>
-              </div>
-
-              <!-- Callout de Descoberta: Cota Aberta -->
-              <div class="cota-discovery-callout">
-                <div class="cota-discovery-head">
-                  <span class="cota-discovery-tag">Dados &amp; Finanças &middot; Novo Projeto</span>
-                  <h3 class="cota-discovery-title">Cota Aberta &mdash; Análise de Fundos CVM</h3>
-                </div>
-                <p class="cota-discovery-desc">
-                  Ferramenta analítica em Python 3.11+, SQLite e Streamlit para exploração de cotas e patrimônio líquido de fundos com dados sintéticos. Cálculo de retornos percentuais, cotas normalizadas e diagnóstico de dados ausentes.
-                </p>
-                <button type="button" class="cota-discovery-btn" data-jump-room="cota" aria-label="Explorar sala do projeto Cota Aberta">
-                  <span>Conhecer Cota Aberta</span>
-                  <span aria-hidden="true">&rarr;</span>
-                </button>
-              </div>
-            </div>
-
-            <!-- Calculadora e Gráfico Reativo SVG -->
-            <div class="room-demo-pane">
-              <div class="demo-card-frame">
-                <div class="demo-card-header">
-                  <span class="demo-status-pill">CALCULADORA DE CAPITALIZAÇÃO</span>
-                  <span class="demo-caption">Motor finance-lab.js</span>
-                </div>
-
-                <div class="finance-calculator-body">
-                  <!-- Formulário de Parâmetros -->
-                  <form id="finance-calc-form" class="finance-form" novalidate>
-                    <div class="form-grid-2x2">
-                      <div class="form-field">
-                        <label for="fin-initial-amount">Valor inicial (R$):</label>
-                        <input type="number" id="fin-initial-amount" name="initialAmount" value="1000" min="0" max="1000000" step="100" required class="fin-input">
-                      </div>
-
-                      <div class="form-field">
-                        <label for="fin-monthly-contrib">Aporte mensal (R$):</label>
-                        <input type="number" id="fin-monthly-contrib" name="monthlyContribution" value="100" min="0" max="10000" step="50" required class="fin-input">
-                      </div>
-
-                      <div class="form-field">
-                        <label for="fin-annual-rate">Taxa anual efetiva (% a.a.):</label>
-                        <input type="number" id="fin-annual-rate" name="annualRatePercent" value="12" min="0" max="30" step="0.5" required class="fin-input">
-                      </div>
-
-                      <div class="form-field">
-                        <label for="fin-months">Prazo em meses (inteiro):</label>
-                        <input type="number" id="fin-months" name="months" value="12" min="1" max="360" step="1" required class="fin-input">
-                      </div>
-                    </div>
-
-                    <div class="form-submit-row">
-                      <button type="submit" class="sim-action-btn primary" id="btn-run-finance">
-                        <span>Recalcular Simulação</span>
-                      </button>
-                    </div>
-                  </form>
-
-                  <!-- Caixa de Erro Diagnóstica (Preserva Gráfico) -->
-                  <div id="finance-error-box" class="finance-error-message" hidden role="alert"></div>
-
-                  <!-- Resumo dos Resultados -->
-                  <div class="finance-results-strip">
-                    <div class="result-box">
-                      <span class="res-label">Saldo Final</span>
-                      <strong class="res-value" id="res-final-balance">R$ 2.384,65</strong>
-                    </div>
-                    <div class="result-box">
-                      <span class="res-label">Total Aportado</span>
-                      <strong class="res-value" id="res-total-contributed">R$ 2.200,00</strong>
-                    </div>
-                    <div class="result-box">
-                      <span class="res-label">Juros Acumulados</span>
-                      <strong class="res-value accent" id="res-total-interest">R$ 184,65</strong>
-                    </div>
-                    <div class="result-box">
-                      <span class="res-label">Taxa Mensal Equivalente</span>
-                      <strong class="res-value" id="res-monthly-rate">0,95% a.m.</strong>
-                    </div>
-                  </div>
-
-                  <!-- Gráfico SVG Reativo -->
-                  <div class="finance-chart-wrapper">
-                    <svg id="finance-chart-svg" class="finance-svg" viewBox="0 0 500 200" width="100%" height="200" aria-label="Gráfico de evolução patrimonial"></svg>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- SALA 07: COTA ABERTA (ANÁLISE DE FUNDOS CVM) -->
-      <section class="project-room" id="room-cota" data-room-id="cota" hidden aria-labelledby="room-title-cota">
-        <div class="room-inner">
-          <header class="room-header">
-            <div class="room-nav-controls">
-              <button type="button" class="room-back-btn" data-action="exit-room">
-                <span class="back-arrow" aria-hidden="true">&larr;</span>
-                <span>Voltar ao Atlas <kbd>Esc</kbd></span>
-              </button>
-              <div class="room-indexer">
-                <span class="room-index-num">Dados &amp; Finanças</span>
-                <span class="room-index-name">cota-aberta</span>
-              </div>
-              <div class="room-stepper">
-                <button type="button" class="room-step-btn" data-step-dir="prev" aria-label="Projeto anterior: Laboratório Financeiro">&larr; Anterior</button>
-                <button type="button" class="room-step-btn" data-step-dir="next" aria-label="Próximo projeto: YAHCW">Próximo &rarr;</button>
-              </div>
-            </div>
-          </header>
-
-          <div class="room-body-split">
-            <!-- Caso de Estudo e Arquitetura -->
-            <div class="room-content-pane">
-              <div class="room-meta-badge">
-                <span>Python 3.11+ &middot; SQLite &middot; Streamlit &middot; Pandas</span>
-              </div>
-              <h2 class="room-heading" id="room-title-cota">Cota Aberta &mdash; Análise de Fundos CVM</h2>
-              <p class="room-lead">
-                Aplicação analítica em Python para consulta, processamento e diagnóstico de séries temporais de cotas e patrimônio de fundos de investimento a partir dos informes diários públicos da CVM.
-              </p>
-
-              <div class="tech-deep-dive">
-                <h3 class="dive-title">Arquitetura de Dados &amp; Funcionalidades</h3>
-                <ul class="dive-list">
-                  <li>
-                    <strong>Pesquisa Parametrizada:</strong> Consulta por CNPJ e subclasse do fundo com filtro temporal customizado por data inicial e final.
-                  </li>
-                  <li>
-                    <strong>Cotas no período:</strong> Retorno calculado pelas cotas inicial e final e evolução da série normalizada em base 100, com as datas efetivamente usadas à vista.
-                  </li>
-                  <li>
-                    <strong>Patrimônio e fluxos:</strong> Patrimônio e cotistas no último informe, além de captações, resgates e fluxo líquido no período.
-                  </li>
-                  <li>
-                    <strong>Proveniência e Auditoria:</strong> Painel de integridade com diagnóstico de registros ausentes e exportação das séries filtradas em formato CSV.
-                  </li>
-                  <li>
-                    <strong>Importação:</strong> Arquivos mensais da CVM e CSV local, com origem registrada e preservação dos campos ausentes.
-                  </li>
-                </ul>
-              </div>
-
-              <div class="dossier-notice" style="margin-top: 20px;">
-                A demonstração do projeto usa dados <strong>sintéticos</strong>, identificados na interface. A importação da CVM permite explorar dados reais com os limites de cobertura à vista.
-              </div>
-
-              <div style="margin-top: 20px;">
-                <a href="https://github.com/arthurMPBBY/cota-aberta" class="dossier-link" target="_blank" rel="noopener noreferrer" style="font-size: 14px;">
-                  Abrir repositório no GitHub: github.com/arthurMPBBY/cota-aberta &nearr;
-                </a>
-                <p style="font-size: 12px; color: var(--color-ink-muted); margin-top: 6px;">
-                  Código, metodologia e instruções para executar o aplicativo estão no repositório.
-                </p>
-              </div>
-            </div>
-
-            <!-- Visualização Editorial do Pipeline de Dados SVG -->
-            <div class="room-demo-pane">
-              <div class="demo-card-frame">
-                <div class="demo-card-header">
-                  <span class="demo-status-pill">FLUXO DE DADOS &middot; PIPELINE</span>
-                  <span class="demo-caption">CVM / CSV &rarr; SQLite &rarr; Streamlit</span>
-                </div>
-
-                <div class="cota-diagram-container">
-                  <svg class="cota-flow-svg" viewBox="0 0 540 380" aria-label="Diagrama do fluxo de dados do Cota Aberta">
-                    <defs>
-                      <linearGradient id="cotaBoxGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stop-color="#121b24" />
-                        <stop offset="100%" stop-color="#0c131a" />
-                      </linearGradient>
-                      <linearGradient id="cotaAccentGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stop-color="#deb87b" />
-                        <stop offset="100%" stop-color="#d9432e" />
-                      </linearGradient>
-                      <filter id="cotaDrop" x="-10%" y="-10%" width="120%" height="120%">
-                        <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.4" />
-                      </filter>
-                    </defs>
-
-                    <!-- Bloco 1: Fontes de Dados -->
-                    <g transform="translate(20, 24)" filter="url(#cotaDrop)">
-                      <rect width="230" height="76" rx="4" fill="url(#cotaBoxGrad)" stroke="#223344" stroke-width="1.2" />
-                      <line x1="0" y1="0" x2="4" y2="76" stroke="#deb87b" stroke-width="4" />
-                      <text x="16" y="24" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700" fill="#deb87b">01. INGESTÃO DE DADOS</text>
-                      <text x="16" y="44" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="#e6edf3">Informes Diários CVM</text>
-                      <text x="16" y="62" font-family="'JetBrains Mono', monospace" font-size="10" fill="#8b949e">Carga mensal + CSV local</text>
-                    </g>
-
-                    <!-- Bloco 2: Validação & Integridade -->
-                    <g transform="translate(290, 24)" filter="url(#cotaDrop)">
-                      <rect width="230" height="76" rx="4" fill="url(#cotaBoxGrad)" stroke="#223344" stroke-width="1.2" />
-                      <line x1="0" y1="0" x2="4" y2="76" stroke="#d9432e" stroke-width="4" />
-                      <text x="16" y="24" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700" fill="#d9432e">02. LIMPEZA &amp; VALIDAÇÃO</text>
-                      <text x="16" y="44" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="#e6edf3">Python 3.11+ / Pandas</text>
-                      <text x="16" y="62" font-family="'JetBrains Mono', monospace" font-size="10" fill="#8b949e">Campos nulos preservados</text>
-                    </g>
-
-                    <!-- Conector 1 -> 2 -->
-                    <line x1="250" y1="62" x2="288" y2="62" stroke="#deb87b" stroke-width="1.6" stroke-dasharray="3 3" />
-                    <polygon points="288,59 294,62 288,65" fill="#deb87b" />
-
-                    <!-- Conector 2 -> 3 -->
-                    <path d="M 405 100 L 405 136 L 270 136 L 270 154" fill="none" stroke="#d9432e" stroke-width="1.6" stroke-dasharray="3 3" />
-                    <polygon points="267,154 270,160 273,154" fill="#d9432e" />
-
-                    <!-- Bloco 3: Persistência SQLite -->
-                    <g transform="translate(130, 160)" filter="url(#cotaDrop)">
-                      <rect width="280" height="78" rx="4" fill="url(#cotaBoxGrad)" stroke="#223344" stroke-width="1.2" />
-                      <line x1="0" y1="0" x2="4" y2="78" stroke="#388bfd" stroke-width="4" />
-                      <text x="16" y="24" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700" fill="#58a6ff">03. PERSISTÊNCIA ESTRUTURADA</text>
-                      <text x="16" y="44" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="#e6edf3">Banco local SQLite</text>
-                      <text x="16" y="63" font-family="'JetBrains Mono', monospace" font-size="10" fill="#8b949e">CNPJ + subclasse + data</text>
-                    </g>
-
-                    <!-- Conector 3 -> 4 -->
-                    <line x1="270" y1="238" x2="270" y2="268" stroke="#58a6ff" stroke-width="1.6" stroke-dasharray="3 3" />
-                    <polygon points="267,268 270,274 273,268" fill="#58a6ff" />
-
-                    <!-- Bloco 4: Camada de Análise & Interface Streamlit -->
-                    <g transform="translate(20, 274)" filter="url(#cotaDrop)">
-                      <rect width="500" height="88" rx="4" fill="url(#cotaBoxGrad)" stroke="#223344" stroke-width="1.2" />
-                      <line x1="0" y1="0" x2="4" y2="88" stroke="url(#cotaAccentGrad)" stroke-width="4" />
-                      <text x="16" y="22" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700" fill="#deb87b">04. CAMADA ANALÍTICA &middot; STREAMLIT</text>
-                      <g transform="translate(16, 32)">
-                        <rect x="0" y="0" width="148" height="46" rx="3" fill="#16222f" stroke="#2a3f55" stroke-width="0.8" />
-                        <text x="8" y="18" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="700" fill="#deb87b">RETORNO DA COTA</text>
-                        <text x="8" y="34" font-family="'JetBrains Mono', monospace" font-size="9" fill="#c3cecd">Cota / Cota&#8320; - 1</text>
-                      </g>
-                      <g transform="translate(172, 32)">
-                        <rect x="0" y="0" width="148" height="46" rx="3" fill="#16222f" stroke="#2a3f55" stroke-width="0.8" />
-                        <text x="8" y="18" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="700" fill="#deb87b">COTA NORMALIZADA</text>
-                        <text x="8" y="34" font-family="'JetBrains Mono', monospace" font-size="9" fill="#c3cecd">Série Base 100</text>
-                      </g>
-                      <g transform="translate(328, 32)">
-                        <rect x="0" y="0" width="156" height="46" rx="3" fill="#16222f" stroke="#2a3f55" stroke-width="0.8" />
-                        <text x="8" y="18" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="700" fill="#d9432e">PL &middot; COTISTAS &middot; CSV</text>
-                        <text x="8" y="34" font-family="'JetBrains Mono', monospace" font-size="9" fill="#c3cecd">Auditoria de Dados</text>
-                      </g>
-                    </g>
-                  </svg>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
     </div> <!-- /#rooms-container -->
 
 
-    <!-- 3. MODO LEITURA DIRETA (LINEAR PARA RECRUTADORES & HR) -->
+    <!-- 4. MODO LEITURA DIRETA (LINEAR PARA RECRUTADORES & HR) -->
     <div id="direct-reading-view" class="direct-reading-view" hidden>
       <div class="direct-reading-container">
         <div class="direct-return-bar">
           <button type="button" class="direct-return-btn" id="btn-return-to-atlas">
             <span aria-hidden="true">&larr;</span>
-            <span>Retornar ao Atlas Espacial</span>
+            <span>Retornar ao Início</span>
           </button>
           <span class="direct-view-badge">Modo Editorial Texto &middot; Completo</span>
         </div>
@@ -1401,10 +1404,21 @@
               <a href="https://github.com/arthurMPBBY/cota-aberta" class="dossier-link" target="_blank" rel="noopener noreferrer">github.com/arthurMPBBY/cota-aberta &nearr;</a>
             </div>
 
-            <!-- Projeto 2 -->
+            <!-- Projeto 2: Laboratório Financeiro -->
+            <div class="dossier-project-item" id="dossier-item-financeiro">
+              <div class="dossier-proj-head">
+                <h3 class="dossier-proj-name">2. Laboratório Financeiro (Simulador de Juros Compostos)</h3>
+                <span class="dossier-proj-tech">Modelagem Quantitativa &middot; Taxa Efetiva &middot; finance-lab.js</span>
+              </div>
+              <p class="dossier-proj-desc">
+                Implementação matemática determinística de capitalização composta: conversão da taxa anual efetiva em taxa mensal equivalente com aportes regulares no final do período. Caso canônico de validação: R$ 1.000 iniciais + R$ 100/mês a 12% a.a. efetiva por 12 meses resulta em R$ 2.384,65 finais (R$ 2.200 aportes, R$ 184,65 juros).
+              </p>
+            </div>
+
+            <!-- Projeto 3: YAHCW -->
             <div class="dossier-project-item">
               <div class="dossier-proj-head">
-                <h3 class="dossier-proj-name">2. YAHCW (Yet Another Hot Corners for Windows)</h3>
+                <h3 class="dossier-proj-name">3. YAHCW (Yet Another Hot Corners for Windows)</h3>
                 <span class="dossier-proj-tech">C# &middot; .NET &middot; WinForms &middot; Win32 &middot; DWM</span>
               </div>
               <p class="dossier-proj-desc">
@@ -1416,10 +1430,10 @@
               <a href="https://github.com/arthurMPBBY/YAHCW" class="dossier-link" target="_blank" rel="noopener noreferrer">github.com/arthurMPBBY/YAHCW &nearr;</a>
             </div>
 
-            <!-- Projeto 3 -->
+            <!-- Projeto 4: tuya-smart-lamps -->
             <div class="dossier-project-item">
               <div class="dossier-proj-head">
-                <h3 class="dossier-proj-name">3. tuya-smart-lamps</h3>
+                <h3 class="dossier-proj-name">4. tuya-smart-lamps</h3>
                 <span class="dossier-proj-tech">Python 3 &middot; Sockets TCP &middot; OpenAPI Tuya</span>
               </div>
               <p class="dossier-proj-desc">
@@ -1428,10 +1442,10 @@
               <a href="https://github.com/arthurMPBBY/tuya-smart-lamps" class="dossier-link" target="_blank" rel="noopener noreferrer">github.com/arthurMPBBY/tuya-smart-lamps &nearr;</a>
             </div>
 
-            <!-- Projeto 4 -->
+            <!-- Projeto 5: gaming-fps-hud -->
             <div class="dossier-project-item">
               <div class="dossier-proj-head">
-                <h3 class="dossier-proj-name">4. gaming-fps-hud</h3>
+                <h3 class="dossier-proj-name">5. gaming-fps-hud</h3>
                 <span class="dossier-proj-tech">C++17 &middot; Vulkan API &middot; Qt 6 Quick &middot; KDE Wayland</span>
               </div>
               <p class="dossier-proj-desc">
@@ -1440,18 +1454,7 @@
               <a href="https://github.com/arthurMPBBY/gaming-fps-hud" class="dossier-link" target="_blank" rel="noopener noreferrer">github.com/arthurMPBBY/gaming-fps-hud &nearr;</a>
             </div>
 
-            <!-- Projeto 5 -->
-            <div class="dossier-project-item">
-              <div class="dossier-proj-head">
-                <h3 class="dossier-proj-name">5. Laboratório Financeiro (Simulador de Juros Compostos)</h3>
-                <span class="dossier-proj-tech">Modelagem Quantitativa &middot; Taxa Efetiva &middot; finance-lab.js</span>
-              </div>
-              <p class="dossier-proj-desc">
-                Implementação matemática determinística de capitalização composta: conversão da taxa anual efetiva em taxa mensal equivalente com aportes regulares no final do período. Caso canônico de validação: R$ 1.000 iniciais + R$ 100/mês a 12% a.a. efetiva por 12 meses resulta em R$ 2.384,65 finais (R$ 2.200 aportes, R$ 184,65 juros).
-              </p>
-            </div>
-
-            <!-- Projeto 6 e 7 -->
+            <!-- Projetos 6 e 7 -->
             <div class="dossier-project-item">
               <div class="dossier-proj-head">
                 <h3 class="dossier-proj-name">6. python-curso &amp; 7. spotifast-neon-theme</h3>
@@ -1466,7 +1469,7 @@
           <footer class="dossier-footer">
             <button type="button" class="direct-return-btn" id="btn-return-to-atlas-footer">
               <span aria-hidden="true">&larr;</span>
-              <span>Retornar ao Atlas Espacial</span>
+              <span>Retornar ao Início</span>
             </button>
           </footer>
         </article>
@@ -1474,33 +1477,18 @@
     </div>
 
 
-    <!-- 4. CONTROLES ESSENCIAIS DO ATLAS (DOCK DISCRETO) -->
-    <div id="atlas-dock" class="atlas-dock" role="toolbar" aria-label="Controles essenciais do sistema">
-      <div class="dock-inner">
-        <button type="button" class="dock-tool-btn" id="btn-dock-overview" title="Restaurar visão geral do Atlas" aria-label="Restaurar visão geral do Atlas">
-          <span class="tool-glyph" aria-hidden="true">&odot;</span>
-          <span class="tool-text">Visão geral</span>
-        </button>
-        <button type="button" class="dock-tool-btn motion-toggle" id="motion-toggle-btn" aria-pressed="false" title="Pausar animações de câmera e partículas" aria-label="Pausar animações de câmera e partículas">
-          <span class="motion-icon" aria-hidden="true"></span>
-          <span class="tool-text" id="motion-status-label">Pausar animações</span>
-        </button>
-      </div>
-    </div>
-
-
-    <!-- 6. OVERLAYS MODAIS (ÍNDICE, SOBRE, CONTATO) COM GESTÃO DE FOCO -->
+    <!-- 5. OVERLAYS MODAIS (ÍNDICE, SOBRE, CONTATO) COM GESTÃO DE FOCO -->
     <div id="overlays-container" class="overlays-container" aria-hidden="true">
 
       <!-- MODAL ÍNDICE -->
       <dialog class="atlas-overlay-modal" id="overlay-indice" aria-labelledby="modal-title-indice">
         <div class="modal-dialog-card">
           <div class="modal-card-header">
-            <h2 class="modal-title" id="modal-title-indice">Índice do Atlas Espacial</h2>
+            <h2 class="modal-title" id="modal-title-indice">Índice de Projetos</h2>
             <button type="button" class="modal-close-btn" data-action="close-overlay" aria-label="Fechar índice">&times;</button>
           </div>
           <div class="modal-card-body">
-            <p class="modal-subtitle">Selecione um plano arquitetural para navegar imediatamente à sala:</p>
+            <p class="modal-subtitle">Selecione um projeto para navegar diretamente à sua sala:</p>
             <ul class="indice-links-list">
               <li>
                 <button type="button" class="indice-jump-btn" data-jump-room="cota">
@@ -1513,8 +1501,18 @@
                 </button>
               </li>
               <li>
-                <button type="button" class="indice-jump-btn" data-jump-room="yahcw">
+                <button type="button" class="indice-jump-btn" data-jump-room="financeiro">
                   <span class="idx-badge">02</span>
+                  <div class="idx-text">
+                    <strong>Laboratório Financeiro &mdash; Juros Compostos</strong>
+                    <small>Modelagem Quantitativa &middot; Taxa Efetiva &middot; Gráfico Reativo</small>
+                  </div>
+                  <span class="idx-arrow">&rarr;</span>
+                </button>
+              </li>
+              <li>
+                <button type="button" class="indice-jump-btn" data-jump-room="yahcw">
+                  <span class="idx-badge">03</span>
                   <div class="idx-text">
                     <strong>YAHCW &mdash; Hot Corners, Brilho &amp; Áudio</strong>
                     <small>C# &middot; Win32 &middot; DWM &middot; NamedPipe</small>
@@ -1524,7 +1522,7 @@
               </li>
               <li>
                 <button type="button" class="indice-jump-btn" data-jump-room="tuya">
-                  <span class="idx-badge">03</span>
+                  <span class="idx-badge">04</span>
                   <div class="idx-text">
                     <strong>tuya-smart-lamps &mdash; Automação de Rede</strong>
                     <small>Python 3 &middot; Sockets TCP &middot; OpenAPI Fallback</small>
@@ -1534,7 +1532,7 @@
               </li>
               <li>
                 <button type="button" class="indice-jump-btn" data-jump-room="gaming">
-                  <span class="idx-badge">04</span>
+                  <span class="idx-badge">05</span>
                   <div class="idx-text">
                     <strong>gaming-fps-hud &mdash; Telemetria Vulkan</strong>
                     <small>C++17 &middot; vkQueuePresentKHR &middot; Qt 6 Wayland</small>
@@ -1544,7 +1542,7 @@
               </li>
               <li>
                 <button type="button" class="indice-jump-btn" data-jump-room="python">
-                  <span class="idx-badge">05</span>
+                  <span class="idx-badge">06</span>
                   <div class="idx-text">
                     <strong>python-curso &mdash; Algoritmos &amp; Coleções</strong>
                     <small>Python 3 &middot; Fundamentos Acadêmicos UFABC</small>
@@ -1554,20 +1552,10 @@
               </li>
               <li>
                 <button type="button" class="indice-jump-btn" data-jump-room="spotifast">
-                  <span class="idx-badge">06</span>
+                  <span class="idx-badge">07</span>
                   <div class="idx-text">
                     <strong>spotifast-neon-theme &mdash; Design Tokens</strong>
                     <small>JSON &middot; Paleta de Cores Estruturada</small>
-                  </div>
-                  <span class="idx-arrow">&rarr;</span>
-                </button>
-              </li>
-              <li>
-                <button type="button" class="indice-jump-btn" data-jump-room="financeiro">
-                  <span class="idx-badge">07</span>
-                  <div class="idx-text">
-                    <strong>Laboratório Financeiro &mdash; Juros Compostos</strong>
-                    <small>Modelagem Quantitativa &middot; Taxa Efetiva &middot; SVG</small>
                   </div>
                   <span class="idx-arrow">&rarr;</span>
                 </button>
@@ -1586,12 +1574,11 @@
           </div>
           <div class="modal-card-body">
             <div class="profile-summary">
-            <p><strong>Edição Giroscópio:</strong> Câmara óptica procedural inspirada na cinemática do Steam Deck, com gimbals concêntricos e calibrações em âmbar luminoso sobre grafite profundo. <a href="/2/" style="color:var(--color-vermilion);text-decoration:none;font-weight:700;">Versão anterior preservada em papel claro (/2/) &rarr;</a></p>
               <p>
                 Graduando na <strong>Universidade Federal do ABC (UFABC &mdash; 2º período)</strong>.
               </p>
               <p>
-                Estudo programação de sistemas em <strong>C#, Python e C++</strong>, com foco em interfaces nativas de sistema operacional, comunicação em rede e modelagem quantitativa.
+                Estudo programação de sistemas em <strong>Python, C# e C++</strong>, com foco em ferramentas de análise de dados, interfaces nativas de sistema operacional e modelagem quantitativa.
               </p>
               <p>
                 <strong>Objetivo Profissional:</strong> Busco meu <em>primeiro estágio</em> em <strong>análise de dados ou mercado financeiro</strong>. Valorizo demonstração prática por meio de projetos abertos no GitHub e matemática aplicada verificável.
@@ -1642,41 +1629,49 @@
 
     </div> <!-- /#overlays-container -->
 
+
+    <!-- 6. CONTROLE PERSISTENTE ÚNICO DE PAUSA DE ANIMAÇÕES (>=44x44) -->
+    <!-- Sem dock longo, sem 'Visão geral' redundante -->
+    <button type="button" class="motion-floating-btn" id="motion-toggle-btn" aria-pressed="false" aria-label="Pausar animações de câmera e partículas" title="Pausar animações">
+      <span class="motion-icon" aria-hidden="true"></span>
+      <span class="sr-only" id="motion-status-label">Pausar animações</span>
+    </button>
+
   </main>
 
   <!-- DEGRADAÇÃO SEM JAVASCRIPT (FALLBACK SEMÂNTICO) -->
   <noscript>
     <style>
       body.mode-atlas { height: auto; overflow: auto; }
-      .atlas-header, main, .skip-link { display: none; }
-      .no-js-banner { min-height: 100vh; }
-      .no-js-inner a { overflow-wrap: anywhere; }
+      .spatial-viewport, .hero-section { display: block; height: auto; min-height: auto; }
+      .kaleidoscope-canvas { display: none; }
+      .narrative-journey { display: block; }
     </style>
     <div class="no-js-banner">
       <div class="no-js-inner">
-        <h2>Arthur Kadri de Oliveira &mdash; Portfólio de Sistemas &amp; Dados</h2>
+        <h2>Arthur Kadri de Oliveira &mdash; Portfólio de Sistemas, Dados &amp; Finanças</h2>
         <p>JavaScript está desativado no seu navegador. Todo o conteúdo factual, projetos e canais de contato estão disponíveis integralmente abaixo:</p>
         <hr>
         <h3>Projetos no GitHub</h3>
         <ul>
-          <li><strong>cota-aberta:</strong> Análise de séries históricas de cotas e patrimônio líquido de fundos com dados públicos da CVM em Python 3.11+, SQLite e Streamlit. Cálculo de retorno percentual, cota normalizada e diagnóstico de dados ausentes com dados sintéticos. <a href="https://github.com/arthurMPBBY/cota-aberta">Repositório GitHub</a></li>
+          <li><strong>cota-aberta:</strong> Análise de séries históricas de cotas e patrimônio de fundos com dados da CVM em Python 3.11+, SQLite e Streamlit. Cálculo de retorno percentual, cota normalizada e diagnóstico de dados ausentes. <a href="https://github.com/arthurMPBBY/cota-aberta">Repositório GitHub</a></li>
+          <li><strong>Laboratório Financeiro:</strong> Exemplo de juros compostos: R$ 1.000 iniciais e R$ 100/mês a 12% ao ano por 12 meses resultam em R$ 2.384,65 finais (R$ 2.200 aportes, R$ 184,65 juros). Simulação educacional com taxa anual efetiva, convertida em taxa mensal equivalente; aportes no fim do mês.</li>
           <li><strong>YAHCW:</strong> Utilitário C# Win32/DWM para hot corners, NamedPipe com BrightTray e IPolicyConfig. <a href="https://github.com/arthurMPBBY/YAHCW">Repositório GitHub</a></li>
           <li><strong>tuya-smart-lamps:</strong> Automação Python via socket TCP local e contingência OpenAPI em nuvem. <a href="https://github.com/arthurMPBBY/tuya-smart-lamps">Repositório GitHub</a></li>
           <li><strong>gaming-fps-hud:</strong> Camada C++17 Vulkan vkQueuePresentKHR e HUD Wayland Qt 6. <a href="https://github.com/arthurMPBBY/gaming-fps-hud">Repositório GitHub</a></li>
           <li><strong>python-curso:</strong> Exercícios e fundamentos de algoritmos na UFABC. <a href="https://github.com/arthurMPBBY/python-curso">Repositório GitHub</a></li>
           <li><strong>spotifast-neon-theme:</strong> Tokens JSON de cores e design. <a href="https://github.com/arthurMPBBY/spotifast-neon-theme">Repositório GitHub</a></li>
-          <li><strong>Laboratório Financeiro:</strong> Exemplo estático de juros compostos: R$ 1.000 iniciais e R$ 100 ao final de cada mês, a 12% ao ano por 12 meses, resultam em R$ 2.384,65. São R$ 2.200,00 em aportes e R$ 184,65 em juros. Simulação educacional, sem recomendação de investimento.</li>
         </ul>
         <hr>
-        <p>Contato: <a href="mailto:arthurkadri968@gmail.com">arthurkadri968@gmail.com</a> | Estudante UFABC (2º período) em busca de primeiro estágio em mercado financeiro ou dados.</p>
+        <p>Contato: <a href="mailto:arthurkadri968@gmail.com">arthurkadri968@gmail.com</a> | Estudante UFABC (2º período) em busca de primeiro estágio em análise de dados ou mercado financeiro.</p>
       </div>
     </div>
   </noscript>
 
   <!-- SCRIPTS DO SISTEMA -->
-  <script src="kaleidoscope.js?v=20261101-iris-zoom-v2"></script>
+  <script src="kaleidoscope.js?v=20261103-monumental-v1"></script>
   <script src="finance-lab.js"></script>
   <script src="cloud-morph.js"></script>
-  <script src="script.js?v=20261101-iris-zoom-v2"></script>
+  <script src="script.js?v=20261103-monumental-v1"></script>
 </body>
 </html>
