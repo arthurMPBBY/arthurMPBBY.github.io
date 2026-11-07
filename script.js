@@ -320,7 +320,7 @@
   // Aplicação da transformação espacial (origem 0,0 do mundo no centro da tela)
   function applyWorldTransform() {
     if (!spatialWorld) return;
-    if (window.innerWidth <= 600) {
+    if (window.innerWidth <= 900) {
       spatialWorld.style.transform = 'none';
       document.documentElement.style.setProperty('--atlas-scale', '1');
       return;
@@ -420,7 +420,7 @@
 
   function drawAtlasCanvas() {
     if (!atlasCanvas || !atlasCanvasContext) return;
-    if (window.innerWidth <= 600) return;
+    if (window.innerWidth <= 900) return;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     const viewportWidth = window.innerWidth || 1200;
     const viewportHeight = window.innerHeight || 800;
@@ -624,7 +624,7 @@
 
   // Ponteiro no Atlas: geometria e câmera permanecem fixas/estacionárias
   function handlePointerDown(pointerEvent) {
-    if (window.innerWidth <= 600) return;
+    if (window.innerWidth <= 900) return;
     if (pointerEvent.button !== 0 && pointerEvent.pointerType === 'mouse') {
       return;
     }
@@ -670,7 +670,7 @@
 
   // Roda do mouse no Atlas: age EXCLUSIVAMENTE na profundidade da íris
   function handleWheelZoom(wheelEvent) {
-    if (window.innerWidth <= 600) {
+    if (window.innerWidth <= 900) {
       return; // Permite rolagem nativa da galeria no layout móvel
     }
     // Permite Ctrl+wheel e Cmd+wheel para zoom nativo do navegador
@@ -1970,7 +1970,7 @@
     window.addEventListener('resize', function () {
       updateHeaderHeightVar();
       if (!currentActiveRoom && !isDirectReadingActive) {
-        if (window.innerWidth > 600) {
+        if (window.innerWidth > 900) {
           const fitZoom = calculateOverviewFit();
           cameraState.targetZoom = fitZoom;
           if (isMotionReduced) {

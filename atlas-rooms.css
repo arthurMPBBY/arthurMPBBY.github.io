@@ -1,0 +1,27 @@
+/* Reading surfaces share the atlas materials; demos keep their own colours. */
+.project-room { background:#071114; color:#f1ebdc; }
+.room-inner { max-width:1320px; margin:0 auto; padding:32px 48px 72px; }
+.room-header { border-bottom:1px solid #d2b78040; padding-bottom:24px; margin-bottom:40px; }
+.room-back-btn,.room-step-btn { min-height:44px; border-radius:3px; border-color:#d2b78040; color:#f1ebdc; background:#101f23; }
+.room-meta-badge { color:#d2b780; border-color:#d2b78040; background:transparent; letter-spacing:.1em; }
+.room-heading { font-family:Georgia,'Times New Roman',serif; font-weight:normal; font-size:clamp(30px,3.2vw,50px); line-height:1.12; letter-spacing:-.025em; color:#f1ebdc; }
+.room-lead { font-size:17px; line-height:1.8; color:#c1c8c3; }
+.room-body-split { gap:56px; }
+.room-content-pane h3 { color:#d2b780; }
+.room-links-bar { border-top:1px solid #d2b78035; padding-top:22px; }
+.modal-dialog-card { background:#0b191d; border:1px solid #d2b78045; border-radius:5px; color:#f1ebdc; }
+.modal-card-header { border-bottom-color:#d2b78035; }
+.modal-title { font-family:Georgia,serif; font-weight:normal; font-size:28px; }
+.modal-close-btn { min-width:44px; min-height:44px; color:#d2b780; }
+.contact-channel-item,.indice-jump-btn { border-color:#d2b78030; background:#0d2023; }
+.direct-reading-view { background:#081316; }
+.direct-reading-container { max-width:1000px; margin:0 auto; padding:110px 48px 70px; }
+.dossier-document { background:#0c1b1f; border:1px solid #d2b78035; border-radius:4px; box-shadow:none; padding:48px; }
+.dossier-name { font-family:Georgia,serif; font-weight:normal; font-size:clamp(32px,4vw,48px); }
+.dossier-section-title { color:#d2b780; border-bottom-color:#d2b78040; }
+.dossier-proj-name { color:#f1ebdc; }
+.dossier-proj-desc { color:#c1c8c3; line-height:1.8; }
+.dossier-proj-tech { color:#d2b780; }
+.dossier-link { overflow-wrap:anywhere; }
+@media(max-width:900px) { .room-inner { padding:24px 20px 60px!important; } .room-body-split { gap:26px; } .room-nav-controls { flex-wrap:wrap; gap:14px; } .room-indexer { min-width:0; } .room-stepper { flex-wrap:wrap; } .direct-reading-container { padding:105px 14px 40px; } .dossier-document { padding:24px 18px; } .room-lead { font-size:15px; } }
+@media print { .direct-reading-container,.dossier-document { padding:0; border:0; background:white; color:black; } }

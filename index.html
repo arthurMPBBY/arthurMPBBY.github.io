@@ -18,10 +18,26 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css?v=20261101-iris-zoom-v2">
   <link rel="stylesheet" href="optics-interface.css?v=20261101-iris-zoom-v2">
+  <link rel="stylesheet" href="atlas-renewal.css?v=20261107">
+  <link rel="stylesheet" href="atlas-sculptures.css?v=20261107">
+  <link rel="stylesheet" href="atlas-mobile.css?v=20261107">
+  <link rel="stylesheet" href="atlas-rooms.css?v=20261107">
+  <link rel="stylesheet" href="atlas-cartography.css?v=20261107">
+  <link rel="stylesheet" href="atlas-catalogue.css?v=20261107">
+  <link rel="stylesheet" href="atlas-integration.css?v=20261107">
+  <link rel="stylesheet" href="iris-volume.css?v=20261107-volume-v1">
 </head>
 <body class="mode-atlas">
   <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
-
+  <header class="renewal-topbar" aria-label="Navegação do portfólio">
+    <a class="renewal-brand" id="brand-home-link" href="#atlas" aria-label="Arthur Kadri — voltar ao atlas"><span class="renewal-brand-mark" aria-hidden="true">✳</span><span>AK <span class="renewal-brand-divider">/</span> ATLAS</span></a>
+    <span class="renewal-edition">SISTEMAS, DADOS &amp; EXPERIMENTOS</span>
+    <nav class="renewal-navigation" aria-label="Explorar o atlas">
+      <button type="button" id="btn-direct-reading" aria-pressed="false">Leitura direta</button>
+      <button type="button" data-atlas-search aria-haspopup="dialog"><span>Buscar projetos</span><kbd aria-hidden="true">⌘ K</kbd></button>
+    </nav>
+  </header>
+  <div class="renewal-signature" aria-hidden="true"><span>PORTFÓLIO INDEPENDENTE</span><span>Uma cartografia de ideias em construção.</span></div>
   <!-- Região de anúncios de acessibilidade -->
   <div id="live-announcer" class="sr-only" aria-live="polite"></div>
 
@@ -51,6 +67,7 @@
                 <span class="contact-dot" aria-hidden="true"></span>
                 <span>Contato direto</span>
               </button>
+              <button type="button" class="renewal-featured" data-jump-room="cota"><span class="renewal-featured-kicker">EM DESTAQUE</span><span>Cota Aberta <span aria-hidden="true">↗</span></span></button>
             </div>
             <div class="meridian-hint" aria-hidden="true">
               <span class="hint-pulse"></span>
@@ -479,7 +496,7 @@
                 <span>Voltar ao Atlas <kbd>Esc</kbd></span>
               </button>
               <div class="room-indexer">
-                <span class="room-index-num">01 / 06</span>
+                <span class="room-index-num">01 / 07</span>
                 <span class="room-index-name">YAHCW (Hot Corners)</span>
               </div>
               <div class="room-stepper">
@@ -644,7 +661,7 @@
                 <span>Voltar ao Atlas <kbd>Esc</kbd></span>
               </button>
               <div class="room-indexer">
-                <span class="room-index-num">02 / 06</span>
+                <span class="room-index-num">02 / 07</span>
                 <span class="room-index-name">tuya-smart-lamps</span>
               </div>
               <div class="room-stepper">
@@ -751,7 +768,7 @@
                 <span>Voltar ao Atlas <kbd>Esc</kbd></span>
               </button>
               <div class="room-indexer">
-                <span class="room-index-num">03 / 06</span>
+                <span class="room-index-num">03 / 07</span>
                 <span class="room-index-name">gaming-fps-hud</span>
               </div>
               <div class="room-stepper">
@@ -870,7 +887,7 @@
                 <span>Voltar ao Atlas <kbd>Esc</kbd></span>
               </button>
               <div class="room-indexer">
-                <span class="room-index-num">04 / 06</span>
+                <span class="room-index-num">04 / 07</span>
                 <span class="room-index-name">python-curso</span>
               </div>
               <div class="room-stepper">
@@ -979,7 +996,7 @@
                 <span>Voltar ao Atlas <kbd>Esc</kbd></span>
               </button>
               <div class="room-indexer">
-                <span class="room-index-num">05 / 06</span>
+                <span class="room-index-num">05 / 07</span>
                 <span class="room-index-name">spotifast-neon-theme</span>
               </div>
               <div class="room-stepper">
@@ -1069,7 +1086,7 @@
                 <span>Voltar ao Atlas <kbd>Esc</kbd></span>
               </button>
               <div class="room-indexer">
-                <span class="room-index-num">06 / 06</span>
+                <span class="room-index-num">06 / 07</span>
                 <span class="room-index-name">Dados &amp; Finanças / Laboratório</span>
               </div>
               <div class="room-stepper">
@@ -1647,8 +1664,8 @@
   <!-- DEGRADAÇÃO SEM JAVASCRIPT (FALLBACK SEMÂNTICO) -->
   <noscript>
     <style>
-      body.mode-atlas { height: auto; overflow: auto; }
-      .atlas-header, main, .skip-link { display: none; }
+      body.mode-atlas { position:static; height:auto; min-height:100vh; overflow:auto; }
+      .atlas-header, .renewal-topbar, .renewal-signature, main, .skip-link { display:none!important; }
       .no-js-banner { min-height: 100vh; }
       .no-js-inner a { overflow-wrap: anywhere; }
     </style>
@@ -1674,9 +1691,11 @@
   </noscript>
 
   <!-- SCRIPTS DO SISTEMA -->
-  <script src="kaleidoscope.js?v=20261101-iris-zoom-v2"></script>
+  <script src="kaleidoscope.js?v=20261107-volume-v1"></script>
   <script src="finance-lab.js"></script>
   <script src="cloud-morph.js"></script>
   <script src="script.js?v=20261101-iris-zoom-v2"></script>
+  <script src="atlas-cartography.js?v=20261107"></script>
+  <script src="atlas-search.js?v=20261107"></script>
 </body>
 </html>

@@ -1,0 +1,18 @@
+/* Volume is rendered by the mesh/shaders; these rules only stop the UI
+   from covering it with two overlapping dark radial masks. */
+html[data-view="atlas"] #kaleidoscope-canvas {
+  mix-blend-mode:normal!important;
+  filter:none!important;
+  opacity:1!important;
+}
+.spatial-meridian::before { display:none!important; }
+.meridian-typography::before {
+  inset:-12px -8%;
+  background:radial-gradient(ellipse,#030a0d66 0%,#030a0d22 48%,transparent 76%);
+}
+@media(max-width:900px) {
+  .meridian-typography { background:transparent!important; }
+}
+/* Keep scene suspension/fallback visibility under ownership of the renderer. */
+html[data-view="room"] #kaleidoscope-canvas,
+html[data-view="direct"] #kaleidoscope-canvas { opacity:0!important;visibility:hidden!important; }

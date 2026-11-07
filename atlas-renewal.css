@@ -1,0 +1,882 @@
+/* ==========================================================================
+   ARTHUR KADRI — ATLAS ESPACIAL DE SISTEMAS
+   Revitalização Visual Desktop: Observatório Cartográfico Editorial
+   Paleta Nobre: Petróleo Profundo, Marfim Editorial & Latão Usinado
+   Superfície: Explore (Preservação da Íris Central, 6 Estações e Coordenadas)
+   ========================================================================== */
+
+/* ==========================================================================
+   1. TOKENS GLOBAIS DE SISTEMA (OBSERVATÓRIO CARTOGRÁFICO)
+   ========================================================================== */
+:root {
+  /* Base Petróleo Cartográfico & Quase-Preto Nobre */
+  --obs-petroleum-void: #030608;
+  --obs-petroleum-deep: #050a0e;
+  --obs-petroleum-base: #081118;
+  --obs-petroleum-surface: #0c1720;
+  --obs-petroleum-elevated: #111e29;
+  --obs-petroleum-overlay: rgba(6, 12, 17, 0.94);
+
+  /* Marfim & Papel Antigo Editorial (Alta legibilidade sem ofuscar) */
+  --obs-ivory-bright: #faf7f0;
+  --obs-ivory-primary: #f2ece0;
+  --obs-ivory-secondary: #d3cbbe;
+  --obs-ivory-muted: #9c9586;
+  --obs-ivory-faint: #6e685c;
+
+  /* Latão Usinado & Ouro Antigo Calibrado */
+  --obs-brass-luminous: #f3d79b;
+  --obs-brass-primary: #cca558;
+  --obs-brass-burnished: #9e7a36;
+  --obs-brass-dark: #634b1c;
+  --obs-brass-glow: rgba(204, 165, 88, 0.24);
+  --obs-brass-glow-soft: rgba(204, 165, 88, 0.10);
+
+  /* Acentos de Telemetria e Azimute */
+  --obs-accent-vermilion: #d04f32;
+  --obs-accent-sage: #53806f;
+  --obs-accent-cyan: #3d798a;
+
+  /* Linhas Técnicas e Hairlines */
+  --obs-hairline-brass: 1px solid rgba(204, 165, 88, 0.28);
+  --obs-hairline-brass-faint: 1px solid rgba(204, 165, 88, 0.14);
+  --obs-hairline-ivory: 1px solid rgba(242, 236, 224, 0.12);
+  --obs-line-datum: 1px dashed rgba(204, 165, 88, 0.32);
+
+  /* Sombras Materiais Sem Vidro SaaS */
+  --obs-shadow-cartouche: 0 16px 36px rgba(0, 0, 0, 0.70), 0 2px 6px rgba(0, 0, 0, 0.50);
+  --obs-shadow-sculpture: 0 22px 48px rgba(2, 6, 9, 0.82), 0 4px 14px rgba(2, 6, 9, 0.65);
+  --obs-shadow-meridian: 0 0 60px rgba(204, 165, 88, 0.12);
+
+  /* Tipografia Editorial */
+  --obs-font-display: 'Plus Jakarta Sans', Georgia, 'Times New Roman', serif;
+  --obs-font-reading: 'DM Sans', system-ui, -apple-system, sans-serif;
+  --obs-font-tech: 'JetBrains Mono', 'SF Mono', monospace;
+
+  /* Compatibilidade com Tokens Legados */
+  --color-paper: var(--obs-petroleum-deep);
+  --color-paper-light: var(--obs-petroleum-base);
+  --color-paper-subtle: var(--obs-petroleum-surface);
+  --color-paper-card: var(--obs-petroleum-surface);
+  --color-ink-primary: var(--obs-ivory-primary);
+  --color-ink-secondary: var(--obs-ivory-secondary);
+  --color-ink-muted: var(--obs-ivory-muted);
+  --color-vermilion: var(--obs-brass-primary);
+  --color-vermilion-hover: var(--obs-brass-luminous);
+  --color-vermilion-glow: var(--obs-brass-glow);
+  --border-vermilion: var(--obs-hairline-brass);
+}
+
+/* ==========================================================================
+   2. SUPERFÍCIE DA VIEWPORT ESPACIAL (ATMOSFERA DO OBSERVATÓRIO)
+   ========================================================================== */
+html, body.mode-atlas {
+  background-color: var(--obs-petroleum-void);
+  background-image:
+    radial-gradient(circle at 50% 50%, #0d1a24 0%, #071017 45%, #030608 85%);
+  color: var(--obs-ivory-primary);
+}
+
+.spatial-viewport {
+  background: radial-gradient(circle at 50% 50%, rgba(13, 26, 36, 0.6) 0%, rgba(4, 8, 12, 0.98) 72%);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Linha sutil de retícula cartográfica técnica de fundo */
+.spatial-viewport::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, rgba(204, 165, 88, 0.025) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(204, 165, 88, 0.025) 1px, transparent 1px);
+  background-size: 80px 80px;
+  background-position: center center;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Camada de vinheta de observatório celestial */
+.spatial-viewport::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 50%, transparent 40%, rgba(3, 6, 8, 0.75) 80%, #020507 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Preservação e Realce da Íris Generativa */
+.kaleidoscope-canvas {
+  filter: contrast(1.08) brightness(0.96) saturate(1.15);
+  mix-blend-mode: screen;
+  opacity: 0.92;
+}
+
+.atlas-canvas {
+  filter: contrast(1.04);
+  opacity: 0.88;
+}
+
+/* ==========================================================================
+   3. ESCOPO DESKTOP (>= 901px) — COMPOSIÇÃO CARTOGRÁFICA DE ALTA DIGNIDADE
+   ========================================================================== */
+@media (min-width: 901px) {
+
+  /* ------------------------------------------------------------------------
+     3.1 TOPBAR EDITORIAL E ASSINATURA (.renewal-topbar & .renewal-signature)
+     ------------------------------------------------------------------------ */
+  .renewal-topbar {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 850;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 7px 22px;
+    background-color: var(--obs-petroleum-surface);
+    border: var(--obs-hairline-brass);
+    border-radius: 2px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(243, 215, 155, 0.15);
+    font-family: var(--obs-font-tech);
+    font-size: 11px;
+    letter-spacing: 1.2px;
+    color: var(--obs-ivory-secondary);
+    text-transform: uppercase;
+    user-select: none;
+    pointer-events: auto;
+  }
+
+  .renewal-topbar::before,
+  .renewal-topbar::after {
+    content: "+";
+    color: var(--obs-brass-primary);
+    font-weight: 700;
+    opacity: 0.7;
+  }
+
+  .renewal-topbar-title {
+    color: var(--obs-ivory-bright);
+    font-weight: 600;
+  }
+
+  .renewal-topbar-datum {
+    color: var(--obs-brass-primary);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .renewal-topbar-datum::before {
+    content: "";
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background-color: var(--obs-brass-primary);
+    box-shadow: 0 0 8px var(--obs-brass-primary);
+  }
+
+  .renewal-signature {
+    position: fixed;
+    left: 28px;
+    bottom: 24px;
+    z-index: 850;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px 16px;
+    background-color: var(--obs-petroleum-surface);
+    border: var(--obs-hairline-brass-faint);
+    border-left: 2px solid var(--obs-brass-primary);
+    box-shadow: var(--obs-shadow-cartouche);
+    font-family: var(--obs-font-tech);
+    pointer-events: auto;
+  }
+
+  .renewal-signature-title {
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--obs-ivory-bright);
+    text-transform: uppercase;
+  }
+
+  .renewal-signature-subtitle {
+    font-size: 10px;
+    letter-spacing: 0.6px;
+    color: var(--obs-ivory-muted);
+  }
+
+  .renewal-signature-coords {
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    color: var(--obs-brass-primary);
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* ------------------------------------------------------------------------
+     3.2 MERIDIANO DE ORIGEM (0, 0) — CENTRO ASTRONÔMICO & EDITORIAL
+     ------------------------------------------------------------------------ */
+  .spatial-meridian {
+    position: absolute;
+    left: 0;
+    top: 0;
+    transform: translate(-50%, -50%);
+    width: 560px;
+    max-width: 92vw;
+    text-align: center;
+    pointer-events: none;
+    z-index: 10;
+    isolation: isolate;
+  }
+
+  /* Halo de profundo contraste óptico sobre a íris */
+  .spatial-meridian::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 620px;
+    height: 620px;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle,
+      rgba(3, 7, 10, 0.94) 0%,
+      rgba(5, 11, 15, 0.88) 32%,
+      rgba(7, 15, 21, 0.62) 58%,
+      rgba(7, 15, 21, 0) 80%
+    );
+    pointer-events: none;
+    z-index: -1;
+    box-shadow: var(--obs-shadow-meridian);
+  }
+
+  /* Astrolábio / Anéis Concêntricos Cartográficos Técnicos */
+  .meridian-rings {
+    display: block !important; /* Revive sobre a supressão do optics com alta elegância */
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 480px;
+    height: 480px;
+    transform: translate(-50%, -50%);
+    border: 1px solid rgba(204, 165, 88, 0.16);
+    border-radius: 50%;
+    pointer-events: none;
+    box-shadow: inset 0 0 24px rgba(204, 165, 88, 0.05);
+  }
+
+  .meridian-rings::before {
+    content: "";
+    position: absolute;
+    inset: 48px;
+    border: 1px dashed rgba(204, 165, 88, 0.18);
+    border-radius: 50%;
+  }
+
+  .meridian-rings::after {
+    content: "";
+    position: absolute;
+    inset: 110px;
+    border: 1px solid rgba(242, 236, 224, 0.10);
+    border-radius: 50%;
+  }
+
+  /* Retícula de Visada e Eixos Cardeais */
+  .meridian-crosshair {
+    display: block !important;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 220px;
+    height: 220px;
+    transform: translate(-50%, -50%);
+    border: 1px solid rgba(204, 165, 88, 0.22);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .meridian-crosshair::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: -24px;
+    bottom: -24px;
+    width: 1px;
+    transform: translateX(-50%);
+    background: linear-gradient(
+      to bottom,
+      rgba(204, 165, 88, 0) 0%,
+      rgba(204, 165, 88, 0.45) 20%,
+      rgba(204, 165, 88, 0.70) 50%,
+      rgba(204, 165, 88, 0.45) 80%,
+      rgba(204, 165, 88, 0) 100%
+    );
+  }
+
+  .meridian-crosshair::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: -24px;
+    right: -24px;
+    height: 1px;
+    transform: translateY(-50%);
+    background: linear-gradient(
+      to right,
+      rgba(204, 165, 88, 0) 0%,
+      rgba(204, 165, 88, 0.45) 20%,
+      rgba(204, 165, 88, 0.70) 50%,
+      rgba(204, 165, 88, 0.45) 80%,
+      rgba(204, 165, 88, 0) 100%
+    );
+  }
+
+  /* Vetores Cartográficos de Azimute (Guias sutis conectando o centro às estações) */
+  .meridian-vectors {
+    display: block !important;
+    position: absolute;
+    inset: -380px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .meridian-vectors .vector-line {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    height: 1px;
+    transform-origin: 0 0;
+    background: linear-gradient(to right, rgba(204, 165, 88, 0.35) 0%, rgba(204, 165, 88, 0.08) 75%, transparent 100%);
+    pointer-events: none;
+  }
+
+  /* Tipografia do Meridiano Central */
+  .meridian-typography {
+    position: relative;
+    z-index: 5;
+    padding: 24px 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* Tag Acadêmica com Moldura de Latão Cartográfico */
+  .meridian-academic-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--obs-font-tech);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2.8px;
+    text-transform: uppercase;
+    color: var(--obs-brass-primary);
+    background: var(--obs-petroleum-base);
+    padding: 4px 14px;
+    border: var(--obs-hairline-brass);
+    border-radius: 2px;
+    margin-bottom: 14px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  }
+
+  .meridian-academic-tag::before {
+    content: "⦿";
+    font-size: 11px;
+    color: var(--obs-brass-luminous);
+  }
+
+  /* Título Expressivo e Nome Legível com Hierarquia Imponente */
+  .meridian-title {
+    font-family: var(--obs-font-display);
+    font-size: clamp(48px, 4.4vw, 64px);
+    font-weight: 800;
+    letter-spacing: -1.8px;
+    color: var(--obs-ivory-bright);
+    line-height: 1.02;
+    margin-bottom: 14px;
+    text-transform: none; /* Tipografia editorial com caixa alta e baixa requintada */
+    text-shadow:
+      0 3px 12px rgba(2, 6, 9, 0.95),
+      0 0 45px rgba(204, 165, 88, 0.35);
+    position: relative;
+  }
+
+  .meridian-title::after {
+    content: "";
+    display: block;
+    width: 64px;
+    height: 2px;
+    background: linear-gradient(to right, transparent, var(--obs-brass-primary), transparent);
+    margin: 10px auto 0 auto;
+  }
+
+  /* Lead Narrativo Editorial */
+  .meridian-lead {
+    font-family: var(--obs-font-reading);
+    font-size: 15.5px;
+    font-weight: 400;
+    color: var(--obs-ivory-secondary);
+    line-height: 1.6;
+    margin-bottom: 18px;
+    max-width: 460px;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.85);
+  }
+
+  .meridian-career {
+    display: block;
+    margin-top: 4px;
+    font-family: var(--obs-font-tech);
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    color: var(--obs-brass-luminous);
+    font-weight: 500;
+  }
+
+  /* Botão de Contato Nobre (Opaco Cartográfico, Sem Efeito Vidro SaaS) */
+  .meridian-contact-group {
+    margin: 4px 0 16px 0;
+    pointer-events: auto;
+  }
+
+  .meridian-contact-btn {
+    all: unset;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 22px;
+    background: var(--obs-petroleum-surface);
+    border: var(--obs-hairline-brass);
+    border-radius: 2px;
+    color: var(--obs-ivory-bright);
+    font-family: var(--obs-font-tech);
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(243, 215, 155, 0.12);
+    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .meridian-contact-btn:hover,
+  .meridian-contact-btn:focus-visible {
+    background: var(--obs-petroleum-elevated);
+    border-color: var(--obs-brass-luminous);
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(204, 165, 88, 0.28), inset 0 1px 0 rgba(243, 215, 155, 0.3);
+    outline: none;
+  }
+
+  .meridian-contact-btn .contact-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--obs-brass-primary);
+    box-shadow: 0 0 8px var(--obs-brass-primary);
+    transition: background-color 0.2s ease, transform 0.2s ease;
+  }
+
+  .meridian-contact-btn:hover .contact-dot {
+    background-color: var(--obs-brass-luminous);
+    transform: scale(1.25);
+  }
+
+  /* Instruções Técnicas Cartográficas */
+  .meridian-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--obs-font-tech);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.8px;
+    color: var(--obs-ivory-muted);
+    background-color: var(--obs-petroleum-base);
+    border: var(--obs-hairline-brass-faint);
+    padding: 6px 16px;
+    border-radius: 2px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
+    pointer-events: auto;
+  }
+
+  .hint-pulse {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background-color: var(--obs-brass-primary);
+    box-shadow: 0 0 6px var(--obs-brass-primary);
+    animation: obsPulse 2.4s infinite ease-in-out;
+  }
+
+  @keyframes obsPulse {
+    0%, 100% { opacity: 0.4; transform: scale(0.9); }
+    50% { opacity: 1; transform: scale(1.35); }
+  }
+
+  /* ------------------------------------------------------------------------
+     3.3 AS SEIS ESTAÇÕES CARTOGRÁFICAS (COORDENADAS E ARTEFATOS)
+     ------------------------------------------------------------------------ */
+  .spatial-artifact {
+    position: absolute;
+    left: var(--coord-x);
+    top: var(--coord-y);
+    transform: translate(-50%, -50%);
+    width: 390px;
+    pointer-events: auto;
+    z-index: 20;
+    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Coordenadas Preservadas */
+  .artifact-yahcw      { --coord-x: -440px; --coord-y: -220px; }
+  .artifact-tuya       { --coord-x: 440px;  --coord-y: -220px; }
+  .artifact-gaming     { --coord-x: -450px; --coord-y: 220px; }
+  .artifact-python     { --coord-x: 450px;  --coord-y: 220px; }
+  .artifact-spotifast  { --coord-x: 0px;    --coord-y: -350px; }
+  .artifact-financeiro { --coord-x: 0px;    --coord-y: 350px; }
+
+  .artifact-trigger {
+    all: unset;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    cursor: pointer;
+    border-radius: 2px;
+    position: relative;
+    outline: none;
+  }
+
+  .artifact-trigger:focus-visible {
+    outline: 2px solid var(--obs-brass-luminous);
+    outline-offset: 6px;
+  }
+
+  /* ------------------------------------------------------------------------
+     3.4 CARTOUCHE EDITORIAL OPACO E HIERARQUIA ELEGANTE (.object-editorial-label)
+     ------------------------------------------------------------------------ */
+  .object-editorial-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 14px;
+    pointer-events: none;
+    position: relative;
+    width: 100%;
+    max-width: 360px;
+    padding: 14px 20px 12px 20px;
+    background-color: var(--obs-petroleum-surface);
+    border: var(--obs-hairline-brass);
+    border-radius: 2px;
+    box-shadow: var(--obs-shadow-cartouche);
+    transition: border-color 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  /* Cantoneiras Técnicas Cartográficas (Tick Marks de Precisão) */
+  .object-editorial-label::before,
+  .object-editorial-label::after {
+    content: "";
+    position: absolute;
+    width: 7px;
+    height: 7px;
+    border-color: var(--obs-brass-primary);
+    pointer-events: none;
+    transition: all 0.22s ease;
+  }
+
+  .object-editorial-label::before {
+    top: -1px;
+    left: -1px;
+    border-top: 2px solid var(--obs-brass-primary);
+    border-left: 2px solid var(--obs-brass-primary);
+  }
+
+  .object-editorial-label::after {
+    bottom: -1px;
+    right: -1px;
+    border-bottom: 2px solid var(--obs-brass-primary);
+    border-right: 2px solid var(--obs-brass-primary);
+  }
+
+  .spatial-artifact:hover .object-editorial-label,
+  .spatial-artifact:focus-within .object-editorial-label,
+  .spatial-artifact.is-highlighted .object-editorial-label {
+    background-color: var(--obs-petroleum-elevated);
+    border-color: var(--obs-brass-luminous);
+    box-shadow: 0 20px 42px rgba(0, 0, 0, 0.82), 0 0 20px var(--obs-brass-glow);
+  }
+
+  .spatial-artifact:hover .object-editorial-label::before,
+  .spatial-artifact:hover .object-editorial-label::after {
+    width: 11px;
+    height: 11px;
+    border-color: var(--obs-brass-luminous);
+  }
+
+  /* Pré-título com Índice da Estação e Categoria */
+  .label-pre {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+    font-family: var(--obs-font-tech);
+  }
+
+  .label-index {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--obs-brass-primary);
+    letter-spacing: 1px;
+    padding: 1px 6px;
+    background: var(--obs-petroleum-base);
+    border: var(--obs-hairline-brass-faint);
+    border-radius: 2px;
+  }
+
+  .label-category {
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--obs-ivory-muted);
+  }
+
+  /* Título Humano Editorial de Alta Presença */
+  .label-title,
+  .label-human-title {
+    font-family: var(--obs-font-display);
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.4px;
+    color: var(--obs-ivory-bright);
+    line-height: 1.2;
+    margin-bottom: 4px;
+    transition: color 0.2s ease;
+  }
+
+  .spatial-artifact:hover .label-title {
+    color: #ffffff;
+    text-shadow: 0 0 16px rgba(243, 215, 155, 0.35);
+  }
+
+  /* Subtítulo Técnico do Sistema */
+  .label-tech-subtitle {
+    font-family: var(--obs-font-tech);
+    font-size: 11.5px;
+    font-weight: 500;
+    color: var(--obs-brass-primary);
+    letter-spacing: 0.5px;
+    line-height: 1.35;
+    margin-bottom: 4px;
+  }
+
+  /* Frase de Descoberta Editorial */
+  .label-discovery-phrase {
+    font-family: var(--obs-font-reading);
+    font-size: 12px;
+    color: var(--obs-ivory-secondary);
+    line-height: 1.4;
+    margin-top: 4px;
+    opacity: 0.88;
+    min-height: 18px;
+    transition: opacity 0.22s ease, transform 0.22s ease;
+  }
+
+  .spatial-artifact:hover .label-discovery-phrase {
+    opacity: 1;
+    color: var(--obs-ivory-bright);
+  }
+
+  /* CTA Técnico Cartográfico */
+  .label-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    padding-top: 6px;
+    border-top: 1px solid rgba(204, 165, 88, 0.16);
+    width: 100%;
+    justify-content: center;
+    font-family: var(--obs-font-tech);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--obs-brass-primary);
+    transition: all 0.2s ease;
+  }
+
+  .spatial-artifact:hover .label-cta {
+    color: var(--obs-brass-luminous);
+  }
+
+  .spatial-artifact:hover .label-cta .cta-arrow {
+    transform: translateX(4px);
+  }
+
+  .label-cta .cta-arrow {
+    transition: transform 0.2s ease;
+    color: var(--obs-brass-primary);
+  }
+
+  /* ------------------------------------------------------------------------
+     3.5 ESCULTURAS LIVRES EM SVG (GRAVURA MATERIAIS DE OBSERVATÓRIO)
+     ------------------------------------------------------------------------ */
+  .object-sculpture {
+    width: 100%;
+    height: 210px;
+    background: transparent;
+    position: relative;
+    overflow: visible;
+    filter: var(--obs-shadow-sculpture);
+    transition: filter 0.32s cubic-bezier(0.16, 1, 0.3, 1), transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .spatial-artifact:hover .object-sculpture {
+    filter: 0 28px 58px rgba(0, 0, 0, 0.92), 0 0 24px rgba(204, 165, 88, 0.25);
+  }
+
+  /* Refinamento das Peças Internas de cada Estação */
+  /* 01. YAHCW (Win32 & DWM) */
+  .artifact-yahcw .stacked-window {
+    transition: transform 0.26s ease, filter 0.26s ease;
+  }
+  .artifact-yahcw:hover .window-front {
+    filter: drop-shadow(0 0 10px rgba(204, 165, 88, 0.5));
+  }
+
+  /* 02. Tuya (Redes TCP & Luminaire) */
+  .artifact-tuya .sculpture-tuya circle[r="70"],
+  .artifact-tuya .sculpture-tuya circle[r="95"] {
+    stroke: var(--obs-brass-primary);
+    stroke-opacity: 0.32;
+  }
+  .artifact-tuya:hover .sculpture-tuya path[stroke="#d9432e"] {
+    stroke: var(--obs-brass-luminous);
+    filter: drop-shadow(0 0 6px rgba(204, 165, 88, 0.6));
+  }
+
+  /* 03. Gaming (Vulkan Frame Pacing) */
+  .artifact-gaming:hover .sculpture-gaming path[stroke="#0e1218"] {
+    stroke: var(--obs-brass-luminous);
+    stroke-width: 2.8px;
+  }
+
+  /* 04. Python (Algoritmos e Estruturas) */
+  .artifact-python:hover .sculpture-python line {
+    stroke: var(--obs-brass-primary);
+    stroke-opacity: 0.85;
+  }
+
+  /* 05. Spotifast (Milled Vinyl & Design Tokens) */
+  .artifact-spotifast:hover .sculpture-spotifast circle[cx="165"][r="85"] {
+    filter: drop-shadow(0 0 10px rgba(204, 165, 88, 0.45));
+  }
+
+  /* 06. Financeiro (Curva Exponencial e Aportes) */
+  .artifact-financeiro:hover .sculpture-financeiro path[stroke="#d9432e"] {
+    stroke: var(--obs-brass-luminous);
+    filter: drop-shadow(0 2px 8px rgba(204, 165, 88, 0.5));
+  }
+
+  /* ------------------------------------------------------------------------
+     3.6 DOCK DE CONTROLES DO SISTEMA (#atlas-dock)
+     ------------------------------------------------------------------------ */
+  .atlas-dock {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 850;
+    background-color: var(--obs-petroleum-surface);
+    border: var(--obs-hairline-brass);
+    border-radius: 2px;
+    padding: 6px 14px;
+    box-shadow: var(--obs-shadow-cartouche);
+  }
+
+  .dock-tool-btn {
+    all: unset;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    background: var(--obs-petroleum-base);
+    border: var(--obs-hairline-brass-faint);
+    border-radius: 2px;
+    color: var(--obs-ivory-secondary);
+    font-family: var(--obs-font-tech);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .dock-tool-btn:hover,
+  .dock-tool-btn:focus-visible {
+    background: var(--obs-petroleum-elevated);
+    border-color: var(--obs-brass-primary);
+    color: var(--obs-ivory-bright);
+    outline: none;
+  }
+
+  .dock-tool-btn .tool-glyph {
+    color: var(--obs-brass-primary);
+  }
+
+  /* ------------------------------------------------------------------------
+     3.7 OPTICS INTERFACE / VISUALIZADOR DE ÍRIS
+     ------------------------------------------------------------------------ */
+  .optics-view-toggle {
+    background: var(--obs-petroleum-surface) !important;
+    border: var(--obs-hairline-brass) !important;
+    border-radius: 2px !important;
+    color: var(--obs-ivory-primary) !important;
+    box-shadow: var(--obs-shadow-cartouche) !important;
+    font-family: var(--obs-font-tech) !important;
+    font-size: 11px !important;
+    letter-spacing: 0.8px !important;
+  }
+
+  .optics-view-toggle:hover {
+    border-color: var(--obs-brass-luminous) !important;
+    color: #ffffff !important;
+  }
+
+  .optics-adjustments {
+    background: var(--obs-petroleum-surface) !important;
+    border: var(--obs-hairline-brass) !important;
+    border-radius: 2px !important;
+    color: var(--obs-ivory-primary) !important;
+    box-shadow: var(--obs-shadow-cartouche) !important;
+  }
+}
+
+/* ==========================================================================
+   4. SUPORTE A PREFERÊNCIA DE MOVIMENTO REDUZIDO
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .spatial-artifact,
+  .object-editorial-label,
+  .object-sculpture,
+  .meridian-contact-btn {
+    transition: none !important;
+    animation: none !important;
+  }
+  .hint-pulse {
+    animation: none !important;
+  }
+}

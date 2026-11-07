@@ -301,7 +301,7 @@
       '  varyingTexCoord = attributeTexCoord;',
       '  vec3 cameraTarget = vec3(0.0, 0.0, -0.24);',
       '  vec3 defaultCamPos = vec3(0.24 + uniformPointer.x * 0.82, -0.28 + uniformPointer.y * 0.68, 2.68);',
-      '  vec3 cameraOrigin = defaultCamPos - (defaultCamPos - cameraTarget) * (uniformZoom * 0.58);',
+      '  vec3 cameraOrigin = defaultCamPos - (defaultCamPos - cameraTarget) * (uniformZoom * 0.52);',
       '  vec3 cameraForward = normalize(cameraTarget - cameraOrigin);',
       '  vec3 cameraRight = normalize(cross(cameraForward, vec3(0.0, 1.0, 0.0)));',
       '  vec3 cameraUp = cross(cameraRight, cameraForward);',
@@ -318,7 +318,7 @@
       '  gl_Position = vec4(',
       '    cameraCoordX * fovScale * (2.0 * minimumResolution / uniformResolution.x),',
       '    cameraCoordY * fovScale * (2.0 * minimumResolution / uniformResolution.y),',
-      '    cameraDepth * 0.2 - 0.1,',
+      '    cameraDepth * 0.2 - 0.04,',
       '    cameraDepth',
       '  );',
       '}'
@@ -358,12 +358,16 @@
       '  float ridgeIntensity = fiberSample.r;',
       '  float branchingFactor = fiberSample.g;',
       '  float mineralFactor = fiberSample.b;',
-      '  float microFiberGleam = pow(ridgeIntensity, 3.5);',
-      '  vec2 reliefOffset = vec2(0.0006, 0.0018);',
+      '  vec2 reliefOffset = vec2(0.0008, 0.0022);',
       '  float heightRight = texture2D(uniformFiberTexture, dynamicUv + vec2(reliefOffset.x, 0.0)).r;',
-      '  float heightUp = texture2D(uniformFiberTexture, dynamicUv + vec2(0.0, reliefOffset.y)).r;',
-      '  float gradientU = clamp((heightRight - ridgeIntensity) / reliefOffset.x * 0.018 / max(6.2831853 * radialDistance, 0.5), -0.30, 0.30);',
-      '  float gradientV = clamp((heightUp - ridgeIntensity) / reliefOffset.y * 0.018 / 1.60, -0.30, 0.30);',
+      '  float heightLeft  = texture2D(uniformFiberTexture, dynamicUv - vec2(reliefOffset.x, 0.0)).r;',
+      '  float heightUp    = texture2D(uniformFiberTexture, dynamicUv + vec2(0.0, reliefOffset.y)).r;',
+      '  float heightDown  = texture2D(uniformFiberTexture, dynamicUv - vec2(0.0, reliefOffset.y)).r;',
+      '  float reliefStrength = 0.036;',
+      '  float dHdU = (heightRight - heightLeft) * 0.5;',
+      '  float dHdV = (heightUp - heightDown) * 0.5;',
+      '  float gradientU = clamp(dHdU / reliefOffset.x * reliefStrength / max(6.2831853 * radialDistance, 0.60), -0.44, 0.44);',
+      '  float gradientV = clamp(dHdV / reliefOffset.y * reliefStrength / 1.60, -0.44, 0.44);',
       '  vec3 surfaceNormalVector = normalize(varyingNormal);',
       '  vec3 tangentAngular = normalize(vec3(-sin(angleRadian), cos(angleRadian), 0.0));',
       '  vec3 tangentRadial = normalize(cross(tangentAngular, surfaceNormalVector));',
@@ -387,25 +391,33 @@
       '  vec3 materialAlbedo = mix(stromalComposition, warmPigment, warmPresence);',
       '  float cryptDepthOcclusion = smoothstep(0.06, 0.48, ridgeIntensity);',
       '  materialAlbedo = mix(colAbyssal, materialAlbedo, 0.45 + 0.55 * cryptDepthOcclusion);',
-      '  vec3 keyLightVector = normalize(vec3(-0.65 + 0.04 * sin(uniformActiveTime * 0.35), 0.85 + 0.03 * cos(uniformActiveTime * 0.41), 1.25));',
-      '  vec3 fillLightVector = normalize(vec3(0.75 - 0.03 * cos(uniformActiveTime * 0.29), -0.50 + 0.03 * sin(uniformActiveTime * 0.37), 0.35));',
+      '  vec3 keyLightVector = normalize(vec3(-0.95 + 0.05 * sin(uniformActiveTime * 0.35), 0.78 + 0.04 * cos(uniformActiveTime * 0.41), 0.52));',
+      '  vec3 fillLightVector = normalize(vec3(0.85 - 0.04 * cos(uniformActiveTime * 0.29), -0.52 + 0.03 * sin(uniformActiveTime * 0.37), 0.28));',
       '  vec3 normalizedViewVector = normalize(varyingViewDirection);',
       '  vec3 specularHalfVector = normalize(keyLightVector + normalizedViewVector);',
-      '  float diffuseKey = max(dot(sculptedNormal, keyLightVector), 0.0);',
-      '  float diffuseFill = max(dot(sculptedNormal, fillLightVector), 0.0);',
+      '  float nDotKey = dot(sculptedNormal, keyLightVector);',
+      '  float diffuseKey = clamp((nDotKey + 0.14) / 1.14, 0.0, 1.0);',
+      '  float nDotFill = dot(sculptedNormal, fillLightVector);',
+      '  float diffuseFill = max(nDotFill, 0.0);',
       '  float throatOcclusion = smoothstep(-1.07, -0.38, varyingWorldPosition.z);',
-      '  float creviceOcclusion = 0.60 + 0.40 * smoothstep(0.08, 0.65, ridgeIntensity);',
-      '  float limbalShading = 1.0 - smoothstep(1.42, 2.08, radialDistance);',
-      '  float specularPower = pow(max(dot(sculptedNormal, specularHalfVector), 0.0), 55.0);',
-      '  float microSpecular = specularPower * microFiberGleam * 0.18;',
-      '  float wetReflectiveGleam = pow(max(dot(sculptedNormal, specularHalfVector), 0.0), 120.0) * 0.14;',
-      '  float diffuseLighting = (0.85 * diffuseKey + 0.24 * diffuseFill) * creviceOcclusion;',
-      '  vec3 linearSceneComposition = materialAlbedo * (0.34 + diffuseLighting);',
-      '  linearSceneComposition += colChampagne * microSpecular;',
-      '  linearSceneComposition += colCeladon * wetReflectiveGleam;',
-      '  linearSceneComposition *= (0.09 + 0.91 * throatOcclusion) * (0.18 + 0.82 * limbalShading);',
-      '  float rimFresnel = pow(1.0 - max(dot(surfaceNormalVector, normalizedViewVector), 0.0), 3.0);',
-      '  linearSceneComposition += colSlate * (diffuseFill * 0.10 * rimFresnel * throatOcclusion);',
+      '  float creviceOcclusion = 0.42 + 0.58 * smoothstep(0.06, 0.58, ridgeIntensity);',
+      '  float ambientLighting = 0.13;',
+      '  float ambientOcclusion = creviceOcclusion * (0.35 + 0.65 * throatOcclusion);',
+      '  float diffuseLighting = (1.40 * diffuseKey + 0.30 * diffuseFill) * creviceOcclusion;',
+      '  vec3 linearSceneComposition = materialAlbedo * (ambientLighting * ambientOcclusion + diffuseLighting);',
+      '  float tissueSpecularPower = pow(max(dot(sculptedNormal, specularHalfVector), 0.0), 14.0);',
+      '  float tissueRoughnessSheen = tissueSpecularPower * (0.16 + 0.20 * ridgeIntensity);',
+      '  float tDotH = dot(tangentRadial, specularHalfVector);',
+      '  float fiberAnisoFactor = sqrt(max(0.0, 1.0 - tDotH * tDotH));',
+      '  float fiberTissueSheen = pow(fiberAnisoFactor, 10.0) * max(nDotKey, 0.0) * (0.12 * branchingFactor + 0.08 * ridgeIntensity);',
+      '  linearSceneComposition += colChampagne * (tissueRoughnessSheen * 0.22 + fiberTissueSheen * 0.18);',
+      '  float limbalRing = 0.68 + 0.32 * (1.0 - smoothstep(1.82, 2.12, radialDistance));',
+      '  float collaretteShadowBand = smoothstep(0.80, 0.90, radialDistance) * (1.0 - smoothstep(1.02, 1.18, radialDistance));',
+      '  float shadowSide = smoothstep(-0.20, 0.60, -dot(vec2(cos(angleRadian), sin(angleRadian)), normalize(keyLightVector.xy)));',
+      '  float collaretteShadow = 1.0 - 0.18 * collaretteShadowBand * shadowSide;',
+      '  linearSceneComposition *= (0.22 + 0.78 * throatOcclusion) * limbalRing * collaretteShadow;',
+      '  float rimFresnel = pow(1.0 - clamp(dot(surfaceNormalVector, normalizedViewVector), 0.0, 1.0), 3.0);',
+      '  linearSceneComposition += colSlate * (diffuseFill * 0.12 * rimFresnel * throatOcclusion);',
       '  float respirationWave = sin(uniformActiveTime * 0.641) * 0.72 + sin(uniformActiveTime * 0.306 + 1.15) * 0.28;',
       '  float tidalWave = sin(uniformActiveTime * 0.306) * 0.68 + sin(uniformActiveTime * 0.462 + 2.05) * 0.32;',
       '  float pupilDilation = 0.038 * respirationWave + 0.012 * tidalWave;',
@@ -415,25 +427,40 @@
       '  linearSceneComposition += colCopper * (pupillaryLipGlow * diffuseKey * throatOcclusion * lipPigmentVariation * 0.20);',
       '  float pupilEdgeCoverage = smoothstep(0.485, 0.525, radialDistance);',
       '  linearSceneComposition = mix(colAbyssal * 0.4, linearSceneComposition, pupilEdgeCoverage);',
-      '  float limbusCoverage = 1.0 - smoothstep(2.04, 2.18, radialDistance);',
+      '  float limbusCoverage = 1.0 - smoothstep(2.08, 2.18, radialDistance);',
       '  if (limbusCoverage <= 0.001) {',
       '    discard;',
       '  }',
-      '  float atmosphericSeparation = smoothstep(1.86, 2.06, radialDistance) * (1.0 - smoothstep(2.06, 2.18, radialDistance));',
-      '  linearSceneComposition += colPetrol * (atmosphericSeparation * 0.45);',
+      '  float atmosphericSeparation = smoothstep(1.92, 2.08, radialDistance) * (1.0 - smoothstep(2.08, 2.18, radialDistance));',
+      '  linearSceneComposition += colPetrol * (atmosphericSeparation * 0.40);',
       '  vec2 screenCoordinates = (gl_FragCoord.xy - 0.5 * uniformResolution) / min(uniformResolution.x, uniformResolution.y);',
-      '  vec3 cornealNormal = normalize(vec3(screenCoordinates * 0.35, 1.0));',
+      '  float cornealDomeRadius = 2.58;',
+      '  float normalizedDomeRadius = min(radialDistance / cornealDomeRadius, 0.94);',
+      '  float cornealDomeZ = sqrt(max(1.0 - normalizedDomeRadius * normalizedDomeRadius, 0.001));',
+      '  vec3 cornealNormal = normalize(vec3((varyingWorldPosition.xy / cornealDomeRadius) * 1.08, cornealDomeZ));',
       '  vec3 cornealReflectedRay = reflect(-normalizedViewVector, cornealNormal);',
+      '  float forwardReflectionGate = smoothstep(0.04, 0.28, cornealReflectedRay.z);',
       '  vec2 upperSoftboxPosition = vec2(-0.43 + 0.032 * sin(uniformActiveTime * 0.38 + 0.5), 0.62 + 0.024 * cos(uniformActiveTime * 0.27));',
       '  vec2 sideSoftboxPosition = vec2(0.74 + 0.026 * cos(uniformActiveTime * 0.33), -0.12 + 0.036 * sin(uniformActiveTime * 0.25 + 1.2));',
       '  float upperSoftboxIntensity = exp(-pow(abs(cornealReflectedRay.x - upperSoftboxPosition.x) / 0.14, 4.0) - pow(abs(cornealReflectedRay.y - upperSoftboxPosition.y) / 0.040, 2.0));',
+      '  float upperSoftPenumbra = exp(-pow(abs(cornealReflectedRay.x - upperSoftboxPosition.x) / 0.22, 2.0) - pow(abs(cornealReflectedRay.y - upperSoftboxPosition.y) / 0.080, 2.0)) * 0.28;',
       '  float sideSoftboxIntensity = exp(-pow(abs(cornealReflectedRay.x - sideSoftboxPosition.x) / 0.025, 2.0) - pow(abs(cornealReflectedRay.y - sideSoftboxPosition.y) / 0.22, 4.0));',
+      '  float sideSoftPenumbra = exp(-pow(abs(cornealReflectedRay.x - sideSoftboxPosition.x) / 0.050, 2.0) - pow(abs(cornealReflectedRay.y - sideSoftboxPosition.y) / 0.32, 2.0)) * 0.28;',
+      '  float upperTotalSoftbox = (upperSoftboxIntensity + upperSoftPenumbra) * forwardReflectionGate;',
+      '  float sideTotalSoftbox = (sideSoftboxIntensity + sideSoftPenumbra) * forwardReflectionGate;',
       '  vec3 broadLightDirection = normalize(vec3(-0.50 + 0.07 * sin(uniformActiveTime * 0.31), 0.70 + 0.05 * cos(uniformActiveTime * 0.23), 0.90));',
-      '  float broadSurfaceReflection = pow(max(dot(cornealReflectedRay, broadLightDirection), 0.0), 24.0);',
-      '  float cornealFresnel = 0.015 + 0.25 * pow(1.0 - max(dot(normalizedViewVector, cornealNormal), 0.0), 5.0);',
+      '  float broadSurfaceReflection = pow(max(dot(cornealReflectedRay, broadLightDirection), 0.0), 32.0) * forwardReflectionGate;',
+      '  float viewDotCornea = clamp(dot(normalizedViewVector, cornealNormal), 0.0, 1.0);',
+      '  float fresnelGrazing = pow(1.0 - viewDotCornea, 4.0);',
+      '  float cornealFresnel = 0.008 + 0.075 * fresnelGrazing;',
+      '  float limbusFresnelSoftening = (1.0 - smoothstep(1.85, 2.18, radialDistance));',
+      '  float pupilDepthPreservation = mix(0.12, 1.0, pupilEdgeCoverage);',
+      '  float pupilCorneaFresnel = cornealFresnel * limbusFresnelSoftening * pupilDepthPreservation;',
       '  float clearTitleCorridor = smoothstep(0.17, 0.36, length(screenCoordinates));',
-      '  float corneaEnvelope = 1.0 - smoothstep(2.00, 2.16, radialDistance);',
-      '  linearSceneComposition += ((colCeladon * upperSoftboxIntensity * 0.06 + colCopper * sideSoftboxIntensity * 0.05 + colChampagne * broadSurfaceReflection * 0.04) * clearTitleCorridor + colPetrol * cornealFresnel * 0.08) * corneaEnvelope;',
+      '  float corneaEnvelope = 1.0 - smoothstep(2.02, 2.16, radialDistance);',
+      '  vec3 cornealSpecularHighlights = (colChampagne * upperTotalSoftbox * 0.10 + colCopper * sideTotalSoftbox * 0.055 + colChampagne * broadSurfaceReflection * 0.075) * clearTitleCorridor;',
+      '  vec3 cornealFresnelGleam = colPetrol * pupilCorneaFresnel * 0.09;',
+      '  linearSceneComposition += (cornealSpecularHighlights + cornealFresnelGleam) * corneaEnvelope;',
       '  linearSceneComposition *= 0.68 + 0.32 * smoothstep(0.10, 0.28, length(screenCoordinates));',
       '  linearSceneComposition *= 1.0 - smoothstep(0.70, 1.35, length(screenCoordinates)) * 0.35;',
       '  vec2 irisScreenCenter = varyingIrisCenter;',
@@ -458,7 +485,7 @@
       '  linearSceneComposition *= underLabelAttenuation;',
       '  linearSceneComposition += contextualFocusLight;',
       '  linearSceneComposition *= uniformIntensity * (1.0 + uniformProject * 0.07);',
-      '  vec3 mappedColor = vec3(1.0) - exp(-linearSceneComposition * 1.30);',
+      '  vec3 mappedColor = vec3(1.0) - exp(-linearSceneComposition * 1.40);',
       '  vec3 finalSrgbColor = linearToSRGB(mappedColor);',
       '  gl_FragColor = vec4(finalSrgbColor, limbusCoverage);',
       '}'
@@ -898,24 +925,39 @@
         const vertexData = [];
 
         function evaluateHeight(radialDistance) {
-          if (radialDistance < 0.44) {
+          if (radialDistance <= 0.36) {
             return -1.25;
           }
-          const collaretteElevation = Math.exp(-Math.pow((radialDistance - 0.80) / 0.064, 2.0)) * 0.055;
-          const pupilLipElevation = Math.exp(-Math.pow((radialDistance - 0.56) / 0.041, 2.0)) * 0.095;
-          const lipFadeIn = Math.min(1.0, Math.max(0.0, (radialDistance - 0.44) / 0.06));
 
-          let baseSurfaceZ = 0.0;
-          if (radialDistance < 0.52) {
-            const hermiteFraction = (radialDistance - 0.44) / 0.08;
-            const hermiteFactor = hermiteFraction * hermiteFraction * (3.0 - 2.0 * hermiteFraction);
-            baseSurfaceZ = -1.25 + hermiteFactor * 0.63;
-          } else if (radialDistance <= 2.12) {
-            baseSurfaceZ = 0.23 - 0.85 * Math.exp(-(radialDistance - 0.52) * 2.35);
+          // Pupillary lip subtle margin elevation at inner border (r ~ 0.54)
+          const pupilLipElevation = 0.020 * Math.exp(-Math.pow((radialDistance - 0.54) / 0.038, 2.0));
+
+          // Unified Organic Iris Architecture:
+          // 1. Pupillary Zone (0.52 to 0.80): rises smoothly from pupillary margin to the collarette peak
+          // 2. Collarette Crest (r = 0.80): elevated apex of the iris volume (z = 0.52)
+          // 3. Ciliary Stroma & Limbus (0.80 to 2.28): pure organic convex dome (d2z/dr2 < 0 strictly everywhere)
+          let macroZ = 0.0;
+          const zCrest = 0.52;     // Elevated collarette apex
+          const zMargin = 0.15;    // Pupillary border base
+          const zPeriphery = 0.005; // Outer edge
+
+          if (radialDistance < 0.80) {
+            const tZone = Math.max(0.0, Math.min(1.0, (radialDistance - 0.52) / (0.80 - 0.52)));
+            const s = tZone * tZone * tZone * (tZone * (tZone * 6.0 - 15.0) + 10.0);
+            macroZ = zMargin + (zCrest - zMargin) * s;
           } else {
-            baseSurfaceZ = 0.23 - 0.85 * Math.exp(-(2.12 - 0.52) * 2.35);
+            const norm = (radialDistance - 0.80) / (2.28 - 0.80);
+            macroZ = zCrest - (zCrest - zPeriphery) * Math.pow(norm, 1.80);
           }
-          return baseSurfaceZ + collaretteElevation + pupilLipElevation * lipFadeIn;
+
+          const zSurface = macroZ + pupilLipElevation;
+
+          // Organic smooth pupil aperture transition (deep cavity at -1.25, smooth continuous drop)
+          const zDeep = -1.25;
+          const tPupil = Math.max(0.0, Math.min(1.0, (radialDistance - 0.36) / (0.52 - 0.36)));
+          const pupilBlend = tPupil * tPupil * tPupil * (tPupil * (tPupil * 6.0 - 15.0) + 10.0);
+
+          return zDeep + (zSurface - zDeep) * pupilBlend;
         }
 
         function evaluateProfile(radialDistance) {

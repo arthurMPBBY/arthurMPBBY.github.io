@@ -1,0 +1,21 @@
+/* Project catalogue: native modal and progressive disclosure. */
+.atlas-search-dialog { position:fixed; inset:0; margin:auto; padding:0; width:min(650px,calc(100vw - 28px)); max-height:calc(100dvh - 32px); border:1px solid #d2b78070; border-radius:5px; background:#0b171a; color:#f1ebdc; box-shadow:0 30px 100px #000a; overflow:hidden; }
+.atlas-search-dialog:not([open]) { display:none; }
+.atlas-search-dialog::backdrop { background:#02090ce6; }
+.atlas-search-dialog[open] { display:flex; flex-direction:column; }
+.atlas-search-header { display:flex; align-items:center; justify-content:space-between; gap:15px; padding:22px 24px 10px; }
+.atlas-search-header h2 { font:normal 28px Georgia,serif; }
+.atlas-search-close-btn { min-width:44px; min-height:44px; background:transparent; color:#d2b780; border:1px solid #d2b78050; border-radius:3px; cursor:pointer; font-size:22px; }
+.atlas-search-field { display:grid; gap:8px; padding:0 24px 16px; }
+.atlas-search-field label { font:10px var(--font-mono); letter-spacing:.08em; color:#b6bcb5; }
+.atlas-search-input { min-height:48px; width:100%; padding:12px; border:1px solid #d2b78060; border-radius:2px; background:#050f12; color:#f1ebdc; font:16px var(--font-body); }
+.atlas-search-status { margin:0 24px 10px; font:11px var(--font-mono); color:#b6bcb5; }
+.atlas-search-results { overflow:auto; list-style:none; margin:0; padding:0 14px 14px; min-height:0; }
+.atlas-search-item { display:flex; align-items:center; gap:16px; text-decoration:none; padding:14px 12px; min-height:66px; color:#f1ebdc; border:1px solid transparent; border-bottom-color:#d2b78022; border-radius:2px; }
+.atlas-search-item:hover,.atlas-search-item.is-selected { background:#d2b78015; border-color:#d2b78060; }
+.atlas-search-item-index { color:#d2b780; font:11px var(--font-mono); }
+.atlas-search-item strong { display:block; font:600 15px var(--font-body); }
+.atlas-search-item small { display:block; color:#b6bcb5; font:12px var(--font-body); margin-top:4px; }
+.atlas-search-footer { padding:12px 24px; border-top:1px solid #d2b78033; font:10px var(--font-mono); color:#b6bcb5; }
+.atlas-search-dialog :focus-visible { outline:2px solid #d2b780; outline-offset:3px; }
+@media(max-width:420px) { .atlas-search-header { padding:16px 16px 8px; } .atlas-search-header h2 { font-size:24px; } .atlas-search-field { padding:0 16px 12px; } .atlas-search-item { gap:10px; } }

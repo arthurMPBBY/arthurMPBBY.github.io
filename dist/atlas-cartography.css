@@ -1,0 +1,283 @@
+/* ==========================================================================
+   ATLAS DE SISTEMAS — CAMADA CARTOGRÁFICA EDITORIAL
+   Design System: Petróleo, Marfim & Latão Escovado
+   Zero Canvas · Zero rAF Loop · Pure DOM & CSS Architecture
+   ========================================================================== */
+
+:root {
+  /* Paleta Cartográfica Editorial */
+  --carto-petroleo-deep: #060a0d;
+  --carto-petroleo-surface: rgba(8, 14, 19, 0.94);
+  --carto-petroleo-card: rgba(11, 18, 24, 0.90);
+  --carto-marfim-bright: #f8f6f0;
+  --carto-marfim-body: #ede8dc;
+  --carto-marfim-muted: #9faaa9;
+  --carto-latao: #deb87b;
+  --carto-latao-glow: rgba(222, 184, 123, 0.18);
+  --carto-latao-subtle: rgba(222, 184, 123, 0.32);
+  --carto-border-hairline: 1px solid rgba(222, 184, 123, 0.25);
+  --carto-border-strong: 1px solid rgba(222, 184, 123, 0.45);
+  --carto-font-mono: 'JetBrains Mono', monospace;
+  --carto-font-heading: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --carto-font-body: 'DM Sans', system-ui, -apple-system, sans-serif;
+}
+
+/* ==========================================================================
+   VISIBILIDADE E MODOS DE VISÃO (STRICT LAYER OWNERSHIP)
+   Oculta completamente a cartografia em direct, rooms, arte e telas < 1100px
+   ========================================================================== */
+
+html:not([data-view="atlas"]) .atlas-carto-layer,
+html[data-view="room"] .atlas-carto-layer,
+html[data-view="direct"] .atlas-carto-layer,
+html[data-view="arte"] .atlas-carto-layer,
+body.mode-direct .atlas-carto-layer,
+body.mode-room .atlas-carto-layer,
+body:not(.mode-atlas) .atlas-carto-layer,
+.atlas-carto-layer[aria-hidden="true"],
+.atlas-carto-layer.is-view-hidden {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* ==========================================================================
+   1. MARCADORES DISCRETOS DE ORIENTAÇÃO NOS ARTEFATOS (IN-WORLD)
+   Ancorados em cada .spatial-artifact; escalam e transladam com o spatial-world
+   ========================================================================== */
+
+.spatial-artifact {
+  overflow: visible;
+}
+
+.carto-station-marker {
+  position: absolute;
+  top: -26px;
+  left: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  background-color: var(--carto-petroleo-card);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: var(--carto-border-hairline);
+  border-radius: 4px;
+  font-family: var(--carto-font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.06em;
+  color: var(--carto-marfim-muted);
+  pointer-events: none;
+  z-index: 6;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  transition: border-color 0.22s ease, color 0.22s ease, box-shadow 0.22s ease;
+}
+
+.carto-station-marker .marker-quad {
+  color: var(--carto-latao);
+  font-weight: 700;
+}
+
+.carto-station-marker .marker-sep {
+  color: rgba(222, 184, 123, 0.4);
+}
+
+.carto-station-marker .marker-coords {
+  color: var(--carto-marfim-body);
+  font-variant-numeric: tabular-nums;
+}
+
+.carto-station-marker .marker-dist {
+  color: var(--carto-marfim-muted);
+  font-size: 8.5px;
+}
+
+/* Destaque sutil ao focar/pairar o artefato (ZERO DIM DE OUTROS PROJETOS) */
+.spatial-artifact:hover .carto-station-marker,
+.spatial-artifact:focus-within .carto-station-marker,
+.spatial-artifact.is-targeted .carto-station-marker {
+  border-color: var(--carto-latao);
+  color: var(--carto-marfim-bright);
+  box-shadow: 0 4px 16px var(--carto-latao-glow), 0 0 1px var(--carto-latao);
+}
+
+/* ==========================================================================
+   2. LEGENDA SUPERIOR SOB TOPBAR (SUB-BARRA CARTOGRÁFICA EDITORIAL)
+   Medidas claras e coordenadas sob a barra fixa alta de 20px
+   ========================================================================== */
+
+.carto-top-ruler {
+  position: fixed;
+  top: 26px;
+  left: 28px;
+  z-index: 840;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  background: var(--carto-petroleo-surface);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: var(--carto-border-hairline);
+  border-radius: 4px;
+  font-family: var(--carto-font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.08em;
+  color: var(--carto-marfim-muted);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+  pointer-events: auto;
+  user-select: none;
+}
+
+.carto-top-ruler .ruler-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--carto-latao);
+  box-shadow: 0 0 6px var(--carto-latao);
+  display: inline-block;
+}
+
+.carto-top-ruler .ruler-val {
+  color: var(--carto-marfim-body);
+  font-weight: 500;
+}
+
+.carto-top-ruler .ruler-sep {
+  color: rgba(222, 184, 123, 0.35);
+}
+
+/* ==========================================================================
+   3. PAINEL CONTEXTUAL COMPACTO (DESKTOP >= 1100px)
+   Faixa inferior esquerda: acima da assinatura e afastado do dock central
+   ========================================================================== */
+
+.carto-context-panel {
+  position: fixed;
+  left: 28px;
+  bottom: 108px;
+  width: 280px;
+  max-width: calc(100vw - 56px);
+  z-index: 850;
+  background: var(--carto-petroleo-surface);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: var(--carto-border-hairline);
+  border-radius: 8px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.65), 0 0 1px rgba(222, 184, 123, 0.25);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: auto;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+}
+
+.carto-context-panel.is-active {
+  border-color: var(--carto-latao);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.75), 0 0 20px var(--carto-latao-glow);
+}
+
+.carto-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(222, 184, 123, 0.15);
+  padding-bottom: 6px;
+}
+
+.carto-panel-kicker {
+  font-family: var(--carto-font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--carto-latao);
+}
+
+.carto-panel-vector {
+  font-family: var(--carto-font-mono);
+  font-size: 8.5px;
+  letter-spacing: 0.05em;
+  color: var(--carto-marfim-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.carto-panel-body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.carto-panel-title {
+  font-family: var(--carto-font-heading);
+  font-size: 13.5px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--carto-marfim-bright);
+  margin: 0;
+}
+
+.carto-panel-phrase {
+  font-family: var(--carto-font-body);
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--carto-marfim-body);
+  margin: 0;
+}
+
+.carto-panel-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  min-height: 24px;
+}
+
+.carto-panel-meta {
+  font-family: var(--carto-font-mono);
+  font-size: 9px;
+  color: var(--carto-marfim-muted);
+  letter-spacing: 0.04em;
+}
+
+.carto-panel-action {
+  font-family: var(--carto-font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--carto-latao);
+  text-decoration: none;
+  background: rgba(222, 184, 123, 0.10);
+  border: 1px solid rgba(222, 184, 123, 0.35);
+  padding: 3px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+
+.carto-panel-action:hover,
+.carto-panel-action:focus-visible {
+  background: var(--carto-latao);
+  color: var(--carto-petroleo-deep);
+  border-color: var(--carto-latao);
+  outline: none;
+}
+
+/* ==========================================================================
+   4. RESPONSIVIDADE E EXCLUSÕES
+   O painel compacto contextual é restrito a desktop >= 1100px
+   ========================================================================== */
+
+@media (max-width: 1099px) {
+  .carto-context-panel,
+  .carto-top-ruler {
+    display: none !important;
+  }
+}
